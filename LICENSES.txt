@@ -1,3 +1,3 @@
-crt0/crt0.s       is licensed under GPL2
+crt0/crt0.s       is licensed under GPL2 with a "special exception", please read note in crt0/src/crt0.s 
 ihx2sms/ihx2sms.c is public domain. For more information, please refer to http://unlicense.org
 SMSlib            is public domain. For more information, please refer to http://unlicense.org

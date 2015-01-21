@@ -1,6 +1,7 @@
-/* *********************************************
+/* **************************************************
    SMSlib - C programming library for the SMS
-   ********************************************* */
+   (part of devkitSMS - github.com/sverx/devkitSMS)
+   ************************************************** */
 
 /* library initialization. you don't need to call this if you use devkitSMS */
 void SMS_init (void);
@@ -28,6 +29,11 @@ void SMS_VDPturnOffFeature (unsigned int feature);
 /* handy macros :) */
 #define SMS_displayOn()   SMS_VDPturnOnFeature(0x0160)   /* turns on display and frame int */
 #define SMS_displayOff()  SMS_VDPturnOffFeature(0x0160)  /* turns off display and frame int */
+
+void SMS_setBGScrollX (int scrollX);
+void SMS_setBGScrollY (int scrollY);
+void SMS_setBackdropColor (unsigned char entry);
+void SMS_useFirstHalfTilesforSprites (bool usefirsthalf);
 
 /* macro for bankswitching */
 volatile __at (0xffff) unsigned char bank_to_be_mapped_on_slot2;

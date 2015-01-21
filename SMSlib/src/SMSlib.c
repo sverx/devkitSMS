@@ -1,6 +1,7 @@
-/* *********************************************
+/* **************************************************
    SMSlib - C programming library for the SMS
-   ********************************************* */
+   (part of devkitSMS - github.com/sverx/devkitSMS)
+   ************************************************** */
 
 #include <stdbool.h>
 #include "SMSlib.h"
@@ -111,6 +112,26 @@ void SMS_VDPturnOffFeature (unsigned int feature) {
   /* turns off a VDP feature */
   VDPReg[HI(feature)]&=~LO(feature);
   SMS_write_to_VDPRegister (HI(feature),VDPReg[HI(feature)]);
+}
+
+void SMS_setBGScrollX (int scrollX) {
+  VDPReg[0x08]=LO(scrollX);
+  SMS_write_to_VDPRegister(0x08,VDPReg[0x08]);
+}
+
+void SMS_setBGScrollY (int scrollY) {
+  VDPReg[0x09]=LO(scrollY);
+  SMS_write_to_VDPRegister(0x09,VDPReg[0x09]);
+}
+
+void SMS_setBackdropColor (unsigned char entry) {
+  VDPReg[0x07]=entry;
+  SMS_write_to_VDPRegister(0x07,VDPReg[0x07]);
+}
+
+void SMS_useFirstHalfTilesforSprites (bool usefirsthalf) {
+  VDPReg[0x06]=(usefirsthalf)?0xFB:0xFF;
+  SMS_write_to_VDPRegister(0x06,VDPReg[0x06]);
 }
 
 void SMS_setBGPaletteColor (unsigned char entry, unsigned char color) {
