@@ -103,6 +103,12 @@ unsigned int SMS_getKeysReleased (void);
 bool SMS_queryPauseRequested (void);
 void SMS_resetPauseRequest (void);
 
+/* line interrupt */
+void SMS_setLineInterruptHandler (void (*theHandlerFunction)(void));
+void SMS_setLineCounter (unsigned char count);
+#define SMS_enableLineInterrupt()   SMS_VDPturnOnFeature(0x0010)   /* turns on line IRQ */
+#define SMS_disableLineInterrupt()  SMS_VDPturnOffFeature(0x0010)  /* turns off line IRQ */
+
 /* the Interrupt Service Routines (do not modify) */
 void SMS_isr (void) __interrupt;
 void SMS_nmi_isr (void) __critical __interrupt;

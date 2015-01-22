@@ -32,5 +32,9 @@ unsigned int SMS_getKeysHeld (void);      /* the keys that were down last frame 
 unsigned int SMS_getKeysReleased (void);  /* the keys that were down last frame and up now */
 bool SMS_queryPauseRequested (void);      /* the pause key has been pressed since previous check */
 void SMS_resetPauseRequest (void);        /* reset/acknowledge pause requests */
+void SMS_setLineInterruptHandler (void (*theHandlerFunction)(void));  /* link your own handler to the line interrupt */
+void SMS_setLineCounter (unsigned char count);  /* choose on which line trigger the IRQ */
+SMS_enableLineInterrupt()                 /* macro - turns on line IRQ */
+SMS_disableLineInterrupt()                /* macro - turns off line IRQ */
 SMS_mapROMBank(n);                        /* macro - maps bank n at address 0x8000 (slot 2) */
 ```

@@ -60,6 +60,8 @@ unsigned char SpriteTableY[MAXSPRITES];
 unsigned char SpriteTableXN[MAXSPRITES*2];
 unsigned char SpriteNextFree;
 
+void (*SMS_theLineInterruptHandler)(void);
+
 /* macro instead of inline functions. I had no choice :| */
 #define SMS_write_to_VDPRegister(VDPReg,value)    __critical { VDPControlPort=value; VDPControlPort=VDPReg|0x80; }
 #define SMS_set_address_CRAM(address)             __critical { VDPControlPort=address; VDPControlPort=0xC0; }
@@ -259,11 +261,20 @@ void SMS_resetPauseRequest (void) {
   PauseRequested=false;
 }
 
+void SMS_setLineInterruptHandler (void (*theHandlerFunction)(void)) {
+  SMS_theLineInterruptHandler=theHandlerFunction;
+}
+
+void SMS_setLineCounter (unsigned char count) {
+  VDPReg[0x0A]=count;
+  SMS_write_to_VDPRegister(0x0A,VDPReg[0x0A]);
+}
+
 /* Interrupt Service Routines */
 void SMS_isr (void) __interrupt {
   VDPStatus=VDPStatusPort;            /* this also aknowledge interrupt at VDP */
 
-  if (VDPStatus & 0x80) {
+  if (VDPStatus & 0x80) {             /* frame interrupt */
     VDPBlank=true;
     VDPSpriteOverflow=(VDPStatus & 0x40);
     VDPSpriteCollision=(VDPStatus & 0x20);
@@ -274,8 +285,8 @@ void SMS_isr (void) __interrupt {
     KeysHeld=KeysStatus&PreviousKeysStatus;
     KeysPressed=KeysStatus&(~PreviousKeysStatus);
     KeysReleased=(~KeysStatus)&PreviousKeysStatus;
-  }  /* else
-    LineInterruptHandler(); */        /* TO DO */
+  } else                              /* line interrupt */
+    SMS_theLineInterruptHandler();
 
   /* Z80 disable the interrupts on ISR, so we should re-enable them explicitly */
   __asm
