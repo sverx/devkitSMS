@@ -19,14 +19,14 @@ struct dirent *entry;
 
 #define BUFSIZE     16
 unsigned char buf[BUFSIZE];
+#define SUBST_NUM   4
+char *subst[SUBST_NUM]={" ",".","(",")"};
 
 void cleanstr(char *str) {
-  // replace . with _
-  while (strstr(str,"."))
-    strncpy (strstr(str,"."),"_",1);
-  // replace <space> with _
-  while (strstr(str," "))
-    strncpy (strstr(str," "),"_",1);
+  int i;
+  for (i=0;i<SUBST_NUM;i++)
+    while (strstr(str,subst[i]))
+      strncpy (strstr(str,subst[i]),"_",1);
 }
 
 
@@ -102,8 +102,8 @@ int main(int argc, char const* *argv) {
       
       fprintf (fc,"};\n\n");
       
-      fprintf (fh,"extern const unsigned char %s[];\n",clean);
-      fprintf (fh,"extern const unsigned int  %s_len=%d;\n\n",clean,size);
+      fprintf (fh,"extern const unsigned char\t%s[];\n",clean);
+      fprintf (fh,"#define\t\t\t\t%s_len\t%d\n\n",clean,size);
       
       fclose (fIN);
       free(clean);

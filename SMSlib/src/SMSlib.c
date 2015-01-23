@@ -44,17 +44,15 @@ unsigned char VDPReg[0x0B]= { 0x04, /* reg0: Mode 4 */
                              };
 
 volatile bool VDPBlank=false;               /* used by INTerrupt */
+volatile bool PauseRequested=false;         /* used by NMI */
+/*
 volatile bool VDPSpriteOverflow=false;
 volatile bool VDPSpriteCollision=false;
-volatile unsigned char VDPStatus=0;
-volatile unsigned int KeysStatus=0;
-volatile unsigned int PreviousKeysStatus=0;
-volatile unsigned int KeysPressed=0;
-volatile unsigned int KeysHeld=0;
-volatile unsigned int KeysReleased=0;
-unsigned char clipWin_x0,clipWin_y0,clipWin_x1,clipWin_y1;
+*/
+volatile unsigned int KeysStatus=0,PreviousKeysStatus=0;
+/* unsigned char clipWin_x0,clipWin_y0,clipWin_x1,clipWin_y1; */
 
-volatile bool PauseRequested=false;         /* used by NMI */
+
 
 unsigned char SpriteTableY[MAXSPRITES];
 unsigned char SpriteTableXN[MAXSPRITES*2];
@@ -73,6 +71,12 @@ inline void SMS_byte_to_VDP_data (unsigned char data) {
 }
 
 inline void SMS_byte_array_to_VDP_data (const unsigned char *data, unsigned int len) {
+  /* INTERNAL FUNCTION */
+  while (len--!=0)
+    VDPDataPort=*(data++);
+}
+
+inline void SMS_byte_short_array_to_VDP_data (const unsigned char *data, unsigned char len) {
   /* INTERNAL FUNCTION */
   while (len--!=0)
     VDPDataPort=*(data++);
@@ -148,12 +152,12 @@ void SMS_setSpritePaletteColor (unsigned char entry, unsigned char color) {
 
 void SMS_loadBGPalette (const unsigned char *palette) {
   SMS_set_address_CRAM(0x00);
-  SMS_byte_array_to_VDP_data(palette,16);
+  SMS_byte_short_array_to_VDP_data(palette,16);
 }
 
 void SMS_loadSpritePalette (const unsigned char *palette) {
   SMS_set_address_CRAM(0x10);
-  SMS_byte_array_to_VDP_data(palette,16);
+  SMS_byte_short_array_to_VDP_data(palette,16);
 }
 
 void SMS_loadTiles (unsigned char *src, unsigned int Tilefrom, unsigned int len) {
@@ -242,15 +246,15 @@ unsigned int SMS_getKeysStatus (void) {
 }
 
 unsigned int SMS_getKeysPressed (void) {
-  return (KeysPressed);
+  return (KeysStatus&(~PreviousKeysStatus));
 }
 
 unsigned int SMS_getKeysHeld (void) {
-  return (KeysHeld);
+  return (KeysStatus&PreviousKeysStatus);
 }
 
 unsigned int SMS_getKeysReleased (void) {
-  return (KeysReleased);
+  return ((~KeysStatus)&PreviousKeysStatus);
 }
 
 bool SMS_queryPauseRequested (void) {
@@ -272,19 +276,20 @@ void SMS_setLineCounter (unsigned char count) {
 
 /* Interrupt Service Routines */
 void SMS_isr (void) __interrupt {
-  VDPStatus=VDPStatusPort;            /* this also aknowledge interrupt at VDP */
+  /*
+  volatile unsigned char VDPStatus=VDPStatusPort;
+  */
 
-  if (VDPStatus & 0x80) {             /* frame interrupt */
-    VDPBlank=true;
+  if (VDPStatusPort & 0x80) {              /* this also aknowledge interrupt at VDP */
+    VDPBlank=true;                         /* frame interrupt */
+    /*
     VDPSpriteOverflow=(VDPStatus & 0x40);
     VDPSpriteCollision=(VDPStatus & 0x20);
+    */
 
     /* read key input */
     PreviousKeysStatus=KeysStatus;
     KeysStatus=((~IOPortH)<<8)|(~IOPortL);
-    KeysHeld=KeysStatus&PreviousKeysStatus;
-    KeysPressed=KeysStatus&(~PreviousKeysStatus);
-    KeysReleased=(~KeysStatus)&PreviousKeysStatus;
   } else                              /* line interrupt */
     SMS_theLineInterruptHandler();
 
