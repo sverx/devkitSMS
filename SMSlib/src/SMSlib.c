@@ -1,6 +1,6 @@
 /* **************************************************
    SMSlib - C programming library for the SMS
-   (part of devkitSMS - github.com/sverx/devkitSMS)
+   ( part of devkitSMS - github.com/sverx/devkitSMS )
    ************************************************** */
 
 #include <stdbool.h>
@@ -21,10 +21,8 @@ __sfr __at 0xDE IOPortH;
 
 #define MAXSPRITES            64
 
-/*
 #define DISABLE_INTERRUPTS    __asm di __endasm
 #define ENABLE_INTERRUPTS     __asm ei __endasm
-*/
 
 unsigned int PNTAddress=0x3800;
 unsigned int SATAddress=0x3F00;
@@ -52,33 +50,31 @@ volatile bool VDPSpriteCollision=false;
 volatile unsigned int KeysStatus=0,PreviousKeysStatus=0;
 /* unsigned char clipWin_x0,clipWin_y0,clipWin_x1,clipWin_y1; */
 
-
-
 unsigned char SpriteTableY[MAXSPRITES];
 unsigned char SpriteTableXN[MAXSPRITES*2];
 unsigned char SpriteNextFree;
 
 void (*SMS_theLineInterruptHandler)(void);
 
-/* macro instead of inline functions. I had no choice :| */
-#define SMS_write_to_VDPRegister(VDPReg,value)    __critical { VDPControlPort=value; VDPControlPort=VDPReg|0x80; }
-#define SMS_set_address_CRAM(address)             __critical { VDPControlPort=address; VDPControlPort=0xC0; }
-#define SMS_set_address_VRAM(address)             __critical { VDPControlPort=LO(address); VDPControlPort=HI(address)|0x40; }
+/* macro instead of inline __critical functions. I had no choice with current SDCC :| */
+#define SMS_write_to_VDPRegister(VDPReg,value)    DISABLE_INTERRUPTS; VDPControlPort=(value); VDPControlPort=(VDPReg)|0x80; ENABLE_INTERRUPTS;
+#define SMS_set_address_CRAM(address)             DISABLE_INTERRUPTS; VDPControlPort=(address); VDPControlPort=0xC0; ENABLE_INTERRUPTS;
+#define SMS_set_address_VRAM(address)             DISABLE_INTERRUPTS; VDPControlPort=LO(address); VDPControlPort=HI(address)|0x40; ENABLE_INTERRUPTS;
 
 inline void SMS_byte_to_VDP_data (unsigned char data) {
   /* INTERNAL FUNCTION */
   VDPDataPort=data;
 }
 
-inline void SMS_byte_array_to_VDP_data (const unsigned char *data, unsigned int len) {
+inline void SMS_byte_array_to_VDP_data (const unsigned char *data, unsigned int size) {
   /* INTERNAL FUNCTION */
-  while (len--!=0)
+  while (size--!=0)
     VDPDataPort=*(data++);
 }
 
-inline void SMS_byte_short_array_to_VDP_data (const unsigned char *data, unsigned char len) {
+inline void SMS_byte_brief_array_to_VDP_data (const unsigned char *data, unsigned char size) {
   /* INTERNAL FUNCTION */
-  while (len--!=0)
+  while (size--!=0)
     VDPDataPort=*(data++);
 }
 
@@ -88,14 +84,16 @@ inline void SMS_word_to_VDP_data (unsigned int data) {
   VDPDataPort=HI(data);
 }
 
+/*
 inline void SMS_word_array_to_VDP_data (const unsigned int *data, unsigned int len) {
-  /* INTERNAL FUNCTION */
+  INTERNAL FUNCTION
   while (len--!=0) {
     VDPDataPort=LO(*(data));
     VDPDataPort=HI(*(data));
     data++;
   }
 }
+*/
 
 void SMS_init (void) {
   /* Initializes the lib */
@@ -150,19 +148,19 @@ void SMS_setSpritePaletteColor (unsigned char entry, unsigned char color) {
   SMS_byte_to_VDP_data(color);
 }
 
-void SMS_loadBGPalette (const unsigned char *palette) {
+void SMS_loadBGPalette (void *palette) {
   SMS_set_address_CRAM(0x00);
-  SMS_byte_short_array_to_VDP_data(palette,16);
+  SMS_byte_brief_array_to_VDP_data(palette,16);
 }
 
-void SMS_loadSpritePalette (const unsigned char *palette) {
+void SMS_loadSpritePalette (void *palette) {
   SMS_set_address_CRAM(0x10);
-  SMS_byte_short_array_to_VDP_data(palette,16);
+  SMS_byte_brief_array_to_VDP_data(palette,16);
 }
 
-void SMS_loadTiles (unsigned char *src, unsigned int Tilefrom, unsigned int len) {
+void SMS_loadTiles (void *src, unsigned int Tilefrom, unsigned int size) {
   SMS_set_address_VRAM(Tilefrom*32);
-  SMS_byte_array_to_VDP_data(src,len*32);
+  SMS_byte_array_to_VDP_data(src,size);
 }
 
 void SMS_setTileatXY (unsigned char x, unsigned char y, unsigned int tile) {
@@ -170,17 +168,17 @@ void SMS_setTileatXY (unsigned char x, unsigned char y, unsigned int tile) {
   SMS_word_to_VDP_data(tile,2);
 }
 
-void SMS_loadTileMap (unsigned char x, unsigned char y, unsigned int *src, unsigned int len) {
+void SMS_loadTileMap (unsigned char x, unsigned char y, void *src, unsigned int size) {
   SMS_set_address_VRAM(PNTAddress+(y*32+x)*2);
-  SMS_word_array_to_VDP_data(src,len);
+  SMS_byte_array_to_VDP_data(src,size);
 }
 
-void SMS_loadTileMapArea (unsigned char x, unsigned char y,  unsigned int *src, unsigned char width, unsigned char height) {
+void SMS_loadTileMapArea (unsigned char x, unsigned char y,  void *src, unsigned char width, unsigned char height) {
   unsigned char cur_y;
   for (cur_y=y;cur_y<y+height;cur_y++) {
     SMS_set_address_VRAM(PNTAddress+(cur_y*32+x)*2);
-    SMS_word_array_to_VDP_data(src,width);
-    src+=width;
+    SMS_byte_array_to_VDP_data(src,width*2);
+    src=((unsigned char*)src)+width;
   }
 }
 
@@ -197,6 +195,18 @@ bool SMS_addSprite (unsigned char x, int y, unsigned char tile) {
     return (true);
   } else
     return (false);
+}
+
+/* low level functions, just to be used for dirty tricks ;) */
+void SMS_VRAMmemcpy (void *src, unsigned int dst, unsigned int size) {
+  SMS_set_address_VRAM(dst);
+  SMS_byte_array_to_VDP_data(src,size);
+}
+
+void SMS_VRAMmemset (void *dst, unsigned char value, unsigned int size) {
+  SMS_set_address_VRAM((unsigned int)dst);
+  while (size--!=0)
+    SMS_byte_to_VDP_data(value);
 }
 
 /*
@@ -290,13 +300,11 @@ void SMS_isr (void) __interrupt {
     /* read key input */
     PreviousKeysStatus=KeysStatus;
     KeysStatus=((~IOPortH)<<8)|(~IOPortL);
-  } else                              /* line interrupt */
-    SMS_theLineInterruptHandler();
+  } else
+    SMS_theLineInterruptHandler();         /* line interrupt */
 
   /* Z80 disable the interrupts on ISR, so we should re-enable them explicitly */
-  __asm
-    ei
-  __endasm;
+  ENABLE_INTERRUPTS;
 }
 
 void SMS_nmi_isr (void) __critical __interrupt {          /* this is for NMI */
@@ -326,7 +334,7 @@ void SMS_VDPSetSpritesLocation (unsigned int location) {
 /* *********** END ************************ */
 
 
-/* inline critical function doesn't work correctly */
+/* inline critical function doesn't work correctly with SDCC 3.4.0 */
 /*
 inline void SMS_write_to_VDPRegister (unsigned char VDPReg, unsigned char value) {
    INTERNAL FUNCTION

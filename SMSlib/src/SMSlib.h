@@ -1,6 +1,6 @@
 /* **************************************************
    SMSlib - C programming library for the SMS
-   (part of devkitSMS - github.com/sverx/devkitSMS)
+   ( part of devkitSMS - github.com/sverx/devkitSMS )
    ************************************************** */
 
 /* library initialization. you don't need to call this if you use devkitSMS */
@@ -45,15 +45,15 @@ void SMS_waitForVBlank (void);
 /* functions to set a color / load a palette */
 void SMS_setBGPaletteColor (unsigned char entry, unsigned char color);
 void SMS_setSpritePaletteColor (unsigned char entry, unsigned char color);
-void SMS_loadBGPalette (const unsigned char *palette);
-void SMS_loadSpritePalette (const unsigned char *palette);
+void SMS_loadBGPalette (void *palette);
+void SMS_loadSpritePalette (void *palette);
 
 /* functions to load tiles into VRAM */
-void SMS_loadTiles (unsigned char *src, unsigned int Tilefrom, unsigned int len);
+void SMS_loadTiles (void *src, unsigned int Tilefrom, unsigned int size);
 
 /* functions for the tilemap */
-void SMS_loadTileMap (unsigned char x, unsigned char y, unsigned int *src, unsigned int len);
-void SMS_loadTileMapArea (unsigned char x, unsigned char y,  unsigned int *src, unsigned char width, unsigned char height);
+void SMS_loadTileMap (unsigned char x, unsigned char y, void *src, unsigned int size);
+void SMS_loadTileMapArea (unsigned char x, unsigned char y, void *src, unsigned char width, unsigned char height);
 void SMS_setTileatXY (unsigned char x, unsigned char y, unsigned int tile);
 
 /* handy defines for tilemaps entry */
@@ -108,6 +108,10 @@ void SMS_setLineInterruptHandler (void (*theHandlerFunction)(void));
 void SMS_setLineCounter (unsigned char count);
 #define SMS_enableLineInterrupt()   SMS_VDPturnOnFeature(0x0010)   /* turns on line IRQ */
 #define SMS_disableLineInterrupt()  SMS_VDPturnOffFeature(0x0010)  /* turns off line IRQ */
+
+/* low level functions */
+void SMS_VRAMmemcpy (void *src, unsigned int dst, unsigned int size);
+void SMS_VRAMmemset (void *dst, unsigned char value, unsigned int size);
 
 /* the Interrupt Service Routines (do not modify) */
 void SMS_isr (void) __interrupt;
