@@ -53,6 +53,7 @@ void SMS_loadTiles (void *src, unsigned int Tilefrom, unsigned int size);
 
 /* functions for the tilemap */
 void SMS_loadTileMap (unsigned char x, unsigned char y, void *src, unsigned int size);
+void SMS_loadSTMcompressedTileMap (unsigned char x, unsigned char y, unsigned char *src);
 void SMS_loadTileMapArea (unsigned char x, unsigned char y, void *src, unsigned char width, unsigned char height);
 void SMS_setTileatXY (unsigned char x, unsigned char y, unsigned int tile);
 
@@ -111,7 +112,7 @@ void SMS_setLineCounter (unsigned char count);
 
 /* low level functions */
 void SMS_VRAMmemcpy (void *src, unsigned int dst, unsigned int size);
-void SMS_VRAMmemset (void *dst, unsigned char value, unsigned int size);
+void SMS_VRAMmemset (unsigned int dst, unsigned char value, unsigned int size);
 
 /* the Interrupt Service Routines (do not modify) */
 void SMS_isr (void) __interrupt;

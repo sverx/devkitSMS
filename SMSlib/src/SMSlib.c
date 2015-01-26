@@ -165,7 +165,7 @@ void SMS_loadTiles (void *src, unsigned int Tilefrom, unsigned int size) {
 
 void SMS_setTileatXY (unsigned char x, unsigned char y, unsigned int tile) {
   SMS_set_address_VRAM(PNTAddress+(y*32+x)*2);
-  SMS_word_to_VDP_data(tile,2);
+  SMS_word_to_VDP_data(tile);
 }
 
 void SMS_loadTileMap (unsigned char x, unsigned char y, void *src, unsigned int size) {
@@ -180,6 +180,67 @@ void SMS_loadTileMapArea (unsigned char x, unsigned char y,  void *src, unsigned
     SMS_byte_array_to_VDP_data(src,width*2);
     src=((unsigned char*)src)+width;
   }
+}
+
+void SMS_loadSTMcompressedTileMap (unsigned char x, unsigned char y, unsigned char *src) {
+  unsigned int HH=0x0000;
+  unsigned int oldHH=0x0000;
+  unsigned char cur;
+  unsigned char cnt;
+  unsigned char restore=0;
+
+  SMS_set_address_VRAM(PNTAddress+(y*32+x)*2);
+  while (true) {
+    if (restore) {
+      if (--restore==0)
+        HH=oldHH;
+    }
+    cur=*src++;
+    if (cur & 0x01) {
+      if (cur & 0x02) {
+        /* RLE of successive words */
+        HH=(HH & 0xFF00)|*src++;
+        cnt=(cur>>2)+2;
+        while (cnt>0) {
+          SMS_word_to_VDP_data(HH);
+          if (cnt>1)
+            HH++;
+          cnt--;
+        }
+      } else {
+        /* RLE of same words */
+        HH=(HH & 0xFF00)|*src++;
+        cnt=(cur>>2)+2;
+        while (cnt>0) {
+          SMS_word_to_VDP_data(HH);
+          cnt--;
+        }
+      }
+    } else {
+      if (cur & 0x02) {
+        /* new HH */
+        if (cur & 0x04) {
+          /* temporary */
+          oldHH=HH;
+          restore=2;
+        } else {
+          /* definitive */
+          restore=0;
+        }
+        HH=((cur>>3)<<8);
+      } else {
+        /* RAW */
+        cnt=(cur>>2);
+        if (cnt==0)
+          return;
+        while (cnt>0) {
+          SMS_byte_to_VDP_data(*src++);
+          SMS_byte_to_VDP_data(HI(HH));
+          cnt--;
+        }
+      }
+    }
+  } /* end while */
 }
 
 void SMS_initSprites (void) {
@@ -203,8 +264,8 @@ void SMS_VRAMmemcpy (void *src, unsigned int dst, unsigned int size) {
   SMS_byte_array_to_VDP_data(src,size);
 }
 
-void SMS_VRAMmemset (void *dst, unsigned char value, unsigned int size) {
-  SMS_set_address_VRAM((unsigned int)dst);
+void SMS_VRAMmemset (unsigned int dst, unsigned char value, unsigned int size) {
+  SMS_set_address_VRAM(dst);
   while (size--!=0)
     SMS_byte_to_VDP_data(value);
 }
