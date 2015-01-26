@@ -1,4 +1,4 @@
-/* 
+/*
     folder2c - creates a .c and a .h file with the contents of
                every binary file in a folder
 
@@ -34,6 +34,7 @@ int main(int argc, char const* *argv) {
 
   char *cname, *hname, *iname, *clean;
   int i,cnt,size;
+  int total_size=0;
   
   printf("*** sverx's folder2c converter ***\n");
 	
@@ -103,11 +104,13 @@ int main(int argc, char const* *argv) {
       fprintf (fc,"};\n\n");
       
       fprintf (fh,"extern const unsigned char\t%s[];\n",clean);
-      fprintf (fh,"#define\t\t\t\t%s_len\t%d\n\n",clean,size);
+      fprintf (fh,"#define\t\t\t\t%s_size %d\n\n",clean,size);
       
       fclose (fIN);
       free(clean);
       free(iname);
+      
+      total_size+=size;
     }
   }
   
@@ -118,6 +121,6 @@ int main(int argc, char const* *argv) {
   free(cname);
   free(hname);
 
-  printf("Info: conversion completed\n");
+  printf("Info: conversion completed. File \"%s.c\" defines %d total bytes.\n",argv[2],total_size);
   return (0);
 }
