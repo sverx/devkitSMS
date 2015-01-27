@@ -16,10 +16,11 @@ void SMS_setBackdropColor (unsigned char entry);           /* set which sprite p
 void SMS_useFirstHalfTilesforSprites (bool usefirsthalf);  /* use tiles 0-255 for sprites if true, 256-511 if false */
 void SMS_setBGPaletteColor (unsigned char entry, unsigned char color);
 void SMS_setSpritePaletteColor (unsigned char entry, unsigned char color);
-void SMS_loadBGPalette (const unsigned char *palette);
-void SMS_loadSpritePalette (const unsigned char *palette);
-void SMS_loadTiles (unsigned char *src, unsigned int Tilefrom, unsigned int len);
-void SMS_loadTileMap (unsigned char x, unsigned char y, unsigned int *src, unsigned int len);
+void SMS_loadBGPalette (void *palette);
+void SMS_loadSpritePalette (void *palette);
+void SMS_loadTiles (void *src, unsigned int Tilefrom, unsigned int len);
+void SMS_loadTileMap (unsigned char x, unsigned char y, void *src, unsigned int len);
+void SMS_loadSTMcompressedTileMap (unsigned char x, unsigned char y, unsigned char *src);
 void SMS_loadTileMapArea (unsigned char x, unsigned char y,  unsigned int *src, unsigned char width, unsigned char height);
 void SMS_setTileatXY (unsigned char x, unsigned char y, unsigned int tile);
 void SMS_initSprites (void);              /* we're going to start declaring sprites, in front-to-back order */
@@ -36,5 +37,9 @@ void SMS_setLineInterruptHandler (void (*theHandlerFunction)(void));  /* link yo
 void SMS_setLineCounter (unsigned char count);  /* choose on which line trigger the IRQ */
 SMS_enableLineInterrupt()                 /* macro - turns on line IRQ */
 SMS_disableLineInterrupt()                /* macro - turns off line IRQ */
+void SMS_VRAMmemcpy (void *src, unsigned int dst, unsigned int size);              /* memcpy to VRAM (low level) */
+void SMS_VRAMmemset (unsigned int dst, unsigned char value, unsigned int size);    /* memset to VRAM (low level) */
 SMS_mapROMBank(n);                        /* macro - maps bank n at address 0x8000 (slot 2) */
+SMS_EMBED_SEGA_ROM_HEADER(productCode,revision); /* macro - embed SEGA header into ROM */
+SMS_EMBED_SDSC_HEADER(verMaj,verMin,dateYear,dateMonth,dateDay,author,name,descr); /* macro - embed SDSC homebrew header into ROM */
 ```

@@ -22,11 +22,13 @@ unsigned int add_banks=0;
 unsigned int count, addr, type;
 char data[256];
 
+#define SEGA_HEADER_ADDR     0x7ff0
 
 int main(int argc, char const* *argv) {
 	
   int i,dest_addr;
   char tmp[3];
+  unsigned int checksum=0;
   
   printf("*** sverx's IHX to SMS converter ***\n");
 	
@@ -88,15 +90,26 @@ int main(int argc, char const* *argv) {
     size=16384*((size/16384)+1);
     
   printf("Info: size of output ROM is %d KB\n",size/1024);
-  
+
+  /* check/update SEGA header checksum */
+  if (size>=32*1024) {
+    if (!strncmp("TMR SEGA",(char *)&buf[SEGA_HEADER_ADDR],8)) {
+      for (i=0;i<SEGA_HEADER_ADDR;i++)
+        checksum+=buf[i];
+      buf[SEGA_HEADER_ADDR+10]=checksum&0x00FF;
+      buf[SEGA_HEADER_ADDR+11]=checksum>>8;
+      printf("Info: SEGA header found, checksum updated\n");
+    }
+  }
+
   fOUT=fopen(argv[2],"wb");
   if (!fOUT) {
     printf("Fatal: can't open output SMS file\n");
     return(1);
   }
-  
-  fwrite (&buf, 1, size, fOUT); 
-  fclose (fOUT);	
-  
+
+  fwrite (&buf, 1, size, fOUT);
+  fclose (fOUT);
+
   return (0);
 }

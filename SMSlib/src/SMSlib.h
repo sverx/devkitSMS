@@ -114,6 +114,28 @@ void SMS_setLineCounter (unsigned char count);
 void SMS_VRAMmemcpy (void *src, unsigned int dst, unsigned int size);
 void SMS_VRAMmemset (unsigned int dst, unsigned char value, unsigned int size);
 
+/* macros for SEGA and SDSC headers */
+#define SMS_BYTE_TO_BCD(n) ((n/10)*16+(n%10))
+
+#define SMS_EMBED_SEGA_ROM_HEADER(productCode,revision) const __at (0x7ff0) char __SMS__SEGA_signature[16]={ \
+                                                        'T','M','R',' ','S','E','G','A', \
+                                                                    0xFF,0xFF,0xFF,0xFF, \
+              SMS_BYTE_TO_BCD(productCode%100),SMS_BYTE_TO_BCD((productCode/100)%10000), \
+                                                                     (revision&0x0f),0x4C}
+
+#define SMS_EMBED_SDSC_HEADER(verMaj,verMin,dateYear,dateMonth,dateDay,author,name,descr) \
+ const __at (0x7fe0-sizeof(author)) char __SMS__SDSC_author[]=author; \
+ const __at (0x7fe0-sizeof(author)-sizeof(name)) char __SMS__SDSC_name[]=name; \
+ const __at (0x7fe0-sizeof(author)-sizeof(name)-sizeof(descr)) char __SMS__SDSC_descr[]=descr; \
+ const __at (0x7fe0) char __SMS__SDSC_signature[16]={'S','D','S','C', \
+                               SMS_BYTE_TO_BCD(verMaj),SMS_BYTE_TO_BCD(verMin), \
+                            SMS_BYTE_TO_BCD(dateDay),SMS_BYTE_TO_BCD(dateMonth), \
+                    SMS_BYTE_TO_BCD(dateYear%100),SMS_BYTE_TO_BCD(dateYear/100), \
+                        (0x7fe0-sizeof(author))&0xff,(0x7fe0-sizeof(author))>>8, \
+(0x7fe0-sizeof(author)-sizeof(name))&0xff,(0x7fe0-sizeof(author)-sizeof(name))>>8, \
+(0x7fe0-sizeof(author)-sizeof(name)-sizeof(descr))&0xff,(0x7fe0-sizeof(author)-sizeof(name)-sizeof(descr))>>8}
+/* pretty nice, isn't it? :) */
+
 /* the Interrupt Service Routines (do not modify) */
 void SMS_isr (void) __interrupt;
 void SMS_nmi_isr (void) __critical __interrupt;
