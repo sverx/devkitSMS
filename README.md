@@ -10,9 +10,10 @@ How to code your own programs using devkitSMS:
 * make sure that your installation works - details at page 20 of the PDF manual
 * place crt0.rel from this package into your SDCC 'lib/z80' folder
 * place ihx2sms.exe from this package into your SDCC 'bin' folder
-  (if you're not on Windows please compile this tool youself from the source)
-* place SMSlib.h and SMSlib.rel in your project folder
-  or you can create a folder for SMSlib, place both SMSlib.c and SMSlib.h there and compile it yourself with SDCC:
+  (if you're not on Windows please compile this tool youself from the sources)
+* place folder2c.exe from this package into your SDCC 'bin' folder (optional, you can use other tools to convert your data. If you're not on Windows please compile this tool youself from the sources)
+* place SMSlib.h and SMSlib.rel in your project folder or somewhere within reach ;)
+  You could also create a SMSlib folder, place both SMSlib.c and SMSlib.h there and compile it yourself with SDCC:
 ```
   sdcc -c -mz80 --std-sdcc99 --fomit-frame-pointer SMSlib.c
 ```
@@ -20,16 +21,26 @@ How to code your own programs using devkitSMS:
 How to use SMSlib:
 
 * include SMSlib.h in your sources
-* compile your program adding the path to SMSlib.rel as last parameter:
+* compile your program adding the path to SMSlib.rel:
 ```
   sdcc -mz80 --std-sdcc99 --fomit-frame-pointer --data-loc 0xC000 your_program.c ..\SMSlib\SMSlib.rel
 ```
+  note that you should put all .rel files references after the name of the file you're compiling.
+
+How to add external data into your ROM:
+
+* use the folder2c utility included, for example.
+  It creates a .c source file (with its .h header file) containing one constant data array for each single file found in the specified dir:
+```
+  folder2c assets data
+```
+  this creates data.c and data.h from the files found inside assets subfolder.
+Each array will be named from the original filename, replacing spaces, periods and brackets with an underscore (it doesn't convert any other char so please use only alphanumeric chars). For each array there will be a #define into the .h file specifying the size in bytes, and it'll be called <arrayname>_size.
 
 How to use more than 48KB in your ROM:
 
-* in your program, use the SMSlib provided 'SMS_mapROMBank(n)' macro to map the bank you need
-* put your data and compile a separate .c file for each 16KB ROM bank starting from bank2, for example bank2.c, bank3.c etc...
-  giving each one a different CONST segment name (I suggest using BANK#):
+* in your program, use the SMSlib provided 'SMS_mapROMBank(n)' macro to map the bank you need (your code should be restrained to the first 32KB as the last 16KB will be paged out)
+* put your data into a separate .c file for each 16KB ROM bank starting from bank2, for example bank2.c, bank3.c etc... (you can use folder2c described above) giving each one a different CONST segment name. I suggest using BANK# for descriptiveness:
 ```
   sdcc -c -mz80 --std-sdcc99 --constseg BANK2 bank2.c
   sdcc -c -mz80 --std-sdcc99 --constseg BANK3 bank3.c
@@ -45,4 +56,4 @@ How to build the final .sms file
 ```
   ihx2sms your_program.ihx your_program.sms
 ```
-  (the size of the ROM will be a multiple of 16KB)
+  The size of the ROM will be a multiple of 16KB. The utility also calculates the ROM checksum for the output file if the SEGA header has been included in your program.
