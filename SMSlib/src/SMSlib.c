@@ -16,6 +16,13 @@ __sfr __at 0xBE VDPDataPort;
 __sfr __at 0xDC IOPortL;
 __sfr __at 0xDE IOPortH;
 
+#ifdef MD_PAD_SUPPORT
+/* define IOPortCtrl (for accessing MD pad) */
+__sfr __at 0x3F IOPortCtrl;
+#define TH_HI 0xF5
+#define TH_LO 0xD5
+#endif
+
 #define HI(x)                 ((x)>>8)
 #define LO(x)                 ((x)&0xFF)
 
@@ -48,6 +55,10 @@ volatile bool VDPSpriteOverflow=false;
 volatile bool VDPSpriteCollision=false;
 */
 volatile unsigned int KeysStatus=0,PreviousKeysStatus=0;
+#ifdef MD_PAD_SUPPORT
+volatile unsigned int MDKeysStatus=0,PreviousMDKeysStatus=0;
+#endif
+
 /* unsigned char clipWin_x0,clipWin_y0,clipWin_x1,clipWin_y1; */
 
 unsigned char SpriteTableY[MAXSPRITES];
@@ -187,14 +198,10 @@ void SMS_loadSTMcompressedTileMap (unsigned char x, unsigned char y, unsigned ch
   unsigned int oldHH=0x0000;
   unsigned char cur;
   unsigned char cnt;
-  unsigned char restore=0;
+  bool needRestore=false;
 
   SMS_set_address_VRAM(PNTAddress+(y*32+x)*2);
   while (true) {
-    if (restore) {
-      if (--restore==0)
-        HH=oldHH;
-    }
     cur=*src++;
     if (cur & 0x01) {
       if (cur & 0x02) {
@@ -220,25 +227,27 @@ void SMS_loadSTMcompressedTileMap (unsigned char x, unsigned char y, unsigned ch
       if (cur & 0x02) {
         /* new HH */
         if (cur & 0x04) {
-          /* temporary */
+          /* temporary, thus save HH into oldHH */
           oldHH=HH;
-          restore=2;
-        } else {
-          /* definitive */
-          restore=0;
+          needRestore=true;
         }
         HH=((cur>>3)<<8);
+        continue;         /* to skip the restore check at the end of the while block */
       } else {
         /* RAW */
         cnt=(cur>>2);
         if (cnt==0)
-          return;
+          break;          /* done, thus exit the while block */
         while (cnt>0) {
           SMS_byte_to_VDP_data(*src++);
           SMS_byte_to_VDP_data(HI(HH));
           cnt--;
         }
       }
+    }
+    if (needRestore) {
+      HH=oldHH;
+      needRestore=false;
     }
   } /* end while */
 }
@@ -328,6 +337,24 @@ unsigned int SMS_getKeysReleased (void) {
   return ((~KeysStatus)&PreviousKeysStatus);
 }
 
+#ifdef MD_PAD_SUPPORT
+unsigned int SMS_getMDKeysStatus (void) {
+  return (MDKeysStatus);
+}
+
+unsigned int SMS_getMDKeysPressed (void) {
+  return (MDKeysStatus&(~PreviousMDKeysStatus));
+}
+
+unsigned int SMS_getMDKeysHeld (void) {
+  return (MDKeysStatus&PreviousMDKeysStatus);
+}
+
+unsigned int SMS_getMDKeysReleased (void) {
+  return ((~MDKeysStatus)&PreviousMDKeysStatus);
+}
+#endif
+
 bool SMS_queryPauseRequested (void) {
   return(PauseRequested);
 }
@@ -361,6 +388,27 @@ void SMS_isr (void) __interrupt {
     /* read key input */
     PreviousKeysStatus=KeysStatus;
     KeysStatus=((~IOPortH)<<8)|(~IOPortL);
+    
+#ifdef MD_PAD_SUPPORT
+    PreviousMDKeysStatus=MDKeysStatus;
+    /* read MD controller (3 or 6 buttons) if detected */
+    IOPortCtrl=TH_HI;
+    IOPortCtrl=TH_LO;
+    MDKeysStatus=IOPortL;
+    if (!(MDKeysStatus & 0xF3)) {         /* verify it's a MD pad */
+      MDKeysStatus=(~MDKeysStatus)&0x30;  /* read A & MD_START */
+      IOPortCtrl=TH_HI;
+      IOPortCtrl=TH_LO;
+      IOPortCtrl=TH_HI;
+      IOPortCtrl=TH_LO;
+      if (!(IOPortL & 0x0F)) {            /* verify we're reading a 6 buttons pad */
+        IOPortCtrl=TH_HI;
+        MDKeysStatus|=(~IOPortL)&0x0F;    /* read MD_MODE, X, Y, Z */
+        IOPortCtrl=TH_LO;
+      }
+    } else
+      MDKeysStatus=0;
+#endif
   } else
     SMS_theLineInterruptHandler();         /* line interrupt */
 

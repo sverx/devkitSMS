@@ -2,6 +2,9 @@
    SMSlib - C programming library for the SMS
    ( part of devkitSMS - github.com/sverx/devkitSMS )
    ************************************************** */
+   
+#define MD_PAD_SUPPORT
+/* delete previous line to deactivate MD pads support */
 
 /* library initialization. you don't need to call this if you use devkitSMS */
 void SMS_init (void);
@@ -99,6 +102,23 @@ unsigned int SMS_getKeysReleased (void);
 #define CARTRIDGE_SLOT          0x2000          /* ??? */
 #define PORT_A_TH               0x4000          /* for light gun */
 #define PORT_B_TH               0x8000          /* for light gun */
+
+#ifdef MD_PAD_SUPPORT
+/* functions to read additional MD buttons */
+unsigned int SMS_getMDKeysStatus (void);
+unsigned int SMS_getMDKeysPressed (void);
+unsigned int SMS_getMDKeysHeld (void);
+unsigned int SMS_getMDKeysReleased (void);
+
+/* handy defines for additional MD joypad(s) handling */
+#define PORT_A_MD_KEY_Z         0x0001
+#define PORT_A_MD_KEY_Y         0x0002
+#define PORT_A_MD_KEY_X         0x0004
+#define PORT_A_MD_KEY_MODE      0x0008
+#define PORT_A_MD_KEY_A         0x0010
+#define PORT_A_MD_KEY_START     0x0020
+/* port B still missing */
+#endif
 
 /* pause handling */
 bool SMS_queryPauseRequested (void);
