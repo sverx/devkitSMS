@@ -68,9 +68,9 @@ unsigned char SpriteNextFree;
 void (*SMS_theLineInterruptHandler)(void);
 
 /* macro instead of inline __critical functions. I had no choice with current SDCC :| */
-#define SMS_write_to_VDPRegister(VDPReg,value)    DISABLE_INTERRUPTS; VDPControlPort=(value); VDPControlPort=(VDPReg)|0x80; ENABLE_INTERRUPTS;
-#define SMS_set_address_CRAM(address)             DISABLE_INTERRUPTS; VDPControlPort=(address); VDPControlPort=0xC0; ENABLE_INTERRUPTS;
-#define SMS_set_address_VRAM(address)             DISABLE_INTERRUPTS; VDPControlPort=LO(address); VDPControlPort=HI(address)|0x40; ENABLE_INTERRUPTS;
+#define SMS_write_to_VDPRegister(VDPReg,value)    { DISABLE_INTERRUPTS; VDPControlPort=(value); VDPControlPort=(VDPReg)|0x80; ENABLE_INTERRUPTS; }
+#define SMS_set_address_CRAM(address)             { DISABLE_INTERRUPTS; VDPControlPort=(address); VDPControlPort=0xC0; ENABLE_INTERRUPTS; }
+#define SMS_set_address_VRAM(address)             { DISABLE_INTERRUPTS; VDPControlPort=LO(address); VDPControlPort=HI(address)|0x40; ENABLE_INTERRUPTS; }
 
 inline void SMS_byte_to_VDP_data (unsigned char data) {
   /* INTERNAL FUNCTION */
