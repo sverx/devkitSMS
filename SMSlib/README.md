@@ -23,6 +23,8 @@ void SMS_loadTileMap (unsigned char x, unsigned char y, void *src, unsigned int 
 void SMS_loadSTMcompressedTileMap (unsigned char x, unsigned char y, unsigned char *src);
 void SMS_loadTileMapArea (unsigned char x, unsigned char y,  unsigned int *src, unsigned char width, unsigned char height);
 void SMS_setTileatXY (unsigned char x, unsigned char y, unsigned int tile);
+void SMS_setNextTileatXY (unsigned char x, unsigned char y);
+void SMS_setTile (unsigned int tile);
 void SMS_initSprites (void);              /* we're going to start declaring sprites, in front-to-back order */
 bool SMS_addSprite (unsigned char x, int y, unsigned char tile); /* declare a sprite - returns false if no more sprites are available */
 void SMS_finalizeSprites (void);          /* we're done declaring sprites */
