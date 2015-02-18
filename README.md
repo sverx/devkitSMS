@@ -15,7 +15,7 @@ How to code your own programs using devkitSMS:
 * place SMSlib.h and SMSlib.rel in your project folder or somewhere within reach ;)
   You could also create a SMSlib folder, place both SMSlib.c and SMSlib.h there and compile it yourself with SDCC:
 ```
-  sdcc -c -mz80 --std-sdcc99 --fomit-frame-pointer SMSlib.c
+  sdcc -c -mz80 --std-sdcc99 SMSlib.c
 ```
 
 How to use SMSlib:
@@ -23,7 +23,7 @@ How to use SMSlib:
 * include SMSlib.h in your sources
 * compile your program adding the path to SMSlib.rel:
 ```
-  sdcc -mz80 --std-sdcc99 --fomit-frame-pointer --data-loc 0xC000 your_program.c ..\SMSlib\SMSlib.rel
+  sdcc -mz80 --std-sdcc99 --data-loc 0xC000 your_program.c ..\SMSlib\SMSlib.rel
 ```
   note that you should put all .rel files references after the name of the file you're compiling.
 
@@ -47,7 +47,7 @@ How to use more than 48KB in your ROM:
 ```
 * compile your program adding a parameter for the linker for each bank (_BANK#) and adding each .rel file to be linked, in ascending order, at the end:
 ```
-  sdcc -mz80 --std-sdcc99 --fomit-frame-pointer --data-loc 0xC000 -Wl-b_BANK2=0x8000 -Wl-b_BANK3=0x8000 your_program.c ..\SMSlib\SMSlib.rel bank2.rel bank3.rel
+  sdcc -mz80 --std-sdcc99 --data-loc 0xC000 -Wl-b_BANK2=0x8000 -Wl-b_BANK3=0x8000 your_program.c ..\SMSlib\SMSlib.rel bank2.rel bank3.rel
 ```
 
 How to build the final .sms file
