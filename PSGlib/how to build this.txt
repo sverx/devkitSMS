@@ -1,0 +1,1 @@
+sdcc -mz80 --std-sdcc99 -c PSGlib.c
