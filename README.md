@@ -12,13 +12,17 @@ How to code your own programs using devkitSMS:
 * place ihx2sms.exe from this package into your SDCC 'bin' folder
   (if you're not on Windows please compile this tool youself from the sources)
 * place folder2c.exe from this package into your SDCC 'bin' folder (optional, you can use other tools to convert your data. If you're not on Windows please compile this tool youself from the sources)
-* place SMSlib.h and SMSlib.rel in your project folder or somewhere within reach ;)
+* place SMSlib.h and SMSlib.rel in your project folder - or somewhere within reach ;)
   You could also create a SMSlib folder, place both SMSlib.c and SMSlib.h there and compile it yourself with SDCC:
 ```
   sdcc -c -mz80 --std-sdcc99 SMSlib.c
 ```
+* optionally, if you plan to use PSG music/SFX, place PSGlib.h and PSGlib.rel in your project folder (again you could also create a PSGlib folder, place both PSGlib.c and PSGlib.h there and compile it yourself with SDCC:
+```
+  sdcc -c -mz80 --std-sdcc99 PSGlib.c
+```
 
-How to use SMSlib:
+How to use devkitSMS/SMSlib:
 
 * include SMSlib.h in your sources
 * compile your program adding the path to SMSlib.rel:
@@ -26,6 +30,14 @@ How to use SMSlib:
   sdcc -mz80 --std-sdcc99 --data-loc 0xC000 your_program.c ..\SMSlib\SMSlib.rel
 ```
   note that you should put all .rel files references after the name of the file you're compiling.
+  
+How to use devkitSMS/PSGlib:
+
+* include PSGlib.h in your sources
+* compile your program adding the path to PSGlib.rel:
+```
+  sdcc -mz80 --std-sdcc99 --data-loc 0xC000 your_program.c ..\PSGlib\PSGlib.rel ..\SMSlib\SMSlib.rel
+```
 
 How to add external data into your ROM:
 
