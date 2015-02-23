@@ -33,6 +33,10 @@ unsigned int SMS_getKeysStatus (void);    /* the current status of the keys */
 unsigned int SMS_getKeysPressed (void);   /* the keys that were up last frame and down now */
 unsigned int SMS_getKeysHeld (void);      /* the keys that were down last frame and still down now */
 unsigned int SMS_getKeysReleased (void);  /* the keys that were down last frame and up now */
+unsigned int SMS_getMDKeysStatus (void);  /* the current status of the extended keys on a MD controller */
+unsigned int SMS_getMDKeysPressed (void); /* the extended keys that were up last frame and down now on a MD controller */
+unsigned int SMS_getMDKeysHeld (void);    /* the extended keys that were down last frame and still down now on a MD controller */
+unsigned int SMS_getMDKeysReleased (void); /* the extended keys that were down last frame and up now on a MD controller */
 bool SMS_queryPauseRequested (void);      /* the pause key has been pressed since previous check */
 void SMS_resetPauseRequest (void);        /* reset/acknowledge pause requests */
 void SMS_setLineInterruptHandler (void (*theHandlerFunction)(void));  /* link your own handler to the line interrupt */

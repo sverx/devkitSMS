@@ -19,6 +19,8 @@ void SMS_VDPturnOffFeature (unsigned int feature);
 #define VDPFEATURE_EXTRAHEIGHT      0x0002
 #define VDPFEATURE_SHIFTSPRITES     0x0008
 #define VDPFEATURE_HIDEFIRSTCOL     0x0020
+#define VDPFEATURE_LOCKHSCROLL      0x0040
+#define VDPFEATURE_LOCKVSCROLL      0x0080
 
 /* group 1 */
 #define VDPFEATURE_ZOOMSPRITES      0x0101
@@ -59,6 +61,8 @@ void SMS_loadTileMap (unsigned char x, unsigned char y, void *src, unsigned int 
 void SMS_loadSTMcompressedTileMap (unsigned char x, unsigned char y, unsigned char *src);
 void SMS_loadTileMapArea (unsigned char x, unsigned char y, void *src, unsigned char width, unsigned char height);
 void SMS_setTileatXY (unsigned char x, unsigned char y, unsigned int tile);
+void SMS_setNextTileatXY (unsigned char x, unsigned char y);
+void SMS_setTile (unsigned int tile);
 
 /* handy defines for tilemaps entry */
 #define TILE_FLIPPED_X            0x0200
@@ -130,9 +134,13 @@ void SMS_setLineCounter (unsigned char count);
 #define SMS_enableLineInterrupt()   SMS_VDPturnOnFeature(0x0010)   /* turns on line IRQ */
 #define SMS_disableLineInterrupt()  SMS_VDPturnOffFeature(0x0010)  /* turns off line IRQ */
 
+/* Vcount */
+unsigned char SMS_getVCount (void);
+
 /* low level functions */
-void SMS_VRAMmemcpy (void *src, unsigned int dst, unsigned int size);
+void SMS_VRAMmemcpy (unsigned int dst, void *src, unsigned int size);
 void SMS_VRAMmemset (unsigned int dst, unsigned char value, unsigned int size);
+void SMS_VRAMmemsetW (unsigned int dst, unsigned int value, unsigned int size);
 
 /* macros for SEGA and SDSC headers */
 #define SMS_BYTE_TO_BCD(n) (((n)/10)*16+((n)%10))

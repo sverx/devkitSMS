@@ -6,12 +6,14 @@
 #include <stdbool.h>
 #include "SMSlib.h"
 
-/* define VDPControlPort (SDCC z80 syntax) */   
+/* define VDPControlPort (SDCC z80 syntax) */
 __sfr __at 0xBF VDPControlPort;
 /* define VDPStatusPort */
 __sfr __at 0xBF VDPStatusPort;
 /* define VDPDataPort */
 __sfr __at 0xBE VDPDataPort;
+/* define VDPVcounter */
+__sfr __at 0x7E VDPVCounterPort;
 /* define IOPort (joypad) */
 __sfr __at 0xDC IOPortL;
 __sfr __at 0xDE IOPortH;
@@ -179,6 +181,14 @@ void SMS_setTileatXY (unsigned char x, unsigned char y, unsigned int tile) {
   SMS_word_to_VDP_data(tile);
 }
 
+void SMS_setNextTileatXY (unsigned char x, unsigned char y) {
+  SMS_set_address_VRAM(PNTAddress+(y*32+x)*2);
+}
+
+void SMS_setTile (unsigned int tile) {
+  SMS_word_to_VDP_data(tile);
+}
+
 void SMS_loadTileMap (unsigned char x, unsigned char y, void *src, unsigned int size) {
   SMS_set_address_VRAM(PNTAddress+(y*32+x)*2);
   SMS_byte_array_to_VDP_data(src,size);
@@ -268,7 +278,7 @@ bool SMS_addSprite (unsigned char x, int y, unsigned char tile) {
 }
 
 /* low level functions, just to be used for dirty tricks ;) */
-void SMS_VRAMmemcpy (void *src, unsigned int dst, unsigned int size) {
+void SMS_VRAMmemcpy (unsigned int dst, void *src, unsigned int size) {
   SMS_set_address_VRAM(dst);
   SMS_byte_array_to_VDP_data(src,size);
 }
@@ -277,6 +287,15 @@ void SMS_VRAMmemset (unsigned int dst, unsigned char value, unsigned int size) {
   SMS_set_address_VRAM(dst);
   while (size--!=0)
     SMS_byte_to_VDP_data(value);
+}
+
+void SMS_VRAMmemsetW (unsigned int dst, unsigned int value, unsigned int size) {
+  SMS_set_address_VRAM(dst);
+  while (size>0) {
+    SMS_byte_to_VDP_data(LO(value));
+    SMS_byte_to_VDP_data(HI(value));
+    size-=2;
+  }
 }
 
 /*
@@ -372,6 +391,11 @@ void SMS_setLineCounter (unsigned char count) {
   SMS_write_to_VDPRegister(0x0A,VDPReg[0x0A]);
 }
 
+/* Vcount */
+unsigned char SMS_getVCount (void) {
+  return(VDPVCounterPort);
+}
+
 /* Interrupt Service Routines */
 void SMS_isr (void) __interrupt {
   /*
@@ -387,30 +411,32 @@ void SMS_isr (void) __interrupt {
 
     /* read key input */
     PreviousKeysStatus=KeysStatus;
-    KeysStatus=((~IOPortH)<<8)|(~IOPortL);
-    
+
 #ifdef MD_PAD_SUPPORT
-    PreviousMDKeysStatus=MDKeysStatus;
     /* read MD controller (3 or 6 buttons) if detected */
+    PreviousMDKeysStatus=MDKeysStatus;
     IOPortCtrl=TH_HI;
+#endif
+
+    KeysStatus=((~IOPortH)<<8)|(~IOPortL);
+
+#ifdef MD_PAD_SUPPORT
     IOPortCtrl=TH_LO;
     MDKeysStatus=IOPortL;
-    if (!(MDKeysStatus & 0xF3)) {         /* verify it's a MD pad */
-      MDKeysStatus=(~MDKeysStatus)&0x30;  /* read A & MD_START */
+    if (!(MDKeysStatus & 0x0C)) {           /* verify it's a MD pad */
+      MDKeysStatus=(~MDKeysStatus)&0x30;    /* read MD_A & MD_START */
       IOPortCtrl=TH_HI;
       IOPortCtrl=TH_LO;
-      IOPortCtrl=TH_HI;
-      IOPortCtrl=TH_LO;
-      if (!(IOPortL & 0x0F)) {            /* verify we're reading a 6 buttons pad */
+      if (!(IOPortL & 0x0F)) {              /* verify we're reading a 6 buttons pad */
         IOPortCtrl=TH_HI;
-        MDKeysStatus|=(~IOPortL)&0x0F;    /* read MD_MODE, X, Y, Z */
+        MDKeysStatus|=(~IOPortL)&0x0F;      /* read MD_MODE, MD_X, MD_Y, MD_Z */
         IOPortCtrl=TH_LO;
       }
     } else
       MDKeysStatus=0;
 #endif
   } else
-    SMS_theLineInterruptHandler();         /* line interrupt */
+    SMS_theLineInterruptHandler();          /* line interrupt */
 
   /* Z80 disable the interrupts on ISR, so we should re-enable them explicitly */
   ENABLE_INTERRUPTS;
