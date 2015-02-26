@@ -2,7 +2,7 @@
    PSGlib - C programming library for the SMS' PSG
    ( part of devkitSMS - github.com/sverx/devkitSMS )
    ************************************************** */
-   
+
 #include "PSGlib.h"
 
 #define PSGDataPort         #0x7f
@@ -25,7 +25,7 @@
 __sfr __at 0x7F PSGPort;
 
 // fundamental vars
-unsigned char  PSGMusicStatus;        // are we playing a background music?
+unsigned char  PSGMusicStatus=PSG_STOPPED;  // are we playing a background music?
 unsigned char *PSGMusicStart;         // the pointer to the beginning of music
 unsigned char *PSGMusicPointer;       // the pointer to the current
 unsigned char *PSGMusicLoopPoint;     // the pointer to the loop begin
@@ -46,11 +46,11 @@ unsigned char  PSGChan3LowTone;            //  the low tone bits for channels 3
 unsigned char  PSGChan2HighTone;           //  the high tone bits for channel 2
 
 // flags for channels 2-3 access
-unsigned char    PSGChannel2SFX;           // !0 means channel 2 is allocated to SFX
-unsigned char    PSGChannel3SFX;           // !0 means channel 3 is allocated to SFX
+unsigned char    PSGChannel2SFX=0;         // !0 means channel 2 is allocated to SFX
+unsigned char    PSGChannel3SFX=0;         // !0 means channel 3 is allocated to SFX
 
 // fundamental vars for SFX
-unsigned char    PSGSFXStatus;             // are we playing a SFX?
+unsigned char    PSGSFXStatus=PSG_STOPPED; // are we playing a SFX?
 unsigned char   *PSGSFXStart;              // the pointer to the beginning of SFX
 unsigned char   *PSGSFXPointer;            // the pointer to the current address
 unsigned char   *PSGSFXLoopPoint;          // the pointer to the loop begin
@@ -60,16 +60,6 @@ unsigned char    PSGSFXLoopFlag;           // the SFX should loop or not (flag)
 // decompression vars for SFX
 unsigned char    PSGSFXSubstringLen;       // lenght of the substring we are playing
 unsigned char   *PSGSFXSubstringRetAddr;   // return to this address when substring is over
-
-void PSGInit (void) {
-/* *********************************************************************
-   initializes the PSG 'engine'
-*/
-  PSGMusicStatus=PSG_STOPPED;       // set music status to PSG_STOPPED
-  PSGSFXStatus=PSG_STOPPED;         // set SFX status to PSG_STOPPED
-  PSGChannel2SFX=PSG_STOPPED;       // set channel 2 SFX to PSG_STOPPED
-  PSGChannel3SFX=PSG_STOPPED;       // set channel 3 SFX to PSG_STOPPED
-}
 
 void PSGStop (void) {
 /* *********************************************************************
@@ -199,12 +189,9 @@ void PSGFrame (void) {
 ; destroys AF,HL,BC
 */
 __asm
-  push af
-  push hl
-  push bc
   ld a,(_PSGMusicStatus)          ; check if we have got to play a tune
   or a
-  jp z,_ret
+  ret z
 
   ld a,(_PSGMusicSkipFrames)      ; check if we have got to skip frames
   or a
@@ -270,7 +257,7 @@ _a2:
 _skipFrame:
   dec a
   ld (_PSGMusicSkipFrames),a
-  jp _ret
+  ret
 
 _noLatch:
   cp PSGData
@@ -287,7 +274,7 @@ _command:
   ld (_PSGMusicSkipFrames),a      ; we got additional frames
 _done:
   ld (_PSGMusicPointer),hl        ; save current address
-  jp _ret                        ; frame done
+  ret                            ; frame done
 
 _otherCommands:
   cp PSGSubString
@@ -302,7 +289,7 @@ _otherCommands:
   ; if we do, it means the PSG file is probably corrupted, so we just RET
   ; ***************************************************************************
 
-  jp _ret
+  ret
 
 _send2PSG:
   ld a,b
@@ -340,7 +327,7 @@ _setLoopPoint:
 _musicLoop:
   ld a,(_PSGLoopFlag)               ; looping requested?
   or a
-  jp z,_ret_PSGStop                ; No:stop it!
+  jp z,_PSGStop                    ; No:stop it!
   ld hl,(_PSGMusicLoopPoint)
   jp _intLoop
 
@@ -376,17 +363,6 @@ _a4:
   or a
   jr z,_send2PSG
   jp _intLoop
-
-_ret_PSGStop:
-  pop bc
-  pop hl
-  pop af
-  jp _PSGStop                      ; (tail call optimization)
-
-_ret:
-  pop bc
-  pop hl
-  pop af
 __endasm;
 }
 
@@ -396,12 +372,9 @@ void PSGSFXFrame (void) {
 ; destroys AF,HL,BC
 */
 __asm
-  push af
-  push hl
-  push bc
   ld a,(_PSGSFXStatus)            ; check if we have got to play SFX
   or a
-  jp z,_ret_SFX
+  ret z
 
   ld a,(_PSGSFXSkipFrames)        ; check if we have got to skip frames
   or a
@@ -430,7 +403,7 @@ _continue_SFX:
 _skipFrame_SFX:
   dec a
   ld (_PSGSFXSkipFrames),a
-  jp _ret_SFX
+  ret
 
 _command_SFX:
   cp PSGWait
@@ -440,7 +413,7 @@ _command_SFX:
   ld (_PSGSFXSkipFrames),a        ; we got additional frames to skip
 _done_SFX:
   ld (_PSGSFXPointer),hl          ; save current address
-  jp _ret_SFX                    ; frame done
+  ret                            ; frame done
 
 _otherCommands_SFX:
   cp PSGSubString
@@ -455,7 +428,7 @@ _otherCommands_SFX:
   ; if we do, it means the PSG SFX file is probably corrupted, so we just RET
   ; ***************************************************************************
 
-  jp _ret_SFX
+  ret
 
 _setLoopPoint_SFX:
   ld (_PSGSFXLoopPoint),hl
@@ -464,7 +437,7 @@ _setLoopPoint_SFX:
 _sfxLoop_SFX:
   ld a,(_PSGSFXLoopFlag)               ; is it a looping SFX?
   or a
-  jp z,_ret_PSGSFXStop                ; No:stop it!
+  jp z, _PSGSFXStop                  ; No:stop it!
   ld hl,(_PSGSFXLoopPoint)
   ld (_PSGSFXPointer),hl
   jp _intLoop_SFX
@@ -480,16 +453,5 @@ _substring_SFX:
   ld hl,(_PSGSFXStart)
   add hl,bc                         ; make substring current
   jp _intLoop_SFX
-  
-_ret_PSGSFXStop:
-  pop bc
-  pop hl
-  pop af
-  jp _PSGSFXStop                     ; (tail call optimization)
-
-_ret_SFX:
-  pop bc
-  pop hl
-  pop af
 __endasm;
 }
