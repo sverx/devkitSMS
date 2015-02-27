@@ -10,14 +10,14 @@
 #define SFX_CHANNEL3        #0x02
 #define SFX_CHANNELS2AND3   SFX_CHANNEL2|SFX_CHANNEL3
 
-void PSGPlay (unsigned char *song);
+void PSGPlay (void *song);
 void PSGCancelLoop (void);
-void PSGPlayNoRepeat (unsigned char *song);
+void PSGPlayNoRepeat (void *song);
 void PSGStop (void);
 unsigned char PSGGetStatus (void);
 
-void PSGSFXPlay (unsigned char *sfx, unsigned char channels);
-void PSGSFXPlayLoop (unsigned char *sfx, unsigned char channels);
+void PSGSFXPlay (void *sfx, unsigned char channels);
+void PSGSFXPlayLoop (void *sfx, unsigned char channels);
 void PSGSFXCancelLoop (void);
 void PSGSFXStop (void);
 unsigned char PSGSFXGetStatus (void);

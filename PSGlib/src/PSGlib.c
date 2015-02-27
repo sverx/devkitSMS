@@ -25,41 +25,41 @@
 __sfr __at 0x7F PSGPort;
 
 // fundamental vars
-unsigned char  PSGMusicStatus=PSG_STOPPED;  // are we playing a background music?
-unsigned char *PSGMusicStart;         // the pointer to the beginning of music
-unsigned char *PSGMusicPointer;       // the pointer to the current
-unsigned char *PSGMusicLoopPoint;     // the pointer to the loop begin
-unsigned char  PSGMusicSkipFrames;    // the frames we need to skip
-unsigned char  PSGLoopFlag;           // the tune should loop or not (flag)
-unsigned char  PSGMusicLastLatch;     // the last PSG music latch
+unsigned char PSGMusicStatus=PSG_STOPPED;  // are we playing a background music?
+void *PSGMusicStart;                       // the pointer to the beginning of music
+void *PSGMusicPointer;                     // the pointer to the current
+void *PSGMusicLoopPoint;                   // the pointer to the loop begin
+unsigned char PSGMusicSkipFrames;          // the frames we need to skip
+unsigned char PSGLoopFlag;                 // the tune should loop or not (flag)
+unsigned char PSGMusicLastLatch;           // the last PSG music latch
 
 //  decompression vars
-unsigned char  PSGMusicSubstringLen;      // lenght of the substring we are playing
-unsigned char *PSGMusicSubstringRetAddr;  // return to this address when substring is over
+unsigned char PSGMusicSubstringLen;        // lenght of the substring we are playing
+void *PSGMusicSubstringRetAddr;            // return to this address when substring is over
 
 // ******* SFX *************
 // command buffering for channels 2-3
-unsigned char  PSGChan2Volume;             // the volume for channel 2
-unsigned char  PSGChan3Volume;             // the volume for channel 3
-unsigned char  PSGChan2LowTone;            // the low tone bits for channels 2
-unsigned char  PSGChan3LowTone;            //  the low tone bits for channels 3
-unsigned char  PSGChan2HighTone;           //  the high tone bits for channel 2
+unsigned char PSGChan2Volume;              // the volume for channel 2
+unsigned char PSGChan3Volume;              // the volume for channel 3
+unsigned char PSGChan2LowTone;             // the low tone bits for channels 2
+unsigned char PSGChan3LowTone;             //  the low tone bits for channels 3
+unsigned char PSGChan2HighTone;            //  the high tone bits for channel 2
 
 // flags for channels 2-3 access
-unsigned char    PSGChannel2SFX=0;         // !0 means channel 2 is allocated to SFX
-unsigned char    PSGChannel3SFX=0;         // !0 means channel 3 is allocated to SFX
+unsigned char PSGChannel2SFX=0;            // !0 means channel 2 is allocated to SFX
+unsigned char PSGChannel3SFX=0;            // !0 means channel 3 is allocated to SFX
 
 // fundamental vars for SFX
-unsigned char    PSGSFXStatus=PSG_STOPPED; // are we playing a SFX?
-unsigned char   *PSGSFXStart;              // the pointer to the beginning of SFX
-unsigned char   *PSGSFXPointer;            // the pointer to the current address
-unsigned char   *PSGSFXLoopPoint;          // the pointer to the loop begin
-unsigned char    PSGSFXSkipFrames;         // the frames we need to skip
-unsigned char    PSGSFXLoopFlag;           // the SFX should loop or not (flag)
+unsigned char PSGSFXStatus=PSG_STOPPED;    // are we playing a SFX?
+void *PSGSFXStart;                         // the pointer to the beginning of SFX
+void *PSGSFXPointer;                       // the pointer to the current address
+void *PSGSFXLoopPoint;                     // the pointer to the loop begin
+unsigned char PSGSFXSkipFrames;            // the frames we need to skip
+unsigned char PSGSFXLoopFlag;              // the SFX should loop or not (flag)
 
 // decompression vars for SFX
-unsigned char    PSGSFXSubstringLen;       // lenght of the substring we are playing
-unsigned char   *PSGSFXSubstringRetAddr;   // return to this address when substring is over
+unsigned char PSGSFXSubstringLen;          // lenght of the substring we are playing
+void *PSGSFXSubstringRetAddr;              // return to this address when substring is over
 
 void PSGStop (void) {
 /* *********************************************************************
@@ -76,7 +76,7 @@ void PSGStop (void) {
   }
 }
 
-void PSGPlay (unsigned char *song) {
+void PSGPlay (void *song) {
 /* *********************************************************************
   receives the address of the PSG to start playing (continuously)
 */
@@ -99,7 +99,7 @@ void PSGCancelLoop (void) {
   PSGLoopFlag=0;
 }
 
-void PSGPlayNoRepeat (unsigned char *song) {
+void PSGPlayNoRepeat (void *song) {
 /* *********************************************************************
   receives the address of the PSG to start playing (once)
 */
@@ -143,7 +143,7 @@ void PSGSFXStop (void) {
   }
 }
 
-void PSGSFXPlay (unsigned char *sfx, unsigned char channels) {
+void PSGSFXPlay (void *sfx, unsigned char channels) {
 /* *********************************************************************
   receives the address of the SFX to start and the mask that indicates
                                      which channel(s) the SFX will use
@@ -174,7 +174,7 @@ unsigned char PSGSFXGetStatus (void) {
   return(PSGSFXStatus);
 }
 
-void PSGSFXPlayLoop (unsigned char *sfx, unsigned char channels) {
+void PSGSFXPlayLoop (void *sfx, unsigned char channels) {
 /* *********************************************************************
   receives the address of the SFX to start continuously and the mask
                     that indicates which channel(s) the SFX will use
@@ -186,7 +186,6 @@ void PSGSFXPlayLoop (unsigned char *sfx, unsigned char channels) {
 void PSGFrame (void) {
 /* *********************************************************************
   processes a music frame
-; destroys AF,HL,BC
 */
 __asm
   ld a,(_PSGMusicStatus)          ; check if we have got to play a tune
@@ -369,7 +368,6 @@ __endasm;
 void PSGSFXFrame (void) {
 /* ********************************************************************
    processes a SFX frame
-; destroys AF,HL,BC
 */
 __asm
   ld a,(_PSGSFXStatus)            ; check if we have got to play SFX
