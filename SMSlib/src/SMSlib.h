@@ -72,10 +72,9 @@ void SMS_setTile (unsigned int tile);
 
 /* functions for sprites handling */
 void SMS_initSprites (void);
-bool SMS_addSprite (unsigned char x, int y, unsigned char tile); /* returns false if no more sprites are available */
-/* STILL MISSING */
-/* void SMS_setClippingWindow (unsigned char x0, unsigned char y0, unsigned char x1, unsigned char y1); */
-/* bool SMS_addSpriteClipping (int x, int y, unsigned char tile); */
+bool SMS_addSprite (unsigned char x, unsigned char y, unsigned char tile);  /* returns false if no more sprites are available */
+void SMS_setClippingWindow (unsigned char x0, unsigned char y0, unsigned char x1, unsigned char y1);
+bool SMS_addSpriteClipping (int x, int y, unsigned char tile);
 void SMS_finalizeSprites (void);
 void SMS_copySpritestoSAT (void);
 

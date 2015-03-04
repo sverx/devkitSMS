@@ -61,7 +61,7 @@ volatile unsigned int KeysStatus=0,PreviousKeysStatus=0;
 volatile unsigned int MDKeysStatus=0,PreviousMDKeysStatus=0;
 #endif
 
-/* unsigned char clipWin_x0,clipWin_y0,clipWin_x1,clipWin_y1; */
+unsigned char clipWin_x0,clipWin_y0,clipWin_x1,clipWin_y1;
 
 unsigned char SpriteTableY[MAXSPRITES];
 unsigned char SpriteTableXN[MAXSPRITES*2];
@@ -110,13 +110,13 @@ inline void SMS_word_array_to_VDP_data (const unsigned int *data, unsigned int l
 
 void SMS_init (void) {
   /* Initializes the lib */
-  int i;
+  unsigned char i;
   /* VDP initialization */
   for (i=0;i<0x0B;i++)
     SMS_write_to_VDPRegister(i,VDPReg[i]);
   /* init Pause */
   SMS_resetPauseRequest();
-  /* SMS_setClippingWindow(0,0,256,192);  */
+  SMS_setClippingWindow(0,0,255,191);
 }
 
 void SMS_VDPturnOnFeature (unsigned int feature) {
@@ -266,9 +266,9 @@ void SMS_initSprites (void) {
   SpriteNextFree=0;
 }
 
-bool SMS_addSprite (unsigned char x, int y, unsigned char tile) {
+bool SMS_addSprite (unsigned char x, unsigned char y, unsigned char tile) {
   if (SpriteNextFree<MAXSPRITES) {
-    SpriteTableY[SpriteNextFree]=LO(y-1);
+    SpriteTableY[SpriteNextFree]=y-1;
     SpriteTableXN[SpriteNextFree*2]=x;
     SpriteTableXN[SpriteNextFree*2+1]=tile;
     SpriteNextFree++;
@@ -298,7 +298,6 @@ void SMS_VRAMmemsetW (unsigned int dst, unsigned int value, unsigned int size) {
   }
 }
 
-/*
 void SMS_setClippingWindow (unsigned char x0, unsigned char y0, unsigned char x1, unsigned char y1) {
   clipWin_x0=x0;
   clipWin_y0=y0;
@@ -308,12 +307,11 @@ void SMS_setClippingWindow (unsigned char x0, unsigned char y0, unsigned char x1
 
 bool SMS_addSpriteClipping (int x, int y, unsigned char tile) {
   if (SpriteNextFree<MAXSPRITES) {
-    if ((x>(clipWin_x1-8))||(x<clipWin_x0))
+    if ((x>clipWin_x1) || (x<((int)clipWin_x0-8)))
       return (false);                               // sprite clipped
-    y--;
-    if ((y>(clipWin_y1-8))||(y<clipWin_y0))
+    if ((y>clipWin_y1) || (y<((int)clipWin_y0-8)))
       return (false);                               // sprite clipped
-    SpriteTableY[SpriteNextFree]=LO(y);
+    SpriteTableY[SpriteNextFree]=y-1;
     SpriteTableXN[SpriteNextFree*2]=x;
     SpriteTableXN[SpriteNextFree*2+1]=tile;
     SpriteNextFree++;
@@ -321,7 +319,6 @@ bool SMS_addSpriteClipping (int x, int y, unsigned char tile) {
   } else
     return (false);
 }
-*/
 
 void SMS_finalizeSprites (void) {
   if (SpriteNextFree<64)
