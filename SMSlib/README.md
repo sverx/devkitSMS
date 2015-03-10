@@ -26,7 +26,9 @@ void SMS_setTileatXY (unsigned char x, unsigned char y, unsigned int tile);
 void SMS_setNextTileatXY (unsigned char x, unsigned char y);
 void SMS_setTile (unsigned int tile);
 void SMS_initSprites (void);              /* we're going to start declaring sprites, in front-to-back order */
-bool SMS_addSprite (unsigned char x, int y, unsigned char tile); /* declare a sprite - returns false if no more sprites are available */
+bool SMS_addSprite (unsigned char x, unsigned char y, unsigned char tile);  /* declare a sprite - returns false if no more sprites are available */
+void SMS_setClippingWindow (unsigned char x0, unsigned char y0, unsigned char x1, unsigned char y1);   /* set the sprite window. sprites completely outside the window will be clipped */ 
+bool SMS_addSpriteClipping (int x, int y, unsigned char tile);  /* declare a sprite inside the window - returns false if sprite isn't added */
 void SMS_finalizeSprites (void);          /* we're done declaring sprites */
 void SMS_copySpritestoSAT (void);         /* copy sprites to Sprites Attribute Table (do that during vBlank) */
 unsigned int SMS_getKeysStatus (void);    /* the current status of the keys */
