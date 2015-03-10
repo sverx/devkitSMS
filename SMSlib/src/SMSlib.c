@@ -81,14 +81,18 @@ inline void SMS_byte_to_VDP_data (unsigned char data) {
 
 inline void SMS_byte_array_to_VDP_data (const unsigned char *data, unsigned int size) {
   /* INTERNAL FUNCTION */
-  while (size--!=0)
+  while (size>0) {
     VDPDataPort=*(data++);
+    size--;
+  }
 }
 
 inline void SMS_byte_brief_array_to_VDP_data (const unsigned char *data, unsigned char size) {
   /* INTERNAL FUNCTION */
-  while (size--!=0)
+  while (size>0) {
     VDPDataPort=*(data++);
+    size--;
+  }
 }
 
 inline void SMS_word_to_VDP_data (unsigned int data) {
@@ -285,8 +289,10 @@ void SMS_VRAMmemcpy (unsigned int dst, void *src, unsigned int size) {
 
 void SMS_VRAMmemset (unsigned int dst, unsigned char value, unsigned int size) {
   SMS_set_address_VRAM(dst);
-  while (size--!=0)
+  while (size>0) {
     SMS_byte_to_VDP_data(value);
+    size--;
+  }
 }
 
 void SMS_VRAMmemsetW (unsigned int dst, unsigned int value, unsigned int size) {
