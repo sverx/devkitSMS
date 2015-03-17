@@ -14,6 +14,8 @@ __sfr __at 0xBF VDPStatusPort;
 __sfr __at 0xBE VDPDataPort;
 /* define VDPVcounter */
 __sfr __at 0x7E VDPVCounterPort;
+/* define VDPHcounter */
+__sfr __at 0x7F VDPHCounterPort;
 /* define IOPort (joypad) */
 __sfr __at 0xDC IOPortL;
 __sfr __at 0xDE IOPortH;
@@ -87,13 +89,16 @@ inline void SMS_byte_array_to_VDP_data (const unsigned char *data, unsigned int 
   }
 }
 
+/*
+   // NO real saving to have this function
 inline void SMS_byte_brief_array_to_VDP_data (const unsigned char *data, unsigned char size) {
-  /* INTERNAL FUNCTION */
+  // INTERNAL FUNCTION
   while (size>0) {
     VDPDataPort=*(data++);
     size--;
   }
 }
+*/
 
 inline void SMS_word_to_VDP_data (unsigned int data) {
   /* INTERNAL FUNCTION */
@@ -120,6 +125,7 @@ void SMS_init (void) {
     SMS_write_to_VDPRegister(i,VDPReg[i]);
   /* init Pause */
   SMS_resetPauseRequest();
+  /* reset clipping window */
   SMS_setClippingWindow(0,0,255,191);
 }
 
@@ -167,12 +173,12 @@ void SMS_setSpritePaletteColor (unsigned char entry, unsigned char color) {
 
 void SMS_loadBGPalette (void *palette) {
   SMS_set_address_CRAM(0x00);
-  SMS_byte_brief_array_to_VDP_data(palette,16);
+  SMS_byte_array_to_VDP_data(palette,16);
 }
 
 void SMS_loadSpritePalette (void *palette) {
   SMS_set_address_CRAM(0x10);
-  SMS_byte_brief_array_to_VDP_data(palette,16);
+  SMS_byte_array_to_VDP_data(palette,16);
 }
 
 void SMS_loadTiles (void *src, unsigned int Tilefrom, unsigned int size) {
@@ -272,36 +278,15 @@ void SMS_initSprites (void) {
 
 bool SMS_addSprite (unsigned char x, unsigned char y, unsigned char tile) {
   if (SpriteNextFree<MAXSPRITES) {
-    SpriteTableY[SpriteNextFree]=y-1;
-    SpriteTableXN[SpriteNextFree*2]=x;
-    SpriteTableXN[SpriteNextFree*2+1]=tile;
-    SpriteNextFree++;
+    if (y-1!=0xD0) {                            // avoid placing sprites at this Y!
+      SpriteTableY[SpriteNextFree]=y-1;
+      SpriteTableXN[SpriteNextFree*2]=x;
+      SpriteTableXN[SpriteNextFree*2+1]=tile;
+      SpriteNextFree++;
+    }
     return (true);
   } else
     return (false);
-}
-
-/* low level functions, just to be used for dirty tricks ;) */
-void SMS_VRAMmemcpy (unsigned int dst, void *src, unsigned int size) {
-  SMS_set_address_VRAM(dst);
-  SMS_byte_array_to_VDP_data(src,size);
-}
-
-void SMS_VRAMmemset (unsigned int dst, unsigned char value, unsigned int size) {
-  SMS_set_address_VRAM(dst);
-  while (size>0) {
-    SMS_byte_to_VDP_data(value);
-    size--;
-  }
-}
-
-void SMS_VRAMmemsetW (unsigned int dst, unsigned int value, unsigned int size) {
-  SMS_set_address_VRAM(dst);
-  while (size>0) {
-    SMS_byte_to_VDP_data(LO(value));
-    SMS_byte_to_VDP_data(HI(value));
-    size-=2;
-  }
 }
 
 void SMS_setClippingWindow (unsigned char x0, unsigned char y0, unsigned char x1, unsigned char y1) {
@@ -317,10 +302,12 @@ bool SMS_addSpriteClipping (int x, int y, unsigned char tile) {
       return (false);                               // sprite clipped
     if ((y>clipWin_y1) || (y<((int)clipWin_y0-8)))
       return (false);                               // sprite clipped
-    SpriteTableY[SpriteNextFree]=y-1;
-    SpriteTableXN[SpriteNextFree*2]=x;
-    SpriteTableXN[SpriteNextFree*2+1]=tile;
-    SpriteNextFree++;
+    if (y-1!=0xD0) {                                // avoid placing sprites at this Y!
+      SpriteTableY[SpriteNextFree]=y-1;
+      SpriteTableXN[SpriteNextFree*2]=x;
+      SpriteTableXN[SpriteNextFree*2+1]=tile;
+      SpriteNextFree++;
+    }
     return (true);
   } else
     return (false);
@@ -397,6 +384,34 @@ void SMS_setLineCounter (unsigned char count) {
 /* Vcount */
 unsigned char SMS_getVCount (void) {
   return(VDPVCounterPort);
+}
+
+/* Hcount */
+unsigned char SMS_getHCount (void) {
+  return(VDPHCounterPort);
+}
+
+/* low level functions, just to be used for dirty tricks ;) */
+void SMS_VRAMmemcpy (unsigned int dst, void *src, unsigned int size) {
+  SMS_set_address_VRAM(dst);
+  SMS_byte_array_to_VDP_data(src,size);
+}
+
+void SMS_VRAMmemset (unsigned int dst, unsigned char value, unsigned int size) {
+  SMS_set_address_VRAM(dst);
+  while (size>0) {
+    SMS_byte_to_VDP_data(value);
+    size--;
+  }
+}
+
+void SMS_VRAMmemsetW (unsigned int dst, unsigned int value, unsigned int size) {
+  SMS_set_address_VRAM(dst);
+  while (size>0) {
+    SMS_byte_to_VDP_data(LO(value));
+    SMS_byte_to_VDP_data(HI(value));
+    size-=2;
+  }
 }
 
 /* Interrupt Service Routines */

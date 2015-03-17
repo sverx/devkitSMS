@@ -135,6 +135,8 @@ void SMS_setLineCounter (unsigned char count);
 
 /* Vcount */
 unsigned char SMS_getVCount (void);
+/* Hcount */
+unsigned char SMS_getHCount (void);
 
 /* low level functions */
 void SMS_VRAMmemcpy (unsigned int dst, void *src, unsigned int size);
