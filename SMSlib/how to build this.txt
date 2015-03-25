@@ -1,1 +1,1 @@
-sdcc -mz80 --std-sdcc99 -c SMSlib.c
+sdcc -c -mz80 --std-sdcc99 --peep-file peep-rules.txt SMSlib.c

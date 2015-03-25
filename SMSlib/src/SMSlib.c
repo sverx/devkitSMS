@@ -35,6 +35,10 @@ __sfr __at 0x3F IOPortCtrl;
 #define DISABLE_INTERRUPTS    __asm di __endasm
 #define ENABLE_INTERRUPTS     __asm ei __endasm
 
+#define WAIT_VRAM             __asm nop \
+                                    nop \
+                                    nop __endasm
+
 unsigned int PNTAddress=0x3800;
 unsigned int SATAddress=0x3F00;
 
@@ -89,20 +93,17 @@ inline void SMS_byte_array_to_VDP_data (const unsigned char *data, unsigned int 
   }
 }
 
-/*
-   // NO real saving to have this function
 inline void SMS_byte_brief_array_to_VDP_data (const unsigned char *data, unsigned char size) {
-  // INTERNAL FUNCTION
-  while (size>0) {
+  /* INTERNAL FUNCTION */
+  do {
     VDPDataPort=*(data++);
-    size--;
-  }
+  } while (--size!=0);
 }
-*/
 
 inline void SMS_word_to_VDP_data (unsigned int data) {
   /* INTERNAL FUNCTION */
   VDPDataPort=LO(data);
+  WAIT_VRAM;               /* ensure we're not pushing data too fast */
   VDPDataPort=HI(data);
 }
 
@@ -173,12 +174,12 @@ void SMS_setSpritePaletteColor (unsigned char entry, unsigned char color) {
 
 void SMS_loadBGPalette (void *palette) {
   SMS_set_address_CRAM(0x00);
-  SMS_byte_array_to_VDP_data(palette,16);
+  SMS_byte_brief_array_to_VDP_data(palette,16);
 }
 
 void SMS_loadSpritePalette (void *palette) {
   SMS_set_address_CRAM(0x10);
-  SMS_byte_array_to_VDP_data(palette,16);
+  SMS_byte_brief_array_to_VDP_data(palette,16);
 }
 
 void SMS_loadTiles (void *src, unsigned int Tilefrom, unsigned int size) {
@@ -208,7 +209,7 @@ void SMS_loadTileMapArea (unsigned char x, unsigned char y,  void *src, unsigned
   unsigned char cur_y;
   for (cur_y=y;cur_y<y+height;cur_y++) {
     SMS_set_address_VRAM(PNTAddress+(cur_y*32+x)*2);
-    SMS_byte_array_to_VDP_data(src,width*2);
+    SMS_byte_brief_array_to_VDP_data(src,width*2);
     src=((unsigned char*)src)+width;
   }
 }
@@ -260,6 +261,7 @@ void SMS_loadSTMcompressedTileMap (unsigned char x, unsigned char y, unsigned ch
           break;          /* done, thus exit the while block */
         while (cnt>0) {
           SMS_byte_to_VDP_data(*src++);
+          WAIT_VRAM;                      /* ensure we're not pushing data too fast */
           SMS_byte_to_VDP_data(HI(HH));
           cnt--;
         }
@@ -320,9 +322,9 @@ void SMS_finalizeSprites (void) {
 
 void SMS_copySpritestoSAT (void) {
   SMS_set_address_VRAM(SATAddress);
-  SMS_byte_array_to_VDP_data(SpriteTableY,MAXSPRITES);
+  SMS_byte_brief_array_to_VDP_data(SpriteTableY,MAXSPRITES);
   SMS_set_address_VRAM(SATAddress+128);
-  SMS_byte_array_to_VDP_data(SpriteTableXN,MAXSPRITES*2);
+  SMS_byte_brief_array_to_VDP_data(SpriteTableXN,MAXSPRITES*2);
 }
 
 void SMS_waitForVBlank (void) {
@@ -397,6 +399,11 @@ void SMS_VRAMmemcpy (unsigned int dst, void *src, unsigned int size) {
   SMS_byte_array_to_VDP_data(src,size);
 }
 
+void SMS_VRAMmemcpy_brief (unsigned int dst, void *src, unsigned int size) {
+  SMS_set_address_VRAM(dst);
+  SMS_byte_brief_array_to_VDP_data(src,size);
+}
+
 void SMS_VRAMmemset (unsigned int dst, unsigned char value, unsigned int size) {
   SMS_set_address_VRAM(dst);
   while (size>0) {
@@ -409,6 +416,7 @@ void SMS_VRAMmemsetW (unsigned int dst, unsigned int value, unsigned int size) {
   SMS_set_address_VRAM(dst);
   while (size>0) {
     SMS_byte_to_VDP_data(LO(value));
+    WAIT_VRAM;                          /* ensure we're not pushing data too fast */
     SMS_byte_to_VDP_data(HI(value));
     size-=2;
   }

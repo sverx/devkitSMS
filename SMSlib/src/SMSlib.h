@@ -140,6 +140,7 @@ unsigned char SMS_getHCount (void);
 
 /* low level functions */
 void SMS_VRAMmemcpy (unsigned int dst, void *src, unsigned int size);
+void SMS_VRAMmemcpy_brief (unsigned int dst, void *src, unsigned int size);
 void SMS_VRAMmemset (unsigned int dst, unsigned char value, unsigned int size);
 void SMS_VRAMmemsetW (unsigned int dst, unsigned int value, unsigned int size);
 
