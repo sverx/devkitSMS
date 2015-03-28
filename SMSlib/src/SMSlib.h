@@ -1,10 +1,15 @@
 /* **************************************************
-   SMSlib - C programming library for the SMS
+   SMSlib - C programming library for the SMS/GG
    ( part of devkitSMS - github.com/sverx/devkitSMS )
    ************************************************** */
-   
+
+// #define TARGET_GG
+/* uncomment previous line to compile for the GameGear */
+
+#ifndef TARGET_GG
 #define MD_PAD_SUPPORT
-/* delete previous line to deactivate MD pads support */
+/* delete/comment previous line to deactivate MD pads support (SMS only) */
+#endif
 
 /* library initialization. you don't need to call this if you use devkitSMS */
 void SMS_init (void);
@@ -47,11 +52,19 @@ volatile __at (0xffff) unsigned char bank_to_be_mapped_on_slot2;
 /* wait until next VBlank starts */
 void SMS_waitForVBlank (void);
 
+#ifdef TARGET_GG
+/* GG functions to set a color / load a palette */
+void GG_setBGPaletteColor (unsigned char entry, unsigned int color);
+void GG_setSpritePaletteColor (unsigned char entry, unsigned int color);
+void GG_loadBGPalette (void *palette);
+void GG_loadSpritePalette (void *palette);
+#else
 /* functions to set a color / load a palette */
 void SMS_setBGPaletteColor (unsigned char entry, unsigned char color);
 void SMS_setSpritePaletteColor (unsigned char entry, unsigned char color);
 void SMS_loadBGPalette (void *palette);
 void SMS_loadSpritePalette (void *palette);
+#endif
 
 /* functions to load tiles into VRAM */
 void SMS_loadTiles (void *src, unsigned int Tilefrom, unsigned int size);
@@ -106,6 +119,10 @@ unsigned int SMS_getKeysReleased (void);
 #define PORT_A_TH               0x4000          /* for light gun */
 #define PORT_B_TH               0x8000          /* for light gun */
 
+#ifdef TARGET_GG
+#define GG_KEY_START            0x8000          /* START key on GG */
+#endif
+
 #ifdef MD_PAD_SUPPORT
 /* functions to read additional MD buttons */
 unsigned int SMS_getMDKeysStatus (void);
@@ -123,9 +140,11 @@ unsigned int SMS_getMDKeysReleased (void);
 /* port B still missing */
 #endif
 
-/* pause handling */
+#ifndef TARGET_GG
+/* pause handling (SMS only) */
 bool SMS_queryPauseRequested (void);
 void SMS_resetPauseRequest (void);
+#endif
 
 /* line interrupt */
 void SMS_setLineInterruptHandler (void (*theHandlerFunction)(void));
@@ -140,7 +159,7 @@ unsigned char SMS_getHCount (void);
 
 /* low level functions */
 void SMS_VRAMmemcpy (unsigned int dst, void *src, unsigned int size);
-void SMS_VRAMmemcpy_brief (unsigned int dst, void *src, unsigned int size);
+void SMS_VRAMmemcpy_brief (unsigned int dst, void *src, unsigned char size);
 void SMS_VRAMmemset (unsigned int dst, unsigned char value, unsigned int size);
 void SMS_VRAMmemsetW (unsigned int dst, unsigned int value, unsigned int size);
 

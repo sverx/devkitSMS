@@ -1,7 +1,7 @@
 devkitSMS
 =========
 
-a collection of tools and code (with a very presumptuous name) to help in SEGA Master System homebrew development, using SDCC
+a collection of tools and code (with a very presumptuous name) to help in SEGA Master System / SEGA Game Gear homebrew development, using SDCC
 
 How to code your own programs using devkitSMS:
 
@@ -12,12 +12,16 @@ How to code your own programs using devkitSMS:
 * place ihx2sms.exe from this package into your SDCC 'bin' folder
   (if you're not on Windows please compile this tool youself from the sources)
 * place folder2c.exe from this package into your SDCC 'bin' folder (optional, you can use other tools to convert your data. If you're not on Windows please compile this tool youself from the sources)
-* place SMSlib.h and SMSlib.rel in your project folder - or somewhere within reach ;)
+* place SMSlib.h and SMSlib.rel (or SMSlib_GG.rel) in your project folder - or somewhere within reach ;)
   You could also create a SMSlib folder, place both SMSlib.c and SMSlib.h there and compile it yourself with SDCC:
 ```
   sdcc -c -mz80 --std-sdcc99 --peep-file peep-rules.txt SMSlib.c
 ```
-  note that the additional optimizing peep rules needs to be specified if you're using latest SDCC official release (that is 3.4.0 actually) and not necessary if you're using SDCC from revision #9198 on. 
+  note that the additional optimizing peep rules needs to be specified if you're using latest SDCC official release (that is 3.4.0 actually) and not necessary if you're using SDCC from revision #9198 on.
+  If you want to compile the Game Gear version of the lib:
+```  
+  sdcc -o SMSlib_GG.rel -c -mz80 --std-sdcc99 --peep-file peep-rules.txt -DTARGET_GG SMSlib.c
+```
 
 * optionally, if you plan to use PSG music/SFX, place PSGlib.h and PSGlib.rel in your project folder (again you could also create a PSGlib folder, place both PSGlib.c and PSGlib.h there and compile it yourself with SDCC:
 ```

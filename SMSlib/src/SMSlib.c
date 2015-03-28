@@ -1,5 +1,5 @@
 /* **************************************************
-   SMSlib - C programming library for the SMS
+   SMSlib - C programming library for the SMS/GG
    ( part of devkitSMS - github.com/sverx/devkitSMS )
    ************************************************** */
 
@@ -18,7 +18,13 @@ __sfr __at 0x7E VDPVCounterPort;
 __sfr __at 0x7F VDPHCounterPort;
 /* define IOPort (joypad) */
 __sfr __at 0xDC IOPortL;
+#ifdef TARGET_GG
+/* define GG IOPort (GG START key) */
+__sfr __at 0x00 GGIOPort;
+#else
+/* define IOPort (joypad) */
 __sfr __at 0xDE IOPortH;
+#endif
 
 #ifdef MD_PAD_SUPPORT
 /* define IOPortCtrl (for accessing MD pad) */
@@ -57,7 +63,9 @@ unsigned char VDPReg[0x0B]= { 0x04, /* reg0: Mode 4 */
                              };
 
 volatile bool VDPBlank=false;               /* used by INTerrupt */
-volatile bool PauseRequested=false;         /* used by NMI */
+#ifndef TARGET_GG
+volatile bool PauseRequested=false;         /* used by NMI (SMS only) */
+#endif
 /*
 volatile bool VDPSpriteOverflow=false;
 volatile bool VDPSpriteCollision=false;
@@ -124,10 +132,16 @@ void SMS_init (void) {
   /* VDP initialization */
   for (i=0;i<0x0B;i++)
     SMS_write_to_VDPRegister(i,VDPReg[i]);
-  /* init Pause */
+#ifndef TARGET_GG
+  /* init Pause (SMS only)*/
   SMS_resetPauseRequest();
+#endif
   /* reset clipping window */
+#ifdef TARGET_GG
+  SMS_setClippingWindow(48,24,207,167);
+#else
   SMS_setClippingWindow(0,0,255,191);
+#endif
 }
 
 void SMS_VDPturnOnFeature (unsigned int feature) {
@@ -162,6 +176,27 @@ void SMS_useFirstHalfTilesforSprites (bool usefirsthalf) {
   SMS_write_to_VDPRegister(0x06,VDPReg[0x06]);
 }
 
+#ifdef TARGET_GG
+void GG_setBGPaletteColor (unsigned char entry, unsigned int color) {
+  SMS_set_address_CRAM(entry*2);
+  SMS_word_to_VDP_data(color);
+}
+
+void GG_setSpritePaletteColor (unsigned char entry, unsigned int color) {
+  SMS_set_address_CRAM(entry*2+0x20);
+  SMS_word_to_VDP_data(color);
+}
+
+void GG_loadBGPalette (void *palette) {
+  SMS_set_address_CRAM(0x00);
+  SMS_byte_brief_array_to_VDP_data(palette,32);
+}
+
+void GG_loadSpritePalette (void *palette) {
+  SMS_set_address_CRAM(0x20);
+  SMS_byte_brief_array_to_VDP_data(palette,32);
+}
+#else
 void SMS_setBGPaletteColor (unsigned char entry, unsigned char color) {
   SMS_set_address_CRAM(entry);
   SMS_byte_to_VDP_data(color);
@@ -181,6 +216,7 @@ void SMS_loadSpritePalette (void *palette) {
   SMS_set_address_CRAM(0x10);
   SMS_byte_brief_array_to_VDP_data(palette,16);
 }
+#endif
 
 void SMS_loadTiles (void *src, unsigned int Tilefrom, unsigned int size) {
   SMS_set_address_VRAM(Tilefrom*32);
@@ -210,7 +246,7 @@ void SMS_loadTileMapArea (unsigned char x, unsigned char y,  void *src, unsigned
   for (cur_y=y;cur_y<y+height;cur_y++) {
     SMS_set_address_VRAM(PNTAddress+(cur_y*32+x)*2);
     SMS_byte_brief_array_to_VDP_data(src,width*2);
-    src=((unsigned char*)src)+width;
+    src=(unsigned char*)src+width*2;
   }
 }
 
@@ -366,6 +402,7 @@ unsigned int SMS_getMDKeysReleased (void) {
 }
 #endif
 
+#ifndef TARGET_GG
 bool SMS_queryPauseRequested (void) {
   return(PauseRequested);
 }
@@ -373,6 +410,7 @@ bool SMS_queryPauseRequested (void) {
 void SMS_resetPauseRequest (void) {
   PauseRequested=false;
 }
+#endif
 
 void SMS_setLineInterruptHandler (void (*theHandlerFunction)(void)) {
   SMS_theLineInterruptHandler=theHandlerFunction;
@@ -399,7 +437,7 @@ void SMS_VRAMmemcpy (unsigned int dst, void *src, unsigned int size) {
   SMS_byte_array_to_VDP_data(src,size);
 }
 
-void SMS_VRAMmemcpy_brief (unsigned int dst, void *src, unsigned int size) {
+void SMS_VRAMmemcpy_brief (unsigned int dst, void *src, unsigned char size) {
   SMS_set_address_VRAM(dst);
   SMS_byte_brief_array_to_VDP_data(src,size);
 }
@@ -444,7 +482,11 @@ void SMS_isr (void) __interrupt {
     IOPortCtrl=TH_HI;
 #endif
 
+#ifdef TARGET_GG
+    KeysStatus=~(((GGIOPort)<<8)|IOPortL);
+#else
     KeysStatus=((~IOPortH)<<8)|(~IOPortL);
+#endif
 
 #ifdef MD_PAD_SUPPORT
     IOPortCtrl=TH_LO;
@@ -469,7 +511,9 @@ void SMS_isr (void) __interrupt {
 }
 
 void SMS_nmi_isr (void) __critical __interrupt {          /* this is for NMI */
+#ifndef TARGET_GG
   PauseRequested=true;
+#endif
 }
 
 

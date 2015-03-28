@@ -14,10 +14,19 @@ void SMS_setBGScrollX (int scrollX);      /* scroll the background horizontally 
 void SMS_setBGScrollY (int scrollY);      /* scroll the background vertically */
 void SMS_setBackdropColor (unsigned char entry);           /* set which sprite palette entry will be used for backdrop */
 void SMS_useFirstHalfTilesforSprites (bool usefirsthalf);  /* use tiles 0-255 for sprites if true, 256-511 if false */
+
+/* palettes functions: SMS only */
 void SMS_setBGPaletteColor (unsigned char entry, unsigned char color);
 void SMS_setSpritePaletteColor (unsigned char entry, unsigned char color);
 void SMS_loadBGPalette (void *palette);
 void SMS_loadSpritePalette (void *palette);
+
+/* palettes functions: GG only */
+void GG_setBGPaletteColor (unsigned char entry, unsigned int color);
+void GG_setSpritePaletteColor (unsigned char entry, unsigned int color);
+void GG_loadBGPalette (void *palette);
+void GG_loadSpritePalette (void *palette);
+
 void SMS_loadTiles (void *src, unsigned int Tilefrom, unsigned int len);
 void SMS_loadTileMap (unsigned char x, unsigned char y, void *src, unsigned int len);
 void SMS_loadSTMcompressedTileMap (unsigned char x, unsigned char y, unsigned char *src);
@@ -35,19 +44,26 @@ unsigned int SMS_getKeysStatus (void);    /* the current status of the keys */
 unsigned int SMS_getKeysPressed (void);   /* the keys that were up last frame and down now */
 unsigned int SMS_getKeysHeld (void);      /* the keys that were down last frame and still down now */
 unsigned int SMS_getKeysReleased (void);  /* the keys that were down last frame and up now */
+
+/* MD pad handling (SMS only) */
 unsigned int SMS_getMDKeysStatus (void);  /* the current status of the extended keys on a MD controller */
 unsigned int SMS_getMDKeysPressed (void); /* the extended keys that were up last frame and down now on a MD controller */
 unsigned int SMS_getMDKeysHeld (void);    /* the extended keys that were down last frame and still down now on a MD controller */
 unsigned int SMS_getMDKeysReleased (void); /* the extended keys that were down last frame and up now on a MD controller */
+
+/* pause handling (SMS only) */
 bool SMS_queryPauseRequested (void);      /* the pause key has been pressed since previous check */
 void SMS_resetPauseRequest (void);        /* reset/acknowledge pause requests */
+
 void SMS_setLineInterruptHandler (void (*theHandlerFunction)(void));  /* link your own handler to the line interrupt */
 void SMS_setLineCounter (unsigned char count);  /* choose on which line trigger the IRQ */
 SMS_enableLineInterrupt()                 /* macro - turns on line IRQ */
 SMS_disableLineInterrupt()                /* macro - turns off line IRQ */
 void SMS_VRAMmemcpy (void *src, unsigned int dst, unsigned int size);              /* memcpy to VRAM (low level) */
+void SMS_VRAMmemcpy_brief (unsigned int dst, void *src, unsigned char size);       /* memcpy to VRAM (short array - low level) */
 void SMS_VRAMmemset (unsigned int dst, unsigned char value, unsigned int size);    /* memset to VRAM (low level) */
 SMS_mapROMBank(n);                        /* macro - maps bank n at address 0x8000 (slot 2) */
+
 SMS_EMBED_SEGA_ROM_HEADER(productCode,revision); /* macro - embed SEGA header into ROM */
 SMS_EMBED_SDSC_HEADER(verMaj,verMin,dateYear,dateMonth,dateDay,author,name,descr); /* macro - embed SDSC homebrew header into ROM */
 ```
