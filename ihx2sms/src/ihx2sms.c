@@ -26,7 +26,7 @@ char data[256];
 
 int main(int argc, char const* *argv) {
 	
-  int i,dest_addr;
+  unsigned int i,dest_addr;
   char tmp[3];
   unsigned int checksum=0;
   
@@ -60,7 +60,10 @@ int main(int argc, char const* *argv) {
       
         for (i=0;i<count;i++) {
 
-          dest_addr=addr+i+add_banks*0x4000;
+          if ((addr+i)>=0x8000)
+            dest_addr=addr+i+add_banks*0x4000;
+          else
+            dest_addr=addr+i;  
           
           strncpy (tmp,&data[i*2],2); 
           buf[dest_addr]=strtol(tmp,NULL,16);
