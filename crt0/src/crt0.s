@@ -47,7 +47,7 @@
         .org     0x66                   ; handle NMI
         jp _SMS_nmi_isr
 
-	.org	0x100
+	.org	 0x70
 init:
         ld sp, #0xdff0			; set stack pointer at end of RAM
         ld de, #0xfffc			; initialize mappers
@@ -66,6 +66,13 @@ mapper_loop:
         ei				; re-enable interrupts before going to main()
 	call	_main
 	jp	_exit
+	
+
+        .rept	128			; this is a block of 128 OUTI
+	outi				; made for enabling UNSAFE but FAST
+	.endm				; short data transfers to VRAM
+_outi_block::				; _outi_block label points to END of block
+	ret
 
 	;; Ordering of segments for the linker.
 	.area	_HOME

@@ -36,7 +36,9 @@ __sfr __at 0x3F IOPortCtrl;
 #define HI(x)                 ((x)>>8)
 #define LO(x)                 ((x)&0xFF)
 
+#ifndef MAXSPRITES
 #define MAXSPRITES            64
+#endif
 
 #define DISABLE_INTERRUPTS    __asm di __endasm
 #define ENABLE_INTERRUPTS     __asm ei __endasm
@@ -316,7 +318,7 @@ void SMS_initSprites (void) {
 
 bool SMS_addSprite (unsigned char x, unsigned char y, unsigned char tile) {
   if (SpriteNextFree<MAXSPRITES) {
-    if (y-1!=0xD0) {                            // avoid placing sprites at this Y!
+    if ((y-1)!=0xD0) {                          // avoid placing sprites at this Y!
       SpriteTableY[SpriteNextFree]=y-1;
       SpriteTableXN[SpriteNextFree*2]=x;
       SpriteTableXN[SpriteNextFree*2+1]=tile;
@@ -340,7 +342,7 @@ bool SMS_addSpriteClipping (int x, int y, unsigned char tile) {
       return (false);                               // sprite clipped
     if ((y>clipWin_y1) || (y<((int)clipWin_y0-8)))
       return (false);                               // sprite clipped
-    if (y-1!=0xD0) {                                // avoid placing sprites at this Y!
+    if ((y-1)!=0xD0) {                              // avoid placing sprites at this Y!
       SpriteTableY[SpriteNextFree]=y-1;
       SpriteTableXN[SpriteNextFree*2]=x;
       SpriteTableXN[SpriteNextFree*2+1]=tile;
@@ -352,7 +354,7 @@ bool SMS_addSpriteClipping (int x, int y, unsigned char tile) {
 }
 
 void SMS_finalizeSprites (void) {
-  if (SpriteNextFree<64)
+  if (SpriteNextFree<MAXSPRITES)
     SpriteTableY[SpriteNextFree]=0xD0;
 }
 
@@ -458,6 +460,22 @@ void SMS_VRAMmemsetW (unsigned int dst, unsigned int value, unsigned int size) {
     SMS_byte_to_VDP_data(HI(value));
     size-=2;
   }
+}
+
+/* VRAM unsafe functions. Fast, but dangerous! */
+void UNSAFE_SMS_copySpritestoSAT (void) {
+  SMS_set_address_VRAM(SATAddress);
+  __asm
+    ld c,#_VDPDataPort
+    ld hl,#_SpriteTableY
+    call _outi_block-MAXSPRITES*2
+  __endasm;
+  SMS_set_address_VRAM(SATAddress+128);
+  __asm
+    ld c,#_VDPDataPort
+    ld hl,#_SpriteTableXN
+    jp _outi_block-MAXSPRITES*4
+  __endasm;
 }
 
 /* Interrupt Service Routines */

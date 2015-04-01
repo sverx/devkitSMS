@@ -163,14 +163,17 @@ void SMS_VRAMmemcpy_brief (unsigned int dst, void *src, unsigned char size);
 void SMS_VRAMmemset (unsigned int dst, unsigned char value, unsigned int size);
 void SMS_VRAMmemsetW (unsigned int dst, unsigned int value, unsigned int size);
 
+/* VRAM unsafe functions. Fast, but dangerous! */
+void UNSAFE_SMS_copySpritestoSAT (void);
+
 /* macros for SEGA and SDSC headers */
 #define SMS_BYTE_TO_BCD(n) (((n)/10)*16+((n)%10))
 
-#define SMS_EMBED_SEGA_ROM_HEADER(productCode,revision) const __at (0x7ff0) char __SMS__SEGA_signature[16]={ \
-                                                        'T','M','R',' ','S','E','G','A', \
-                                                                    0xFF,0xFF,0xFF,0xFF, \
-            SMS_BYTE_TO_BCD((productCode)%100),SMS_BYTE_TO_BCD(((productCode)/100)%100), \
-                                        (((productCode)/10000)<<4)|((revision)&0x0f),0x4C}
+#define SMS_EMBED_SEGA_ROM_HEADER(productCode,revision) \
+ const __at (0x7ff0) char __SMS__SEGA_signature[16]={'T','M','R',' ','S','E','G','A', \
+                                                                 0xFF,0xFF,0xFF,0xFF, \
+         SMS_BYTE_TO_BCD((productCode)%100),SMS_BYTE_TO_BCD(((productCode)/100)%100), \
+                                   (((productCode)/10000)<<4)|((revision)&0x0f),0x4C}
 
 #define SMS_EMBED_SDSC_HEADER(verMaj,verMin,dateYear,dateMonth,dateDay,author,name,descr) \
  const __at (0x7fe0-sizeof(author)) char __SMS__SDSC_author[]=author; \
