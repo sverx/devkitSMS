@@ -6,9 +6,11 @@
 // #define TARGET_GG
 /* uncomment previous line to compile for the GameGear */
 
-#ifndef TARGET_GG
-#define MD_PAD_SUPPORT
-/* delete/comment previous line to deactivate MD pads support (SMS only) */
+// #define NO_MD_PAD_SUPPORT
+/* uncomment previous line to remove support for the Genesis/MegaDrive pad (SMS only) */
+
+#ifdef TARGET_GG
+#define NO_MD_PAD_SUPPORT          /* no MD pad support on GG! */
 #endif
 
 /* library initialization. you don't need to call this if you use devkitSMS */
@@ -123,7 +125,7 @@ unsigned int SMS_getKeysReleased (void);
 #define GG_KEY_START            0x8000          /* START key on GG */
 #endif
 
-#ifdef MD_PAD_SUPPORT
+#ifndef NO_MD_PAD_SUPPORT
 /* functions to read additional MD buttons */
 unsigned int SMS_getMDKeysStatus (void);
 unsigned int SMS_getMDKeysPressed (void);

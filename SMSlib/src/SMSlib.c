@@ -26,7 +26,7 @@ __sfr __at 0x00 GGIOPort;
 __sfr __at 0xDE IOPortH;
 #endif
 
-#ifdef MD_PAD_SUPPORT
+#ifndef NO_MD_PAD_SUPPORT
 /* define IOPortCtrl (for accessing MD pad) */
 __sfr __at 0x3F IOPortCtrl;
 #define TH_HI 0xF5
@@ -73,7 +73,7 @@ volatile bool VDPSpriteOverflow=false;
 volatile bool VDPSpriteCollision=false;
 */
 volatile unsigned int KeysStatus=0,PreviousKeysStatus=0;
-#ifdef MD_PAD_SUPPORT
+#ifndef NO_MD_PAD_SUPPORT
 volatile unsigned int MDKeysStatus=0,PreviousMDKeysStatus=0;
 #endif
 
@@ -386,7 +386,7 @@ unsigned int SMS_getKeysReleased (void) {
   return ((~KeysStatus)&PreviousKeysStatus);
 }
 
-#ifdef MD_PAD_SUPPORT
+#ifndef NO_MD_PAD_SUPPORT
 unsigned int SMS_getMDKeysStatus (void) {
   return (MDKeysStatus);
 }
@@ -494,7 +494,7 @@ void SMS_isr (void) __interrupt {
     /* read key input */
     PreviousKeysStatus=KeysStatus;
 
-#ifdef MD_PAD_SUPPORT
+#ifndef NO_MD_PAD_SUPPORT
     /* read MD controller (3 or 6 buttons) if detected */
     PreviousMDKeysStatus=MDKeysStatus;
     IOPortCtrl=TH_HI;
@@ -503,10 +503,11 @@ void SMS_isr (void) __interrupt {
 #ifdef TARGET_GG
     KeysStatus=~(((GGIOPort)<<8)|IOPortL);
 #else
-    KeysStatus=((~IOPortH)<<8)|(~IOPortL);
+    // KeysStatus=((~IOPortH)<<8)|(~IOPortL);
+    KeysStatus=~(((IOPortH)<<8)|IOPortL);
 #endif
 
-#ifdef MD_PAD_SUPPORT
+#ifndef NO_MD_PAD_SUPPORT
     IOPortCtrl=TH_LO;
     MDKeysStatus=IOPortL;
     if (!(MDKeysStatus & 0x0C)) {           /* verify it's a MD pad */

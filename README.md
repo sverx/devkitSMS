@@ -17,8 +17,11 @@ How to code your own programs using devkitSMS:
 ```
   sdcc -c -mz80 --std-sdcc99 --peep-file peep-rules.txt SMSlib.c
 ```
-  note that the additional optimizing peep rules needs to be specified if you're using latest SDCC official release (that is 3.4.0 actually) and not necessary if you're using SDCC from revision #9198 on.
-  If you want to compile the Game Gear version of the lib:
+  note that the additional optimizing peep rules needs to be specified if you're using latest SDCC official release (that is 3.4.0 actually) and not necessary if you're using SDCC from revision #9198 on. If you want to leave out MegaDrive Pad support you can compile with
+```
+  sdcc -c -mz80 --std-sdcc99 --peep-file peep-rules.txt -DNO_MD_PAD_SUPPORT SMSlib.c
+``` 
+  If you instead want to compile the Game Gear version of the lib:
 ```  
   sdcc -o SMSlib_GG.rel -c -mz80 --std-sdcc99 --peep-file peep-rules.txt -DTARGET_GG SMSlib.c
 ```
@@ -53,7 +56,7 @@ How to add external data into your ROM:
   folder2c assets data
 ```
   this creates data.c and data.h from the files found inside assets subfolder.
-Each array will be named from the original filename, replacing spaces, periods and brackets with an underscore (it doesn't convert any other char so please use only alphanumeric chars). For each array there will be a #define into the .h file specifying the size in bytes, and it'll be called <arrayname>_size.
+Each array will be named from the original filename, replacing spaces, periods and brackets with an underscore (it doesn't convert any other char so please use only alphanumeric chars). For each array there will be a #define into the .h file specifying the size in bytes, and it'll be called [dataarrayname]_size.
 
 How to use more than 48KB in your ROM:
 
