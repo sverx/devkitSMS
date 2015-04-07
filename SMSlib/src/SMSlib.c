@@ -64,17 +64,17 @@ unsigned char VDPReg[0x0B]= { 0x04, /* reg0: Mode 4 */
                               0xFF  /* regA: line interrupt (disabled) */
                              };
 
-volatile bool VDPBlank=false;               /* used by INTerrupt */
+volatile bool VDPBlank;               /* used by INTerrupt */
 #ifndef TARGET_GG
-volatile bool PauseRequested=false;         /* used by NMI (SMS only) */
+volatile bool PauseRequested;         /* used by NMI (SMS only) */
 #endif
 /*
 volatile bool VDPSpriteOverflow=false;
 volatile bool VDPSpriteCollision=false;
 */
-volatile unsigned int KeysStatus=0,PreviousKeysStatus=0;
+volatile unsigned int KeysStatus,PreviousKeysStatus;
 #ifndef NO_MD_PAD_SUPPORT
-volatile unsigned int MDKeysStatus=0,PreviousMDKeysStatus=0;
+volatile unsigned int MDKeysStatus,PreviousMDKeysStatus;
 #endif
 
 unsigned char clipWin_x0,clipWin_y0,clipWin_x1,clipWin_y1;

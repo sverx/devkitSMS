@@ -59,6 +59,13 @@ mapper_loop:
         ld (de),a			; [0xfffd]=$00,[0xfffe]=$01,[0xffff]=$02
         inc a
         djnz mapper_loop
+        
+        xor a				; clear RAM (to value 0x00)
+        ld hl,#0xc000			;   by setting value 0 to $c000 and
+	ld (hl),a			;   to $c000 and
+        ld de,#0xc001			;   copying (LDIR) it to next byte
+        ld bc,#0x1ff0			;   for 8 KB minus 16 bytes
+        ldir				;   do that
 
         ;; Initialise global variables
         call    gsinit
