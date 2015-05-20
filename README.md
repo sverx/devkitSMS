@@ -57,6 +57,7 @@ How to add external data into your ROM:
 ```
   this creates data.c and data.h from the files found inside assets subfolder.
 Each array will be named from the original filename, replacing spaces, periods and brackets with an underscore (it doesn't convert any other char so please use only alphanumeric chars). For each array there will be a #define into the .h file specifying the size in bytes, and it'll be called [dataarrayname]_size.
+If a numerical third parameter is specified (it's optional), its value will be used in the .h file for an additional #define called [dataarrayname]_bank for each asset.
 
 How to use more than 48KB in your ROM:
 

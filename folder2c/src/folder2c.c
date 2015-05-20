@@ -35,13 +35,22 @@ int main(int argc, char const* *argv) {
   char *cname, *hname, *iname, *clean;
   int i,cnt,size;
   int total_size=0;
+  int bank_num=0;
   
   printf("*** sverx's folder2c converter ***\n");
 	
-  if (argc!=3) {
-    printf("Usage: folder2c folder outfilename\n");
-    printf("creates outfilename.c and outfilename.h with contents of every\nfile found in folder\n");    
+  if (argc<3 || argc>4) {
+    printf("Usage: folder2c folder outfilename [bank number]\n");
+    printf("creates outfilename.c and outfilename.h with contents of every\nfile found in folder.\n");
     return(1);
+  }
+  
+  if (argc==4) {
+    bank_num=atoi(argv[3]);
+    if (bank_num<=0) {
+      printf("Fatal: invalid bank number\n");
+      return(1);
+    }
   }
   
   dp = opendir(argv[1]);
@@ -104,7 +113,10 @@ int main(int argc, char const* *argv) {
       fprintf (fc,"};\n\n");
       
       fprintf (fh,"extern const unsigned char\t%s[];\n",clean);
-      fprintf (fh,"#define\t\t\t\t%s_size %d\n\n",clean,size);
+      fprintf (fh,"#define\t\t\t\t%s_size %d\n",clean,size);
+      if (bank_num)
+        fprintf (fh,"#define\t\t\t\t%s_bank %d\n",clean,bank_num);
+      fprintf (fh,"\n");
       
       fclose (fIN);
       free(clean);
