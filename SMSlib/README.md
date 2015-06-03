@@ -27,7 +27,11 @@ void GG_setSpritePaletteColor (unsigned char entry, unsigned int color);
 void GG_loadBGPalette (void *palette);
 void GG_loadSpritePalette (void *palette);
 
+/* functions to load tiles into VRAM */
 void SMS_loadTiles (void *src, unsigned int Tilefrom, unsigned int len);
+void SMS_loadPSGaidencompressedTiles (void *src, unsigned int Tilefrom);
+
+/* functions for tilemap loading/handling */
 void SMS_loadTileMap (unsigned char x, unsigned char y, void *src, unsigned int len);
 void SMS_loadSTMcompressedTileMap (unsigned char x, unsigned char y, unsigned char *src);
 void SMS_loadTileMapArea (unsigned char x, unsigned char y,  unsigned int *src, unsigned char width, unsigned char height);

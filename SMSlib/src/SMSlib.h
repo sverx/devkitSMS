@@ -70,6 +70,7 @@ void SMS_loadSpritePalette (void *palette);
 
 /* functions to load tiles into VRAM */
 void SMS_loadTiles (void *src, unsigned int Tilefrom, unsigned int size);
+void SMS_loadPSGaidencompressedTiles (void *src, unsigned int Tilefrom);
 
 /* functions for the tilemap */
 void SMS_loadTileMap (unsigned char x, unsigned char y, void *src, unsigned int size);
