@@ -26,7 +26,7 @@ How to code your own programs using devkitSMS:
   sdcc -o SMSlib_GG.rel -c -mz80 --std-sdcc99 --peep-file peep-rules.txt -DTARGET_GG SMSlib.c
 ```
 
-* optionally, if you plan to use PSG music/SFX, place PSGlib.h and PSGlib.rel in your project folder (again you could also create a PSGlib folder, place both PSGlib.c and PSGlib.h there and compile it yourself with SDCC:
+* optionally, if you plan to use PSG music/SFX, place PSGlib.h and PSGlib.rel in your project folder (again you could also create a PSGlib folder, place both PSGlib.c and PSGlib.h there and compile it yourself with SDCC)
 ```
   sdcc -c -mz80 --std-sdcc99 PSGlib.c
 ```
@@ -53,11 +53,11 @@ How to add external data into your ROM:
 * use the folder2c utility included, for example.
   It creates a .c source file (with its .h header file) containing one constant data array for each single file found in the specified dir:
 ```
-  folder2c assets data
+  folder2c assets data [optional ROM bank #]
 ```
   this creates data.c and data.h from the files found inside assets subfolder.
-Each array will be named from the original filename, replacing spaces, periods and brackets with an underscore (it doesn't convert any other char so please use only alphanumeric chars). For each array there will be a #define into the .h file specifying the size in bytes, and it'll be called [dataarrayname]_size.
-If a numerical third parameter is specified (it's optional), its value will be used in the .h file for an additional #define called [dataarrayname]_bank for each asset.
+Each array will be named from the original filename, replacing spaces, periods and brackets with an underscore (it doesn't convert any other char so please use only alphanumeric chars). For each array there will be a #define into the .h file specifying the size in bytes, and it'll be called [arrayname]_size.
+If a numerical third parameter is specified (it's optional), its value will be used in the .h file for an additional #define called [arrayname]_bank for each asset.
 
 How to use more than 48KB in your ROM:
 
@@ -67,9 +67,10 @@ How to use more than 48KB in your ROM:
   sdcc -c -mz80 --std-sdcc99 --constseg BANK2 bank2.c
   sdcc -c -mz80 --std-sdcc99 --constseg BANK3 bank3.c
 ```
-* compile your program adding a parameter for the linker for each bank (_BANK#) and adding each .rel file to be linked, in ascending order, at the end:
+* compile your program and separately link all the objects together adding a parameter for the linker for each bank (_BANK#) and adding each .rel file to be linked, in ascending order, at the end:
 ```
-  sdcc -mz80 --std-sdcc99 --data-loc 0xC000 -Wl-b_BANK2=0x8000 -Wl-b_BANK3=0x8000 your_program.c ..\SMSlib\SMSlib.rel bank2.rel bank3.rel
+  sdcc -c -mz80 --std-sdcc99 your_program.c
+  sdcc -mz80 --std-sdcc99 --data-loc 0xC000 -Wl-b_BANK2=0x8000 -Wl-b_BANK3=0x8000 your_program.rel ..\SMSlib\SMSlib.rel bank2.rel bank3.rel
 ```
 
 How to build the final .sms file
