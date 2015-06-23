@@ -6,6 +6,7 @@ a collection of tools and code (with a very presumptuous name) to help in SEGA M
 How to code your own programs using devkitSMS:
 
 * download and install SDCC - http://sdcc.sourceforge.net/
+  (release 3.4.0 suggested, as the next 3.5.0 has few quirks that are going to be fixed later)
 * read its manual (it's in SDCC 'doc' folder) - or http://sdcc.sourceforge.net/doc/sdccman.pdf
 * make sure that your installation works - details at page 20 of the PDF manual
 * place crt0.rel from this package into your SDCC 'lib/z80' folder
