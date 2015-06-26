@@ -50,19 +50,23 @@ __sfr __at 0x3F IOPortCtrl;
 unsigned int PNTAddress=0x3800;
 unsigned int SATAddress=0x3F00;
 
-/* the VDP registers 'shadow' RAM */
-unsigned char VDPReg[0x0B]= { 0x04, /* reg0: Mode 4 */
-                              0x00, /* reg1: display and frame int OFF */
-                              0xFF, /* reg2: PNT at 0x3800 */
-                              0xFF, /* reg3: no effect (when in mode 4) */
-                              0xFF, /* reg4: no effect (when in mode 4) */
-                              0xFF, /* reg5: SAT at 0x3F00 */
-                              0xFF, /* reg6: Sprite tiles at 0x2000 */
-                              0x00, /* reg7: backdrop color (zero) */
-                              0x00, /* reg8: scroll X (zero) */
-                              0x00, /* reg9: scroll Y (zero) */
-                              0xFF  /* regA: line interrupt (disabled) */
-                             };
+/* the VDP registers initialization value */
+const unsigned char VDPReg_init[11]={
+                  0x04, /* reg0: Mode 4 */
+                  0x20, /* reg1: display OFF - frame int (vblank) ON */
+                  0xFF, /* reg2: PNT at 0x3800 */
+                  0xFF, /* reg3: no effect (when in mode 4) */
+                  0xFF, /* reg4: no effect (when in mode 4) */
+                  0xFF, /* reg5: SAT at 0x3F00 */
+                  0xFF, /* reg6: Sprite tiles at 0x2000 */
+                  0x00, /* reg7: backdrop color (zero) */
+                  0x00, /* reg8: scroll X (zero) */
+                  0x00, /* reg9: scroll Y (zero) */
+                  0xFF  /* regA: line interrupt count (offscreen) */
+                                    };
+                                    
+/* the VDP registers #0 and #1 'shadow' RAM */
+unsigned char VDPReg[2]={0x04, 0x20};
 
 volatile bool VDPBlank;               /* used by INTerrupt */
 #ifndef TARGET_GG
@@ -79,7 +83,11 @@ volatile unsigned int MDKeysStatus,PreviousMDKeysStatus;
 
 unsigned char clipWin_x0,clipWin_y0,clipWin_x1,clipWin_y1;
 
+#if MAXSPRITES==64
 unsigned char SpriteTableY[MAXSPRITES];
+#else
+unsigned char SpriteTableY[MAXSPRITES+1];
+#endif
 unsigned char SpriteTableXN[MAXSPRITES*2];
 unsigned char SpriteNextFree;
 
@@ -87,10 +95,32 @@ unsigned char decompBuffer[32];        /*  used by PSGaiden decompression routin
 
 void (*SMS_theLineInterruptHandler)(void);
 
-/* macro instead of inline __critical functions. I had no choice with current SDCC :| */
+#ifndef NESTED_DI_EI_SUPPORT
+/* macro definitions (no nested DI/EI support) */
 #define SMS_write_to_VDPRegister(VDPReg,value)    { DISABLE_INTERRUPTS; VDPControlPort=(value); VDPControlPort=(VDPReg)|0x80; ENABLE_INTERRUPTS; }
 #define SMS_set_address_CRAM(address)             { DISABLE_INTERRUPTS; VDPControlPort=(address); VDPControlPort=0xC0; ENABLE_INTERRUPTS; }
 #define SMS_set_address_VRAM(address)             { DISABLE_INTERRUPTS; VDPControlPort=LO(address); VDPControlPort=HI(address)|0x40; ENABLE_INTERRUPTS; }
+#else
+/* inline __critical functions (nested DI/EI supported!) */
+inline void SMS_write_to_VDPRegister (unsigned char VDPReg, unsigned char value) __critical {
+    VDPControlPort=value;
+    VDPControlPort=VDPReg|0x80;
+}
+
+inline void SMS_set_address_CRAM (unsigned char address) {
+  __critical {
+    VDPControlPort=address;
+    VDPControlPort=0xC0;
+  }
+}
+
+inline void SMS_set_address_VRAM (unsigned int address) {
+  __critical {
+    VDPControlPort=LO(address);
+    VDPControlPort=HI(address)|0x40;
+  }
+}
+#endif
 
 inline void SMS_byte_to_VDP_data (unsigned char data) {
   /* INTERNAL FUNCTION */
@@ -99,17 +129,16 @@ inline void SMS_byte_to_VDP_data (unsigned char data) {
 
 inline void SMS_byte_array_to_VDP_data (const unsigned char *data, unsigned int size) {
   /* INTERNAL FUNCTION */
-  while (size>0) {
+  do {
     VDPDataPort=*(data++);
-    size--;
-  }
+  } while (--size);
 }
 
 inline void SMS_byte_brief_array_to_VDP_data (const unsigned char *data, unsigned char size) {
   /* INTERNAL FUNCTION */
   do {
     VDPDataPort=*(data++);
-  } while (--size!=0);
+  } while (--size);
 }
 
 inline void SMS_word_to_VDP_data (unsigned int data) {
@@ -135,7 +164,7 @@ void SMS_init (void) {
   unsigned char i;
   /* VDP initialization */
   for (i=0;i<0x0B;i++)
-    SMS_write_to_VDPRegister(i,VDPReg[i]);
+    SMS_write_to_VDPRegister(i,VDPReg_init[i]);
 #ifndef TARGET_GG
   /* init Pause (SMS only)*/
   SMS_resetPauseRequest();
@@ -161,23 +190,19 @@ void SMS_VDPturnOffFeature (unsigned int feature) {
 }
 
 void SMS_setBGScrollX (int scrollX) {
-  VDPReg[0x08]=LO(scrollX);
-  SMS_write_to_VDPRegister(0x08,VDPReg[0x08]);
+  SMS_write_to_VDPRegister(0x08,LO(scrollX));
 }
 
 void SMS_setBGScrollY (int scrollY) {
-  VDPReg[0x09]=LO(scrollY);
-  SMS_write_to_VDPRegister(0x09,VDPReg[0x09]);
+  SMS_write_to_VDPRegister(0x09,LO(scrollY));
 }
 
 void SMS_setBackdropColor (unsigned char entry) {
-  VDPReg[0x07]=entry;
-  SMS_write_to_VDPRegister(0x07,VDPReg[0x07]);
+  SMS_write_to_VDPRegister(0x07,entry);
 }
 
 void SMS_useFirstHalfTilesforSprites (bool usefirsthalf) {
-  VDPReg[0x06]=(usefirsthalf)?0xFB:0xFF;
-  SMS_write_to_VDPRegister(0x06,VDPReg[0x06]);
+  SMS_write_to_VDPRegister(0x06,usefirsthalf?0xFB:0xFF);
 }
 
 #ifdef TARGET_GG
@@ -222,8 +247,8 @@ void SMS_loadSpritePalette (void *palette) {
 }
 #endif
 
-void SMS_loadTiles (void *src, unsigned int Tilefrom, unsigned int size) {
-  SMS_set_address_VRAM(Tilefrom*32);
+void SMS_loadTiles (void *src, unsigned int tilefrom, unsigned int size) {
+  SMS_set_address_VRAM(tilefrom*32);
   SMS_byte_array_to_VDP_data(src,size);
 }
 
@@ -231,13 +256,13 @@ void SMS_loadTiles (void *src, unsigned int Tilefrom, unsigned int size) {
 #pragma disable_warning 85
 // SMS_loadPSGaidencompressedTiles would otherwise complain:
 // warning 85: unreferenced function argument : 'src'
-void SMS_loadPSGaidencompressedTiles (void *src, unsigned int Tilefrom) {
+void SMS_loadPSGaidencompressedTiles (void *src, unsigned int tilefrom) {
 /* ****************************************************************************
    Phantasy Star Gaiden Tile Decoder
    taken from http://www.smspower.org/Development/PhantasyStarGaidenTileDecoder
    (slightly modified and wrapped into a C function)
 ******************************************************************************* */
-  SMS_set_address_VRAM(Tilefrom*32);
+  SMS_set_address_VRAM(tilefrom*32);
   __asm
 
    pop bc                   ; move *src from stack into IX
@@ -528,13 +553,19 @@ bool SMS_addSpriteClipping (int x, int y, unsigned char tile) {
 }
 
 void SMS_finalizeSprites (void) {
+#if MAXSPRITES==64
   if (SpriteNextFree<MAXSPRITES)
+#endif
     SpriteTableY[SpriteNextFree]=0xD0;
 }
 
 void SMS_copySpritestoSAT (void) {
   SMS_set_address_VRAM(SATAddress);
+#if MAXSPRITES==64
   SMS_byte_brief_array_to_VDP_data(SpriteTableY,MAXSPRITES);
+#else
+  SMS_byte_brief_array_to_VDP_data(SpriteTableY,MAXSPRITES+1);
+#endif
   SMS_set_address_VRAM(SATAddress+128);
   SMS_byte_brief_array_to_VDP_data(SpriteTableXN,MAXSPRITES*2);
 }
@@ -593,8 +624,7 @@ void SMS_setLineInterruptHandler (void (*theHandlerFunction)(void)) {
 }
 
 void SMS_setLineCounter (unsigned char count) {
-  VDPReg[0x0A]=count;
-  SMS_write_to_VDPRegister(0x0A,VDPReg[0x0A]);
+  SMS_write_to_VDPRegister(0x0A,count);
 }
 
 /* Vcount */
@@ -642,7 +672,11 @@ void UNSAFE_SMS_copySpritestoSAT (void) {
   __asm
     ld c,#_VDPDataPort
     ld hl,#_SpriteTableY
+#if MAXSPRITES==64
     call _outi_block-MAXSPRITES*2
+#else
+    call _outi_block-(MAXSPRITES+1)*2
+#endif
   __endasm;
   SMS_set_address_VRAM(SATAddress+128);
   __asm
@@ -731,47 +765,3 @@ void SMS_VDPSetSpritesLocation (unsigned int location) {
 
 /* *********** END ************************ */
 
-
-/* inline critical function doesn't work correctly with SDCC 3.4.0 */
-/*
-inline void SMS_write_to_VDPRegister (unsigned char VDPReg, unsigned char value) {
-   INTERNAL FUNCTION
-  __critical {
-    VDPControlPort=value;
-    VDPControlPort=VDPReg|0x80;
-  }
-}
-
-inline void SMS_set_address_CRAM (unsigned char address) {
-   INTERNAL FUNCTION
-  __critical {
-    VDPControlPort=address;
-    VDPControlPort=0xC0;
-  }
-}
-
-inline void SMS_set_address_VRAM (unsigned int address) {
-   INTERNAL FUNCTION
-  __critical {
-    VDPControlPort=LO(address);
-    VDPControlPort=HI(address)|0x40;
-  }
-}
-*/
-
-
-
-
-/* *********** OLD CODE (that won't probably be used) ************************ */
-
-
-/*
-void SMS_VDPToggleFeature (unsigned int feature, bool on) {
-
-  if (on)
-    VDPReg[HI(feature)]|=LO(feature);
-  else
-    VDPReg[HI(feature)]&=~LO(feature); 
-  SMS_write_to_VDPRegister (HI(feature),VDPReg[HI(feature)]);
-}
-*/

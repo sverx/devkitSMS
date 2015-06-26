@@ -13,7 +13,7 @@
 #define NO_MD_PAD_SUPPORT          /* no MD pad support on GG! */
 #endif
 
-/* library initialization. you don't need to call this if you use devkitSMS */
+/* library initialization. you don't need to call this if you use devkitSMS crt0.rel */
 void SMS_init (void);
 
 /* VDP operative mode handling functions */
@@ -34,13 +34,15 @@ void SMS_VDPturnOffFeature (unsigned int feature);
 #define VDPFEATURE_USETALLSPRITES   0x0102
 #define VDPFEATURE_240LINES         0x0108
 #define VDPFEATURE_224LINES         0x0110
+#define VDPFEATURE_FRAMEIRQ         0x0120
+#define VDPFEATURE_SHOWDISPLAY      0x0140
 
-/* (it's possible to combine them if they belong to the same group) */
+/* (it's possible to combine (OR) them if they belong to the same group) */
 /* example: VDPFEATURE_ZOOMSPRITES|VDPFEATURE_USETALLSPRITES */
 
 /* handy macros :) */
-#define SMS_displayOn()   SMS_VDPturnOnFeature(0x0160)   /* turns on display and frame int */
-#define SMS_displayOff()  SMS_VDPturnOffFeature(0x0160)  /* turns off display and frame int */
+#define SMS_displayOn()   SMS_VDPturnOnFeature(VDPFEATURE_SHOWDISPLAY)   /* turns on display */
+#define SMS_displayOff()  SMS_VDPturnOffFeature(VDPFEATURE_SHOWDISPLAY)  /* turns off display */
 
 void SMS_setBGScrollX (int scrollX);
 void SMS_setBGScrollY (int scrollY);
@@ -69,8 +71,8 @@ void SMS_loadSpritePalette (void *palette);
 #endif
 
 /* functions to load tiles into VRAM */
-void SMS_loadTiles (void *src, unsigned int Tilefrom, unsigned int size);
-void SMS_loadPSGaidencompressedTiles (void *src, unsigned int Tilefrom);
+void SMS_loadTiles (void *src, unsigned int tilefrom, unsigned int size);
+void SMS_loadPSGaidencompressedTiles (void *src, unsigned int tilefrom);
 
 /* functions for the tilemap */
 void SMS_loadTileMap (unsigned char x, unsigned char y, void *src, unsigned int size);
@@ -90,7 +92,7 @@ void SMS_setTile (unsigned int tile);
 void SMS_initSprites (void);
 bool SMS_addSprite (unsigned char x, unsigned char y, unsigned char tile);  /* returns false if no more sprites are available */
 void SMS_setClippingWindow (unsigned char x0, unsigned char y0, unsigned char x1, unsigned char y1);
-bool SMS_addSpriteClipping (int x, int y, unsigned char tile);
+bool SMS_addSpriteClipping (int x, int y, unsigned char tile); /* returns false if no more sprites are available or sprite clipped */
 void SMS_finalizeSprites (void);
 void SMS_copySpritestoSAT (void);
 
@@ -173,22 +175,23 @@ void UNSAFE_SMS_copySpritestoSAT (void);
 #define SMS_BYTE_TO_BCD(n) (((n)/10)*16+((n)%10))
 
 #define SMS_EMBED_SEGA_ROM_HEADER(productCode,revision) \
- const __at (0x7ff0) char __SMS__SEGA_signature[16]={'T','M','R',' ','S','E','G','A', \
-                                                                 0xFF,0xFF,0xFF,0xFF, \
-         SMS_BYTE_TO_BCD((productCode)%100),SMS_BYTE_TO_BCD(((productCode)/100)%100), \
-                                   (((productCode)/10000)<<4)|((revision)&0x0f),0x4C}
+ const __at (0x7ff0) unsigned char __SMS__SEGA_signature[16]={'T','M','R',' ','S','E','G','A', \
+                                                                          0xFF,0xFF,0xFF,0xFF, \
+                  SMS_BYTE_TO_BCD((productCode)%100),SMS_BYTE_TO_BCD(((productCode)/100)%100), \
+                                            (((productCode)/10000)<<4)|((revision)&0x0f),0x4C}
 
 #define SMS_EMBED_SDSC_HEADER(verMaj,verMin,dateYear,dateMonth,dateDay,author,name,descr) \
- const __at (0x7fe0-sizeof(author)) char __SMS__SDSC_author[]=author; \
- const __at (0x7fe0-sizeof(author)-sizeof(name)) char __SMS__SDSC_name[]=name; \
+                          const __at (0x7fe0-sizeof(author)) char __SMS__SDSC_author[]=author; \
+                 const __at (0x7fe0-sizeof(author)-sizeof(name)) char __SMS__SDSC_name[]=name; \
  const __at (0x7fe0-sizeof(author)-sizeof(name)-sizeof(descr)) char __SMS__SDSC_descr[]=descr; \
- const __at (0x7fe0) char __SMS__SDSC_signature[16]={'S','D','S','C', \
-                               SMS_BYTE_TO_BCD(verMaj),SMS_BYTE_TO_BCD(verMin), \
-                            SMS_BYTE_TO_BCD(dateDay),SMS_BYTE_TO_BCD(dateMonth), \
-                SMS_BYTE_TO_BCD((dateYear)%100),SMS_BYTE_TO_BCD((dateYear)/100), \
-                        (0x7fe0-sizeof(author))&0xff,(0x7fe0-sizeof(author))>>8, \
-(0x7fe0-sizeof(author)-sizeof(name))&0xff,(0x7fe0-sizeof(author)-sizeof(name))>>8, \
-(0x7fe0-sizeof(author)-sizeof(name)-sizeof(descr))&0xff,(0x7fe0-sizeof(author)-sizeof(name)-sizeof(descr))>>8}
+                          const __at (0x7fe0) char __SMS__SDSC_signature[16]={'S','D','S','C', \
+                                              SMS_BYTE_TO_BCD(verMaj),SMS_BYTE_TO_BCD(verMin), \
+                                          SMS_BYTE_TO_BCD(dateDay),SMS_BYTE_TO_BCD(dateMonth), \
+                              SMS_BYTE_TO_BCD((dateYear)%100),SMS_BYTE_TO_BCD((dateYear)/100), \
+                                      (0x7fe0-sizeof(author))&0xff,(0x7fe0-sizeof(author))>>8, \
+            (0x7fe0-sizeof(author)-sizeof(name))&0xff,(0x7fe0-sizeof(author)-sizeof(name))>>8, \
+                                      (0x7fe0-sizeof(author)-sizeof(name)-sizeof(descr))&0xff, \
+                                        (0x7fe0-sizeof(author)-sizeof(name)-sizeof(descr))>>8}
 /* pretty nice, isn't it? :) */
 
 /* the Interrupt Service Routines (do not modify) */
