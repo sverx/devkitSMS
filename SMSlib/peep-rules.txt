@@ -1,17 +1,8 @@
 replace restart {
-	dec %1
-	ld	a, %1
-	or	a, a
+	ld  a,%1
+    	add a,#0xFF
+	ld  %1,a
+	or  a, a
 } by {
 	dec %1
-	; peephole 141a removed redundant transfer and flag setting in a
 } if notUsed('a')
-
-
-replace restart {
-	dec b
-	jr	NZ,	%5	
-} by {
-	djnz	%5
-	; peephole 156 used djnz
-}

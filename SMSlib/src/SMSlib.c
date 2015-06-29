@@ -102,9 +102,11 @@ void (*SMS_theLineInterruptHandler)(void);
 #define SMS_set_address_VRAM(address)             { DISABLE_INTERRUPTS; VDPControlPort=LO(address); VDPControlPort=HI(address)|0x40; ENABLE_INTERRUPTS; }
 #else
 /* inline __critical functions (nested DI/EI supported!) */
-inline void SMS_write_to_VDPRegister (unsigned char VDPReg, unsigned char value) __critical {
+inline void SMS_write_to_VDPRegister (unsigned char VDPReg, unsigned char value) {
+  __critical {
     VDPControlPort=value;
     VDPControlPort=VDPReg|0x80;
+  }    
 }
 
 inline void SMS_set_address_CRAM (unsigned char address) {
