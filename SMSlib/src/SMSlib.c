@@ -167,6 +167,10 @@ void SMS_init (void) {
   /* VDP initialization */
   for (i=0;i<0x0B;i++)
     SMS_write_to_VDPRegister(i,VDPReg_init[i]);
+  /* reset sprites */
+  SMS_initSprites();
+  SMS_finalizeSprites();
+  UNSAFE_SMS_copySpritestoSAT();
 #ifndef TARGET_GG
   /* init Pause (SMS only)*/
   SMS_resetPauseRequest();
