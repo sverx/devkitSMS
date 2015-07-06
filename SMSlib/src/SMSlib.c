@@ -68,13 +68,13 @@ const unsigned char VDPReg_init[11]={
 /* the VDP registers #0 and #1 'shadow' RAM */
 unsigned char VDPReg[2]={0x04, 0x20};
 
-volatile bool VDPBlank;               /* used by INTerrupt */
+volatile _Bool VDPBlank;               /* used by INTerrupt */
 #ifndef TARGET_GG
-volatile bool PauseRequested;         /* used by NMI (SMS only) */
+volatile _Bool PauseRequested;         /* used by NMI (SMS only) */
 #endif
 /*
-volatile bool VDPSpriteOverflow=false;
-volatile bool VDPSpriteCollision=false;
+volatile _Bool VDPSpriteOverflow=false;
+volatile _Bool VDPSpriteCollision=false;
 */
 volatile unsigned int KeysStatus,PreviousKeysStatus;
 #ifndef NO_MD_PAD_SUPPORT
@@ -203,7 +203,7 @@ void SMS_setBackdropColor (unsigned char entry) {
   SMS_write_to_VDPRegister(0x07,entry);
 }
 
-void SMS_useFirstHalfTilesforSprites (bool usefirsthalf) {
+void SMS_useFirstHalfTilesforSprites (_Bool usefirsthalf) {
   SMS_write_to_VDPRegister(0x06,usefirsthalf?0xFB:0xFF);
 }
 
@@ -458,7 +458,7 @@ void SMS_loadSTMcompressedTileMap (unsigned char x, unsigned char y, unsigned ch
   unsigned int oldHH=0x0000;
   unsigned char cur;
   unsigned char cnt;
-  bool needRestore=false;
+  _Bool needRestore=false;
 
   SMS_set_address_VRAM(PNTAddress+(y*32+x)*2);
   while (true) {
@@ -517,7 +517,7 @@ void SMS_initSprites (void) {
   SpriteNextFree=0;
 }
 
-bool SMS_addSprite (unsigned char x, unsigned char y, unsigned char tile) {
+_Bool SMS_addSprite (unsigned char x, unsigned char y, unsigned char tile) {
   if (SpriteNextFree<MAXSPRITES) {
     if ((y-1)!=0xD0) {                          // avoid placing sprites at this Y!
       SpriteTableY[SpriteNextFree]=y-1;
@@ -537,7 +537,7 @@ void SMS_setClippingWindow (unsigned char x0, unsigned char y0, unsigned char x1
   clipWin_y1=y1;
 }
 
-bool SMS_addSpriteClipping (int x, int y, unsigned char tile) {
+_Bool SMS_addSpriteClipping (int x, int y, unsigned char tile) {
   if (SpriteNextFree<MAXSPRITES) {
     if ((x>clipWin_x1) || (x<((int)clipWin_x0-8)))
       return (false);                               // sprite clipped
@@ -612,7 +612,7 @@ unsigned int SMS_getMDKeysReleased (void) {
 #endif
 
 #ifndef TARGET_GG
-bool SMS_queryPauseRequested (void) {
+_Bool SMS_queryPauseRequested (void) {
   return(PauseRequested);
 }
 

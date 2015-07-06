@@ -47,7 +47,7 @@ void SMS_VDPturnOffFeature (unsigned int feature);
 void SMS_setBGScrollX (int scrollX);
 void SMS_setBGScrollY (int scrollY);
 void SMS_setBackdropColor (unsigned char entry);
-void SMS_useFirstHalfTilesforSprites (bool usefirsthalf);
+void SMS_useFirstHalfTilesforSprites (_Bool usefirsthalf);
 
 /* macro for bankswitching */
 volatile __at (0xffff) unsigned char bank_to_be_mapped_on_slot2;
@@ -90,9 +90,9 @@ void SMS_setTile (unsigned int tile);
 
 /* functions for sprites handling */
 void SMS_initSprites (void);
-bool SMS_addSprite (unsigned char x, unsigned char y, unsigned char tile);  /* returns false if no more sprites are available */
+_Bool SMS_addSprite (unsigned char x, unsigned char y, unsigned char tile);  /* returns false if no more sprites are available */
 void SMS_setClippingWindow (unsigned char x0, unsigned char y0, unsigned char x1, unsigned char y1);
-bool SMS_addSpriteClipping (int x, int y, unsigned char tile); /* returns false if no more sprites are available or sprite clipped */
+_Bool SMS_addSpriteClipping (int x, int y, unsigned char tile); /* returns false if no more sprites are available or sprite clipped */
 void SMS_finalizeSprites (void);
 void SMS_copySpritestoSAT (void);
 
@@ -147,7 +147,7 @@ unsigned int SMS_getMDKeysReleased (void);
 
 #ifndef TARGET_GG
 /* pause handling (SMS only) */
-bool SMS_queryPauseRequested (void);
+_Bool SMS_queryPauseRequested (void);
 void SMS_resetPauseRequest (void);
 #endif
 
