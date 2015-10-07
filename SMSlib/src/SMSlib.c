@@ -23,7 +23,7 @@ __sfr __at 0xDC IOPortL;
 __sfr __at 0x00 GGIOPort;
 #else
 /* define IOPort (joypad) */
-__sfr __at 0xDE IOPortH;
+__sfr __at 0xDD IOPortH;
 #endif
 
 #ifndef NO_MD_PAD_SUPPORT
@@ -68,13 +68,13 @@ const unsigned char VDPReg_init[11]={
 /* the VDP registers #0 and #1 'shadow' RAM */
 unsigned char VDPReg[2]={0x04, 0x20};
 
-volatile _Bool VDPBlank;               /* used by INTerrupt */
+volatile bool VDPBlank;               /* used by INTerrupt */
 #ifndef TARGET_GG
-volatile _Bool PauseRequested;         /* used by NMI (SMS only) */
+volatile bool PauseRequested;         /* used by NMI (SMS only) */
 #endif
 /*
-volatile _Bool VDPSpriteOverflow=false;
-volatile _Bool VDPSpriteCollision=false;
+volatile bool VDPSpriteOverflow=false;
+volatile bool VDPSpriteCollision=false;
 */
 volatile unsigned int KeysStatus,PreviousKeysStatus;
 #ifndef NO_MD_PAD_SUPPORT
@@ -462,7 +462,7 @@ void SMS_loadSTMcompressedTileMap (unsigned char x, unsigned char y, unsigned ch
   unsigned int oldHH=0x0000;
   unsigned char cur;
   unsigned char cnt;
-  _Bool needRestore=false;
+  bool needRestore=false;
 
   SMS_set_address_VRAM(PNTAddress+(y*32+x)*2);
   while (true) {
