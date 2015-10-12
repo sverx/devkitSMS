@@ -81,6 +81,8 @@ volatile unsigned int KeysStatus,PreviousKeysStatus;
 volatile unsigned int MDKeysStatus,PreviousMDKeysStatus;
 #endif
 
+/* variables for sprite windowing and clipping */
+unsigned int  spritesHeight=8, spritesWidth=8;
 unsigned char clipWin_x0,clipWin_y0,clipWin_x1,clipWin_y1;
 
 #if MAXSPRITES==64
@@ -209,6 +211,24 @@ void SMS_setBackdropColor (unsigned char entry) {
 
 void SMS_useFirstHalfTilesforSprites (_Bool usefirsthalf) {
   SMS_write_to_VDPRegister(0x06,usefirsthalf?0xFB:0xFF);
+}
+
+void SMS_setSpriteMode (unsigned char mode) {
+  if (mode & SPRITEMODE_TALL) {
+    SMS_VDPturnOnFeature(VDPFEATURE_USETALLSPRITES);
+    spritesHeight=16;
+  } else {
+    SMS_VDPturnOffFeature(VDPFEATURE_USETALLSPRITES);
+    spritesHeight=8;
+  }
+  if (mode & SPRITEMODE_ZOOMED) {
+    SMS_VDPturnOnFeature(VDPFEATURE_ZOOMSPRITES);
+    spritesWidth=16;
+    spritesHeight*=2;
+  } else {
+    SMS_VDPturnOffFeature(VDPFEATURE_ZOOMSPRITES);
+    spritesWidth=8;
+  }
 }
 
 #ifdef TARGET_GG
@@ -543,9 +563,9 @@ void SMS_setClippingWindow (unsigned char x0, unsigned char y0, unsigned char x1
 
 _Bool SMS_addSpriteClipping (int x, int y, unsigned char tile) {
   if (SpriteNextFree<MAXSPRITES) {
-    if ((x>clipWin_x1) || (x<((int)clipWin_x0-8)))
+    if ((x>clipWin_x1) || (x<((int)clipWin_x0-spritesWidth)))
       return (false);                               // sprite clipped
-    if ((y>clipWin_y1) || (y<((int)clipWin_y0-8)))
+    if ((y>clipWin_y1) || (y<((int)clipWin_y0-spritesHeight)))
       return (false);                               // sprite clipped
     if ((y-1)!=0xD0) {                              // avoid placing sprites at this Y!
       SpriteTableY[SpriteNextFree]=y-1;

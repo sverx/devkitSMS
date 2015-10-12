@@ -48,6 +48,12 @@ void SMS_setBGScrollX (int scrollX);
 void SMS_setBGScrollY (int scrollY);
 void SMS_setBackdropColor (unsigned char entry);
 void SMS_useFirstHalfTilesforSprites (_Bool usefirsthalf);
+void SMS_setSpriteMode (unsigned char mode);
+/* modes for SMS_setSpriteMode */
+#define SPRITEMODE_NORMAL         0x00
+#define SPRITEMODE_TALL           0x01
+#define SPRITEMODE_ZOOMED         0x02
+#define SPRITEMODE_TALL_ZOOMED    0x03
 
 /* macro for bankswitching */
 volatile __at (0xffff) unsigned char bank_to_be_mapped_on_slot2;
