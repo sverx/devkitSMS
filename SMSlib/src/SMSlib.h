@@ -70,8 +70,8 @@ void GG_loadBGPalette (void *palette);
 void GG_loadSpritePalette (void *palette);
 /* GG macros for colors */
 #define RGB(r,g,b)        ((r)|((g)<<4)|((b)<<8))
-#define RGB8(r,g,b)       ((r>>4)|((g>>4)<<4)|((b>>4)<<8))
-#define RGBHTML(RGB24bit) ((RGB24bit>>20)|(((RGB24bit&0xFFFF)>>12)<<4)|(((RGB24bit&0xFF)>>4)<<8))
+#define RGB8(r,g,b)       (((r)>>4)|(((g)>>4)<<4)|(((b)>>4)<<8))
+#define RGBHTML(RGB24bit) (((RGB24bit)>>20)|((((RGB24bit)&0xFFFF)>>12)<<4)|((((RGB24bit)&0xFF)>>4)<<8))
 #else
 /* functions to set a color / load a palette */
 void SMS_setBGPaletteColor (unsigned char entry, unsigned char color);
@@ -80,8 +80,8 @@ void SMS_loadBGPalette (void *palette);
 void SMS_loadSpritePalette (void *palette);
 /* SMS macros for colors */
 #define RGB(r,g,b)        ((r)|((g)<<2)|((b)<<4))
-#define RGB8(r,g,b)       ((r>>6)|((g>>6)<<2)|((b>>6)<<4))
-#define RGBHTML(RGB24bit) ((RGB24bit>>22)|(((RGB24bit&0xFFFF)>>14)<<2)|(((RGB24bit&0xFF)>>6)<<4))
+#define RGB8(r,g,b)       (((r)>>6)|(((g)>>6)<<2)|(((b)>>6)<<4))
+#define RGBHTML(RGB24bit) (((RGB24bit)>>22)|((((RGB24bit)&0xFFFF)>>14)<<2)|((((RGB24bit)&0xFF)>>6)<<4))
 #endif
 
 /* functions to load tiles into VRAM */
