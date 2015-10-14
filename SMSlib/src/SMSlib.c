@@ -29,8 +29,8 @@ __sfr __at 0xDD IOPortH;
 #ifndef NO_MD_PAD_SUPPORT
 /* define IOPortCtrl (for accessing MD pad) */
 __sfr __at 0x3F IOPortCtrl;
-#define TH_HI 0xF5
-#define TH_LO 0xD5
+#define TH_HI                 0xF5
+#define TH_LO                 0xD5
 #endif
 
 #define HI(x)                 ((x)>>8)
@@ -64,13 +64,14 @@ const unsigned char VDPReg_init[11]={
                   0x00, /* reg9: scroll Y (zero) */
                   0xFF  /* regA: line interrupt count (offscreen) */
                                     };
-                                    
+
 /* the VDP registers #0 and #1 'shadow' RAM */
 unsigned char VDPReg[2]={0x04, 0x20};
 
 volatile bool VDPBlank;               /* used by INTerrupt */
 #ifndef TARGET_GG
 volatile bool PauseRequested;         /* used by NMI (SMS only) */
+unsigned char VDPType;                /* used by NTSC/PAL and VDP type detection (SMS only) */
 #endif
 /*
 volatile bool VDPSpriteOverflow=false;
@@ -105,6 +106,7 @@ void (*SMS_theLineInterruptHandler)(void);
 #else
 /* inline __critical functions (nested DI/EI supported!) */
 inline void SMS_write_to_VDPRegister (unsigned char VDPReg, unsigned char value) {
+  /* INTERNAL FUNCTION */
   __critical {
     VDPControlPort=value;
     VDPControlPort=VDPReg|0x80;
@@ -112,6 +114,7 @@ inline void SMS_write_to_VDPRegister (unsigned char VDPReg, unsigned char value)
 }
 
 inline void SMS_set_address_CRAM (unsigned char address) {
+  /* INTERNAL FUNCTION */
   __critical {
     VDPControlPort=address;
     VDPControlPort=0xC0;
@@ -119,6 +122,7 @@ inline void SMS_set_address_CRAM (unsigned char address) {
 }
 
 inline void SMS_set_address_VRAM (unsigned int address) {
+  /* INTERNAL FUNCTION */
   __critical {
     VDPControlPort=LO(address);
     VDPControlPort=HI(address)|0x40;
@@ -152,6 +156,22 @@ inline void SMS_word_to_VDP_data (unsigned int data) {
   VDPDataPort=HI(data);
 }
 
+#ifndef TARGET_GG
+inline void SMS_detect_VDP_type (void) {
+  unsigned char old_value;
+  /* INTERNAL FUNCTION */
+  while (VDPVCounterPort>0x80);       // wait next frame starts
+  while (VDPVCounterPort<0x80);       // wait next half frame
+  do {
+    old_value=VDPVCounterPort;        // wait until VCounter 'goes back'
+  } while (old_value<=VDPVCounterPort);
+  if (old_value>=0xE7)
+    VDPType=VDP_PAL;                  // old value should be 0xF2
+  else
+    VDPType=VDP_NTSC;                 // old value should be 0xDA
+}
+#endif
+
 /*
 inline void SMS_word_array_to_VDP_data (const unsigned int *data, unsigned int len) {
   INTERNAL FUNCTION
@@ -182,8 +202,15 @@ void SMS_init (void) {
   SMS_setClippingWindow(48,24,207,167);
 #else
   SMS_setClippingWindow(0,0,255,191);
+  SMS_detect_VDP_type();
 #endif
 }
+
+#ifndef TARGET_GG
+unsigned char SMS_VDPType (void) {
+  return VDPType;
+}
+#endif
 
 void SMS_VDPturnOnFeature (unsigned int feature) {
   /* turns on a VDP feature */
@@ -770,7 +797,7 @@ void SMS_nmi_isr (void) __critical __interrupt {          /* this is for NMI */
 }
 
 
-/* *********** TEMPORARY CODE (needs fixing) ************************ */
+/* *********** LEFTOVER/INCOMPLETE CODE (do not use) *********************** */
 
 /*
 void SMS_VDPSetSATLocation (unsigned int location) {
@@ -789,5 +816,4 @@ void SMS_VDPSetSpritesLocation (unsigned int location) {
 }
 */
 
-/* *********** END ************************ */
-
+/* *********** END ********************************************************* */
