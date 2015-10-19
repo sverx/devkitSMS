@@ -78,7 +78,8 @@ void SMS_VRAMmemcpy (unsigned int dst, void *src, unsigned int size);           
 void SMS_VRAMmemcpy_brief (unsigned int dst, void *src, unsigned char size);       /* memcpy to VRAM (256 bytes max) */
 void SMS_VRAMmemset (unsigned int dst, unsigned char value, unsigned int size);    /* memset to VRAM */
 
-/* SEGA/SDCC headers */
+/* SEGA/SDSC headers */
 SMS_EMBED_SEGA_ROM_HEADER(productCode,revision);                                   /* macro - embed SEGA header into ROM */
 SMS_EMBED_SDSC_HEADER(verMaj,verMin,dateYear,dateMonth,dateDay,author,name,descr); /* macro - embed SDSC homebrew header into ROM */
+SMS_EMBED_SDSC_HEADER_AUTO_DATE(verMaj,verMin,author,name,descr);                  /* macro - embed auto timestamped SDSC homebrew header into ROM */
 ```

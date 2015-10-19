@@ -196,13 +196,21 @@ void UNSAFE_SMS_copySpritestoSAT (void);
 /* macros for SEGA and SDSC headers */
 #define SMS_BYTE_TO_BCD(n) (((n)/10)*16+((n)%10))
 
-#define SMS_EMBED_SEGA_ROM_HEADER(productCode,revision) \
+#ifndef TARGET_GG
+/* "SMS Export" (32KB) */
+#define SMS_EMBED_SEGA_ROM_HEADER_REGION_CODE  0x4C
+#else
+/* "GG international" (32KB) */
+#define SMS_EMBED_SEGA_ROM_HEADER_REGION_CODE  0x7C
+#endif
+
+#define SMS_EMBED_SEGA_ROM_HEADER(productCode,revision)                                        \
  const __at (0x7ff0) unsigned char __SMS__SEGA_signature[16]={'T','M','R',' ','S','E','G','A', \
                                                                           0xFF,0xFF,0xFF,0xFF, \
                   SMS_BYTE_TO_BCD((productCode)%100),SMS_BYTE_TO_BCD(((productCode)/100)%100), \
-                                            (((productCode)/10000)<<4)|((revision)&0x0f),0x4C}
+           (((productCode)/10000)<<4)|((revision)&0x0f),SMS_EMBED_SEGA_ROM_HEADER_REGION_CODE}
 
-#define SMS_EMBED_SDSC_HEADER(verMaj,verMin,dateYear,dateMonth,dateDay,author,name,descr) \
+#define SMS_EMBED_SDSC_HEADER(verMaj,verMin,dateYear,dateMonth,dateDay,author,name,descr)      \
                           const __at (0x7fe0-sizeof(author)) char __SMS__SDSC_author[]=author; \
                  const __at (0x7fe0-sizeof(author)-sizeof(name)) char __SMS__SDSC_name[]=name; \
  const __at (0x7fe0-sizeof(author)-sizeof(name)-sizeof(descr)) char __SMS__SDSC_descr[]=descr; \
@@ -214,6 +222,21 @@ void UNSAFE_SMS_copySpritestoSAT (void);
             (0x7fe0-sizeof(author)-sizeof(name))&0xff,(0x7fe0-sizeof(author)-sizeof(name))>>8, \
                                       (0x7fe0-sizeof(author)-sizeof(name)-sizeof(descr))&0xff, \
                                         (0x7fe0-sizeof(author)-sizeof(name)-sizeof(descr))>>8}
+
+/* to set SDSC header date to 0000-00-00 so that ihx2sms updates that with compilation date */
+#define SMS_EMBED_SDSC_HEADER_AUTO_DATE(verMaj,verMin,author,name,descr)                       \
+                          const __at (0x7fe0-sizeof(author)) char __SMS__SDSC_author[]=author; \
+                 const __at (0x7fe0-sizeof(author)-sizeof(name)) char __SMS__SDSC_name[]=name; \
+ const __at (0x7fe0-sizeof(author)-sizeof(name)-sizeof(descr)) char __SMS__SDSC_descr[]=descr; \
+                          const __at (0x7fe0) char __SMS__SDSC_signature[16]={'S','D','S','C', \
+                                              SMS_BYTE_TO_BCD(verMaj),SMS_BYTE_TO_BCD(verMin), \
+                                                                          0x00,0x00,0x00,0x00, \
+                                      (0x7fe0-sizeof(author))&0xff,(0x7fe0-sizeof(author))>>8, \
+            (0x7fe0-sizeof(author)-sizeof(name))&0xff,(0x7fe0-sizeof(author)-sizeof(name))>>8, \
+                                      (0x7fe0-sizeof(author)-sizeof(name)-sizeof(descr))&0xff, \
+                                        (0x7fe0-sizeof(author)-sizeof(name)-sizeof(descr))>>8}
+
+
 /* pretty nice, isn't it? :) */
 
 /* the Interrupt Service Routines (do not modify) */

@@ -1,16 +1,17 @@
 /*
-     ihx2sms - 'broken' ihx converter for multibank SEGA Master System ROMS
-     
-     with 'broken' I mean that the program it's actually assuming that each new declaration of data
-     at address 0x8000 informs that we have to allocate a new ROM bank in the final SMS file
-     
-     sverx\2015
-               
+  ihx2sms - 'broken' ihx converter for multibank SEGA Master System / SEGA Game Gear ROMS
+
+  with 'broken' I mean that the program it's actually assuming that each new declaration of data
+  at address 0x8000 informs that we have to allocate a new ROM bank in the final SMS file
+
+  sverx\2015
+
 */
 
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
+#include <time.h>
 
 FILE *fIN;
 FILE *fOUT;
@@ -21,8 +22,13 @@ int use_additional_banks=0;
 unsigned int add_banks=0;
 unsigned int count, addr, type;
 char data[256];
+unsigned int bank_addr=0x8000;
 
-#define SEGA_HEADER_ADDR     0x7ff0
+#define BANK_SIZE           0x4000
+#define SEGA_HEADER_ADDR    0x7ff0
+#define SDSC_HEADER_ADDR    0x7fe0
+
+#define BYTE_TO_BCD(n) (((n)/10)*16+((n)%10))
 
 int main(int argc, char const* *argv) {
 	
@@ -51,7 +57,7 @@ int main(int argc, char const* *argv) {
     switch (type) {
       case 0: // DATA
       
-        if (addr==0x8000) {
+        if (addr==bank_addr) {
           if (use_additional_banks)
             add_banks++;
           else
@@ -60,8 +66,8 @@ int main(int argc, char const* *argv) {
       
         for (i=0;i<count;i++) {
 
-          if ((addr+i)>=0x8000)
-            dest_addr=addr+i+add_banks*0x4000;
+          if ((addr+i)>=bank_addr)
+            dest_addr=addr+i+add_banks*BANK_SIZE;
           else
             dest_addr=addr+i;  
           
@@ -89,13 +95,26 @@ int main(int argc, char const* *argv) {
   }
   fclose (fIN);
 
-  if (size%16384)
-    size=16384*((size/16384)+1);
+  if (size%BANK_SIZE)
+    size=BANK_SIZE*((size/BANK_SIZE)+1);
     
   printf("Info: size of output ROM is %d KB\n",size/1024);
 
-  /* check/update SEGA header checksum */
   if (size>=32*1024) {
+    /* check/update SDSC header date */
+    if (!strncmp("SDSC",(char *)&buf[SDSC_HEADER_ADDR],4)) {
+      if (!memcmp("\0\0\0\0",&buf[SDSC_HEADER_ADDR+6],4)) {
+        time_t curr_time = time(NULL);
+        struct tm *compile_time = localtime(&curr_time);
+        buf[SDSC_HEADER_ADDR+6]=BYTE_TO_BCD(compile_time->tm_mday);
+        buf[SDSC_HEADER_ADDR+7]=BYTE_TO_BCD(compile_time->tm_mon+1);
+        buf[SDSC_HEADER_ADDR+8]=BYTE_TO_BCD((compile_time->tm_year+1900)%100);
+        buf[SDSC_HEADER_ADDR+9]=BYTE_TO_BCD((compile_time->tm_year+1900)/100);
+        printf("Info: release date in SDSC header updated\n");
+      }
+    }
+
+    /* check/update SEGA header checksum */
     if (!strncmp("TMR SEGA",(char *)&buf[SEGA_HEADER_ADDR],8)) {
       for (i=0;i<SEGA_HEADER_ADDR;i++)
         checksum+=buf[i];
