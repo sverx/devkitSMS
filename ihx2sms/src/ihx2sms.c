@@ -17,7 +17,7 @@ FILE *fIN;
 FILE *fOUT;
 
 unsigned char buf[1024*1024];
-unsigned int size=0;
+unsigned int size=0,used=0;
 int use_additional_banks=0;
 unsigned int add_banks=0;
 unsigned int count, addr, type;
@@ -27,6 +27,7 @@ unsigned int bank_addr=0x8000;
 #define BANK_SIZE           0x4000
 #define SEGA_HEADER_ADDR    0x7ff0
 #define SDSC_HEADER_ADDR    0x7fe0
+#define CRT0_END            0x200
 
 #define BYTE_TO_BCD(n) (((n)/10)*16+((n)%10))
 
@@ -36,7 +37,7 @@ int main(int argc, char const* *argv) {
   char tmp[3];
   unsigned int checksum=0;
   
-  printf("*** sverx's IHX to SMS converter ***\n");
+  printf("*** sverx's ihx2sms converter ***\n");
 	
   if (argc!=3) {
     printf("Usage: ihx2sms infile.ihx outfile.sms\n");
@@ -84,6 +85,9 @@ int main(int argc, char const* *argv) {
           printf("Fatal: allocating ROM at or past 0xC000\n");
           return(1);
         }
+        
+        if (addr>=CRT0_END)
+          used+=count;
 
         break;
         
@@ -98,7 +102,9 @@ int main(int argc, char const* *argv) {
   if (size%BANK_SIZE)
     size=BANK_SIZE*((size/BANK_SIZE)+1);
     
-  printf("Info: size of output ROM is %d KB\n",size/1024);
+  used+=CRT0_END;
+
+  printf("Info: %d bytes used/%d total [%0.2f%%] - size of output ROM is %d KB\n",used,size,(float)used/(float)size*100,size/1024);
 
   if (size>=32*1024) {
     /* check/update SDSC header date */
