@@ -1,0 +1,1 @@
+sdasz80 -g -o crt0.s
