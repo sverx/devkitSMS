@@ -1,0 +1,1 @@
+sdcc -o SGlib.rel -c -mz80 --peep-file peep-rules.txt SGlib.c

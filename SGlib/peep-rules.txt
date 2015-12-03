@@ -1,0 +1,8 @@
+replace restart {
+	ld  a,%1
+    	add a,#0xFF
+	ld  %1,a
+	or  a, a
+} by {
+	dec %1
+} if notUsed('a')

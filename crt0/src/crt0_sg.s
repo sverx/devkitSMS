@@ -1,4 +1,7 @@
 ;--------------------------------------------------------------------------
+; *** this is a modified version aimed to SG-1000 homebrew - sverx\2015 ***
+;--------------------------------------------------------------------------
+;--------------------------------------------------------------------------
 ;  crt0.s - Generic crt0.s for a Z80
 ;
 ;  Copyright (C) 2000, Michael Hope
@@ -26,11 +29,6 @@
 ;   might be covered by the GNU General Public License.
 ;--------------------------------------------------------------------------
 
-
-;--------------------------------------------------------------------------
-; ***** this is a modified version aimed to SMS homebrew - sverx\2015 *****
-;--------------------------------------------------------------------------
-
 	.module crt0
 	.globl	_main
 
@@ -42,34 +40,24 @@
 	jp	init
 
         .org    0x38                    ; handle IRQ
-        jp _SMS_isr
+        jp _SG_isr
 
         .org     0x66                   ; handle NMI
-        jp _SMS_nmi_isr
+        jp _SG_nmi_isr
 
 	.org	 0x70
 init:
-        ld sp, #0xdff0			; set stack pointer at end of RAM
-        ld de, #0xfffc			; initialize mappers
-        xor a				
-        ld (de),a			; [0xfffc]=$00
-        ld b,#3
-mapper_loop:
-        inc de
-        ld (de),a			; [0xfffd]=$00,[0xfffe]=$01,[0xffff]=$02
-        inc a
-        djnz mapper_loop
-        
+        ld sp,#0xc3f0			; set stack pointer at end of RAM
         xor a				; clear RAM (to value 0x00)
-        ld hl,#0xc000			;   by setting value 0 to $c000 and
+        ld hl,#0xc000			;   by setting value 0
 	ld (hl),a			;   to $c000 and
         ld de,#0xc001			;   copying (LDIR) it to next byte
-        ld bc,#0x1ff0			;   for 8 KB minus 16 bytes
+        ld bc,#0x03f0			;   for 1 KB minus 16 bytes
         ldir				;   do that
 
         ;; Initialise global variables
         call    gsinit
-        call    _SMS_init
+        call    _SG_init
         ei				; re-enable interrupts before going to main()
 	call	_main
 	jp	_exit
