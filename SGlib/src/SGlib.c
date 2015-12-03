@@ -61,15 +61,15 @@ __sfr __at 0xDD IOPortH;
 #define SGTADDRESS			0x3800
 
 /* the VDP registers initialization value */
-const unsigned char VDPReg_init[11]={
-	          0x02,	// Mode2
-                  0xa0,	// 16K, SCREEN OFF, VBLANK IRQ, sprite 8x8, no zoom
+const unsigned char VDPReg_init[8]={
+                  0x02, // Mode2
+                  0xa0,	// 16KB, screen off, VBlank IRQ, sprite 8x8, no zoom
                   0x06,	// PN bits 13-10 = 0 1 1 0	   (address = $1800)
                   0xff,	// CT bits 13-7  = 1 x x x x x x x (address = $2000)
                   0x03,	// PG bits 13-11 = 0 x x	   (address = $0000)
                   0x36,	// SA bits 13-7  = 0 1 1 0 1 1 0   (address = $1B00)
                   0x07,	// SG bits 13-11 = 1 1 1	   (address = $3800)
-                  0xf1	// text / backdrop
+                  0x00	// text color (unused in Mode2) / backdrop
 };
 
 /* the VDP registers #0 and #1 'shadow' RAM */
@@ -169,8 +169,8 @@ void SG_VDPturnOffFeature (unsigned int feature) {
 
 void SG_init (void) {
   unsigned char i;
-  for (i = 0; i < 8; i ++)
-    SG_write_to_VDPRegister (i, VDPReg_init [i]);
+  for (i=0;i<8;i++)
+    SG_write_to_VDPRegister (i, VDPReg_init[i]);
   SG_initSprites ();
   SG_finalizeSprites ();
   SG_copySpritestoSAT ();
@@ -178,10 +178,10 @@ void SG_init (void) {
 }
 
 void SG_setBackdropColor (unsigned char entry) {
-  SG_write_to_VDPRegister (0x07, entry);
+  SG_write_to_VDPRegister (0x07, entry & 0x0f);
 }
 
-void SMS_setSpriteMode (unsigned char mode) {
+void SG_setSpriteMode (unsigned char mode) {
   if (mode & SG_SPRITEMODE_LARGE) {
     SG_VDPturnOnFeature(SG_VDPFEATURE_USELARGESPRITES);
     spritesHeight=16;
@@ -236,10 +236,10 @@ void SG_loadTileMap (unsigned char x, unsigned char y, void *src, unsigned int s
 
 void SG_loadTileMapArea (unsigned char x, unsigned char y,  void *src, unsigned char width, unsigned char height) {
   unsigned char cur_y;
-  for (cur_y = y; cur_y < y + height; cur_y ++) {
-    SG_set_address_VRAM (PNTADDRESS + (cur_y << 5) + x);
+  for (cur_y=y; cur_y<(y+height); cur_y++) {
+    SG_set_address_VRAM (PNTADDRESS+(cur_y<<5)+x);
     SG_byte_brief_array_to_VDP_data (src, width);
-    src = (unsigned char *) src + width;
+    src=(unsigned char *)src + width;
   }
 }
 
