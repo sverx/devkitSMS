@@ -40,6 +40,10 @@ unsigned int SG_getKeysPressed (void);    /* the keys that were up last frame an
 unsigned int SG_getKeysHeld (void);       /* the keys that were down last frame and still down now */
 unsigned int SG_getKeysReleased (void);   /* the keys that were down last frame and up now */
 
+/* pause handling */
+_Bool SG_queryPauseRequested (void);      /* the pause key has been pressed since previous check */
+void SG_resetPauseRequest (void);         /* reset/acknowledge pause requests */
+
 /* low level functions */
 void SG_VRAMmemcpy (unsigned int dst, void *src, unsigned int size);              /* memcpy to VRAM */
 void SG_VRAMmemcpy_brief (unsigned int dst, void *src, unsigned char size);       /* memcpy to VRAM (256 bytes max) */
