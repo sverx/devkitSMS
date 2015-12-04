@@ -23,12 +23,28 @@ void SG_VDPturnOffFeature (unsigned int feature);
 #define SG_displayOff()  SG_VDPturnOffFeature(SG_VDPFEATURE_SHOWDISPLAY)  /* turns off display */
 
 void SG_setSpriteMode (unsigned char mode);
-#define SG_SPRITEMODE_NORMAL	     0x00
-#define SG_SPRITEMODE_LARGE 	     0x01
-#define SG_SPRITEMODE_ZOOMED         0x02
-#define SG_SPRITEMODE_LARGE_ZOOMED   0x03
+#define SG_SPRITEMODE_NORMAL	       0x00
+#define SG_SPRITEMODE_LARGE 	       0x01
+#define SG_SPRITEMODE_ZOOMED           0x02
+#define SG_SPRITEMODE_LARGE_ZOOMED     0x03
 
 void SG_setBackdropColor (unsigned char entry);
+#define SG_COLOR_TRANSPARENT           0x00
+#define SG_COLOR_BLACK                 0x01
+#define SG_COLOR_MEDIUM_GREEN          0x02
+#define SG_COLOR_LIGHT_GREEN           0x03
+#define SG_COLOR_DARK_BLUE             0x04
+#define SG_COLOR_LIGHT_BLUE            0x05
+#define SG_COLOR_DARK_RED              0x06
+#define SG_COLOR_CYAN                  0x07
+#define SG_COLOR_MEDIUM_RED            0x08
+#define SG_COLOR_LIGHT_RED             0x09
+#define SG_COLOR_DARK_YELLOW           0x0A
+#define SG_COLOR_LIGHT_YELLOW          0x0B
+#define SG_COLOR_DARK_GREEN            0x0C
+#define SG_COLOR_MAGENTA               0x0D
+#define SG_COLOR_GRAY                  0x0E
+#define SG_COLOR_WHITE                 0x0F
 
 /* wait until next VBlank starts */
 void SG_waitForVBlank (void);
@@ -78,11 +94,14 @@ unsigned int SG_getKeysReleased (void);
 #define PORT_B_KEY_2		0x0800
 #define PORT_B_KEY_START	PORT_B_KEY_1  /* handy alias */
 
-#define RESET_KEY_NOT		0x1000		/* 0 = pressed */
-#define CARTRIDGE_SLOT		0x2000		/* ??? */
-#define PORT_A_TH		0x4000		/* for light gun */
-#define PORT_B_TH		0x8000		/* for light gun */
+#define RESET_KEY_NOT		0x1000        /* 0 = pressed */
+#define CARTRIDGE_SLOT		0x2000        /* ??? */
+#define PORT_A_TH		0x4000        /* for light gun */
+#define PORT_B_TH		0x8000        /* for light gun */
 #endif
+
+_Bool SG_queryPauseRequested (void);          /* true if the pause key has been pressed */
+void SG_resetPauseRequest (void);             /* reset/acknowledge pause requests */
 
 /* low level functions */
 void SG_VRAMmemcpy (unsigned int dst, void *src, unsigned int size);
