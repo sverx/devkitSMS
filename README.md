@@ -99,7 +99,7 @@ If a numerical third parameter is specified (it's optional), its value will be u
 ```
   sdcc -c -mz80 --peep-file peep-rules.txt your_program.c
 ```
-* link all the objects together adding a parameter for the linker for each bank (_BANK#) and adding each .rel file to be linked (*proper* goes crt0 *always* first) then all the bank rel files last, in ascending order:
+* link all the objects together adding a parameter for the linker for each bank (_BANK#) and adding each .rel file to be linked (*proper* crt0 file goes *always* first) then all the bank#.rel files last, in ascending order:
 ```
   sdcc -mz80 --no-std-crt0 --data-loc 0xC000 -Wl-b_BANK2=0x8000 -Wl-b_BANK3=0x8000 ..\crt0\crt0_sms.rel your_program.rel ..\SMSlib\SMSlib.rel bank2.rel bank3.rel
 ```

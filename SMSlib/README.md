@@ -14,6 +14,7 @@ void SMS_waitForVBlank (void);                      /* wait until next vBlank st
 void SMS_setBGScrollX (int scrollX);                /* scroll the background horizontally */
 void SMS_setBGScrollY (int scrollY);                /* scroll the background vertically */
 void SMS_setBackdropColor (unsigned char entry);    /* set which sprite palette entry will be used for backdrop */
+void SMS_setSpriteMode (unsigned char mode);        /* check modes list in SMSlib.h */
 void SMS_useFirstHalfTilesforSprites (_Bool usefirsthalf);  /* use tiles 0-255 for sprites if true, 256-511 if false */
 
 /* palettes functions: SMS only */
@@ -61,7 +62,7 @@ unsigned int SMS_getMDKeysHeld (void);    /* the extended keys that were down la
 unsigned int SMS_getMDKeysReleased (void); /* the extended keys that were down last frame and up now on a MD controller */
 
 /* pause handling (SMS only) */
-_Bool SMS_queryPauseRequested (void);      /* the pause key has been pressed since previous check */
+_Bool SMS_queryPauseRequested (void);     /* the pause key has been pressed since previous check */
 void SMS_resetPauseRequest (void);        /* reset/acknowledge pause requests */
 
 /* line IRQ handling */
@@ -77,6 +78,17 @@ SMS_mapROMBank(n);                        /* macro - maps bank n at address 0x80
 void SMS_VRAMmemcpy (unsigned int dst, void *src, unsigned int size);              /* memcpy to VRAM */
 void SMS_VRAMmemcpy_brief (unsigned int dst, void *src, unsigned char size);       /* memcpy to VRAM (256 bytes max) */
 void SMS_VRAMmemset (unsigned int dst, unsigned char value, unsigned int size);    /* memset to VRAM */
+
+/* VRAM unsafe functions. Fast, but dangerous, can be safely used only during VBlank or when screen is off */
+void UNSAFE_SMS_copySpritestoSAT (void);                         /* copy sprites to Sprites Attribute Table */
+void UNSAFE_SMS_VRAMmemcpy32 (unsigned int dst, void *src);      /* copy 32 bytes to VRAM */
+void UNSAFE_SMS_VRAMmemcpy64 (unsigned int dst, void *src);      /* copy 64 bytes to VRAM */
+void UNSAFE_SMS_VRAMmemcpy128 (unsigned int dst, void *src);     /* copy 128 bytes to VRAM */
+
+/* handy macros for UNSAFE_SMS_VRAMmemcpy* functions (can be safely used only during VBlank or when screen is off) */
+UNSAFE_SMS_load1Tile(src,theTile)                        /* copy ONE tile to VRAM */
+UNSAFE_SMS_load2Tiles(src,tilefrom)                      /* copy TWO tile to VRAM */
+UNSAFE_SMS_load4Tiles(src,tilefrom)                      /* copy FOUR tile to VRAM */
 
 /* SEGA/SDSC headers */
 SMS_EMBED_SEGA_ROM_HEADER(productCode,revision);                                   /* macro - embed SEGA header into ROM */

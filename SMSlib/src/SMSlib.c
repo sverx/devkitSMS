@@ -3,10 +3,11 @@
    ( part of devkitSMS - github.com/sverx/devkitSMS )
    ************************************************** */
 
-#include <stdbool.h>
 #include "SMSlib.h"
+#include <stdbool.h>
 
-/* define VDPControlPort (SDCC z80 syntax) */
+/* declare various I/O ports in SDCC z80 syntax */
+/* define VDPControlPort */
 __sfr __at 0xBF VDPControlPort;
 /* define VDPStatusPort */
 __sfr __at 0xBF VDPStatusPort;
@@ -193,8 +194,8 @@ void SMS_init (void) {
   SMS_initSprites();
   SMS_finalizeSprites();
   UNSAFE_SMS_copySpritestoSAT();
+  /* init Pause (SMS only) */
 #ifndef TARGET_GG
-  /* init Pause (SMS only)*/
   SMS_resetPauseRequest();
 #endif
   /* reset clipping window */
@@ -202,6 +203,9 @@ void SMS_init (void) {
   SMS_setClippingWindow(48,24,207,167);
 #else
   SMS_setClippingWindow(0,0,255,191);
+#endif
+  /* PAL/NTSC detection (SMS only) */
+#ifndef TARGET_GG
   SMS_detect_VDP_type();
 #endif
 }
@@ -736,6 +740,36 @@ void UNSAFE_SMS_copySpritestoSAT (void) {
     ld c,#_VDPDataPort
     ld hl,#_SpriteTableXN
     jp _outi_block-MAXSPRITES*4
+  __endasm;
+}
+
+void UNSAFE_SMS_VRAMmemcpy32 (unsigned int dst, void *src) {
+  SMS_set_address_VRAM(dst);
+  __asm
+    ld c,#_VDPDataPort
+    ld l, 2 (iy)
+    ld h, 3 (iy)
+    call _outi_block-32*2
+  __endasm;
+}
+
+void UNSAFE_SMS_VRAMmemcpy64 (unsigned int dst, void *src) {
+  SMS_set_address_VRAM(dst);
+  __asm
+    ld c,#_VDPDataPort
+    ld l, 2 (iy)
+    ld h, 3 (iy)
+    call _outi_block-64*2
+  __endasm;
+}
+
+void UNSAFE_SMS_VRAMmemcpy128 (unsigned int dst, void *src) {
+  SMS_set_address_VRAM(dst);
+  __asm
+    ld c,#_VDPDataPort
+    ld l, 2 (iy)
+    ld h, 3 (iy)
+    call _outi_block-128*2
   __endasm;
 }
 

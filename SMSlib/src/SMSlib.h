@@ -26,6 +26,7 @@ void SMS_VDPturnOffFeature (unsigned int feature);
 #define VDPFEATURE_EXTRAHEIGHT      0x0002
 #define VDPFEATURE_SHIFTSPRITES     0x0008
 #define VDPFEATURE_HIDEFIRSTCOL     0x0020
+#define VDPFEATURE_LEFTCOLBLANK     0x0020     /* a better name */
 #define VDPFEATURE_LOCKHSCROLL      0x0040
 #define VDPFEATURE_LOCKVSCROLL      0x0080
 
@@ -117,6 +118,8 @@ unsigned int SMS_getKeysHeld (void);
 unsigned int SMS_getKeysReleased (void);
 
 /* handy defines for joypad(s) handling */
+#ifndef CONTROLLER_PORTS
+#define CONTROLLER_PORTS
 #define PORT_A_KEY_UP           0x0001
 #define PORT_A_KEY_DOWN         0x0002
 #define PORT_A_KEY_LEFT         0x0004
@@ -137,6 +140,7 @@ unsigned int SMS_getKeysReleased (void);
 #define CARTRIDGE_SLOT          0x2000          /* ??? */
 #define PORT_A_TH               0x4000          /* for light gun */
 #define PORT_B_TH               0x8000          /* for light gun */
+#endif
 
 #ifdef TARGET_GG
 #define GG_KEY_START            0x8000          /* START key on GG */
@@ -192,6 +196,14 @@ void SMS_VRAMmemsetW (unsigned int dst, unsigned int value, unsigned int size);
 
 /* VRAM unsafe functions. Fast, but dangerous! */
 void UNSAFE_SMS_copySpritestoSAT (void);
+void UNSAFE_SMS_VRAMmemcpy32 (unsigned int dst, void *src);
+void UNSAFE_SMS_VRAMmemcpy64 (unsigned int dst, void *src);
+void UNSAFE_SMS_VRAMmemcpy128 (unsigned int dst, void *src);
+
+/* handy macros for UNSAFE_SMS_VRAMmemcpy* */
+#define UNSAFE_SMS_load1Tile(src,theTile)     UNSAFE_SMS_VRAMmemcpy32((theTile)*32,(src))
+#define UNSAFE_SMS_load2Tiles(src,tilefrom)   UNSAFE_SMS_VRAMmemcpy64((tilefrom)*32,(src))
+#define UNSAFE_SMS_load4Tiles(src,tilefrom)   UNSAFE_SMS_VRAMmemcpy128((tilefrom)*32,(src))
 
 /* macros for SEGA and SDSC headers */
 #define SMS_BYTE_TO_BCD(n) (((n)/10)*16+((n)%10))
@@ -222,22 +234,11 @@ void UNSAFE_SMS_copySpritestoSAT (void);
             (0x7fe0-sizeof(author)-sizeof(name))&0xff,(0x7fe0-sizeof(author)-sizeof(name))>>8, \
                                       (0x7fe0-sizeof(author)-sizeof(name)-sizeof(descr))&0xff, \
                                         (0x7fe0-sizeof(author)-sizeof(name)-sizeof(descr))>>8}
+/* pretty nice, isn't it? :) */
 
 /* to set SDSC header date to 0000-00-00 so that ihx2sms updates that with compilation date */
 #define SMS_EMBED_SDSC_HEADER_AUTO_DATE(verMaj,verMin,author,name,descr)                       \
-                          const __at (0x7fe0-sizeof(author)) char __SMS__SDSC_author[]=author; \
-                 const __at (0x7fe0-sizeof(author)-sizeof(name)) char __SMS__SDSC_name[]=name; \
- const __at (0x7fe0-sizeof(author)-sizeof(name)-sizeof(descr)) char __SMS__SDSC_descr[]=descr; \
-                          const __at (0x7fe0) char __SMS__SDSC_signature[16]={'S','D','S','C', \
-                                              SMS_BYTE_TO_BCD(verMaj),SMS_BYTE_TO_BCD(verMin), \
-                                                                          0x00,0x00,0x00,0x00, \
-                                      (0x7fe0-sizeof(author))&0xff,(0x7fe0-sizeof(author))>>8, \
-            (0x7fe0-sizeof(author)-sizeof(name))&0xff,(0x7fe0-sizeof(author)-sizeof(name))>>8, \
-                                      (0x7fe0-sizeof(author)-sizeof(name)-sizeof(descr))&0xff, \
-                                        (0x7fe0-sizeof(author)-sizeof(name)-sizeof(descr))>>8}
-
-
-/* pretty nice, isn't it? :) */
+                                  SMS_EMBED_SDSC_HEADER(verMaj,verMin,0,0,0,author,name,descr)
 
 /* the Interrupt Service Routines (do not modify) */
 void SMS_isr (void) __interrupt;
