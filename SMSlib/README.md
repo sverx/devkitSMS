@@ -86,9 +86,9 @@ void UNSAFE_SMS_VRAMmemcpy64 (unsigned int dst, void *src);      /* copy 64 byte
 void UNSAFE_SMS_VRAMmemcpy128 (unsigned int dst, void *src);     /* copy 128 bytes to VRAM */
 
 /* handy macros for UNSAFE_SMS_VRAMmemcpy* functions (can be safely used only during VBlank or when screen is off) */
-UNSAFE_SMS_load1Tile(src,theTile)                        /* copy ONE tile to VRAM */
-UNSAFE_SMS_load2Tiles(src,tilefrom)                      /* copy TWO tile to VRAM */
-UNSAFE_SMS_load4Tiles(src,tilefrom)                      /* copy FOUR tile to VRAM */
+UNSAFE_SMS_load1Tile(src,theTile)           /* copy ONE tile to VRAM */
+UNSAFE_SMS_load2Tiles(src,tilefrom)         /* copy TWO tiles to VRAM */
+UNSAFE_SMS_load4Tiles(src,tilefrom)         /* copy FOUR tiles to VRAM */
 
 /* SEGA/SDSC headers */
 SMS_EMBED_SEGA_ROM_HEADER(productCode,revision);                                   /* macro - embed SEGA header into ROM */

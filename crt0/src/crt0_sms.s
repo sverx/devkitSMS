@@ -71,12 +71,24 @@ mapper_loop:
         ei				; re-enable interrupts before going to main()
 	call	_main
 	jp	_exit
-	
 
-        .rept	128			; this is a block of 128 OUTI
-	outi				; made for enabling UNSAFE but FAST
-	.endm				; short data transfers to VRAM
-_outi_block::				; _outi_block label points to END of block
+        ; here's a block of 128 OUTI instructions, made for enabling
+        ;    UNSAFE but FAST
+        ; short data transfers to VRAM
+
+_OUTI128::                              ; _OUTI128 label points to a block of 128 OUTI and a RET
+        .rept	64
+	outi
+	.endm
+_OUTI64::                               ; _OUTI64 label points to a block of 64 OUTI and a RET
+        .rept	32
+	outi
+	.endm
+_OUTI32::                               ; _OUTI32 label points to a block of 32 OUTI and a RET
+        .rept	32
+	outi
+	.endm
+_outi_block::				; _outi_block label points to END of OUTI block
 	ret
 
 	;; Ordering of segments for the linker.

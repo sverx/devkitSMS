@@ -47,9 +47,13 @@ __sfr __at 0x3F IOPortCtrl;
 #define WAIT_VRAM             __asm nop \
                                     nop \
                                     nop __endasm
-
+/*
 unsigned int PNTAddress=0x3800;
 unsigned int SATAddress=0x3F00;
+*/
+// one day we might make these variables, but not for now
+#define PNTAddress    ((unsigned int)0x3800)
+#define SATAddress    ((unsigned int)0x3F00)
 
 /* the VDP registers initialization value */
 const unsigned char VDPReg_init[11]={
@@ -99,59 +103,55 @@ unsigned char decompBuffer[32];        /*  used by PSGaiden decompression routin
 
 void (*SMS_theLineInterruptHandler)(void);
 
-#ifndef NESTED_DI_EI_SUPPORT
-/* macro definitions (no nested DI/EI support) */
-#define SMS_write_to_VDPRegister(VDPReg,value)    { DISABLE_INTERRUPTS; VDPControlPort=(value); VDPControlPort=(VDPReg)|0x80; ENABLE_INTERRUPTS; }
-#define SMS_set_address_CRAM(address)             { DISABLE_INTERRUPTS; VDPControlPort=(address); VDPControlPort=0xC0; ENABLE_INTERRUPTS; }
-#define SMS_set_address_VRAM(address)             { DISABLE_INTERRUPTS; VDPControlPort=LO(address); VDPControlPort=HI(address)|0x40; ENABLE_INTERRUPTS; }
-#else
-/* inline __critical functions (nested DI/EI supported!) */
 inline void SMS_write_to_VDPRegister (unsigned char VDPReg, unsigned char value) {
-  /* INTERNAL FUNCTION */
-  __critical {
-    VDPControlPort=value;
-    VDPControlPort=VDPReg|0x80;
-  }    
+  // INTERNAL FUNCTION
+  unsigned char v=value;
+  DISABLE_INTERRUPTS;
+  VDPControlPort=v;
+  VDPControlPort=VDPReg|0x80;
+  ENABLE_INTERRUPTS;
 }
 
 inline void SMS_set_address_CRAM (unsigned char address) {
-  /* INTERNAL FUNCTION */
-  __critical {
-    VDPControlPort=address;
-    VDPControlPort=0xC0;
-  }
+  // INTERNAL FUNCTION
+  unsigned char a=address;
+  DISABLE_INTERRUPTS;
+  VDPControlPort=a;
+  VDPControlPort=0xC0;
+  ENABLE_INTERRUPTS;
 }
 
 inline void SMS_set_address_VRAM (unsigned int address) {
-  /* INTERNAL FUNCTION */
-  __critical {
-    VDPControlPort=LO(address);
-    VDPControlPort=HI(address)|0x40;
-  }
+  // INTERNAL FUNCTION
+  unsigned char L=LO(address);
+  unsigned char H=HI(address)|0x40;
+  DISABLE_INTERRUPTS;
+  VDPControlPort=L;
+  VDPControlPort=H;
+  ENABLE_INTERRUPTS;
 }
-#endif
 
 inline void SMS_byte_to_VDP_data (unsigned char data) {
-  /* INTERNAL FUNCTION */
+  // INTERNAL FUNCTION
   VDPDataPort=data;
 }
 
 inline void SMS_byte_array_to_VDP_data (const unsigned char *data, unsigned int size) {
-  /* INTERNAL FUNCTION */
+  // INTERNAL FUNCTION
   do {
     VDPDataPort=*(data++);
   } while (--size);
 }
 
 inline void SMS_byte_brief_array_to_VDP_data (const unsigned char *data, unsigned char size) {
-  /* INTERNAL FUNCTION */
+  // INTERNAL FUNCTION
   do {
     VDPDataPort=*(data++);
   } while (--size);
 }
 
 inline void SMS_word_to_VDP_data (unsigned int data) {
-  /* INTERNAL FUNCTION */
+  // INTERNAL FUNCTION
   VDPDataPort=LO(data);
   WAIT_VRAM;               /* ensure we're not pushing data too fast */
   VDPDataPort=HI(data);
@@ -159,8 +159,8 @@ inline void SMS_word_to_VDP_data (unsigned int data) {
 
 #ifndef TARGET_GG
 inline void SMS_detect_VDP_type (void) {
+  // INTERNAL FUNCTION
   unsigned char old_value;
-  /* INTERNAL FUNCTION */
   while (VDPVCounterPort>0x80);       // wait next frame starts
   while (VDPVCounterPort<0x80);       // wait next half frame
   do {
@@ -739,38 +739,32 @@ void UNSAFE_SMS_copySpritestoSAT (void) {
   __asm
     ld c,#_VDPDataPort
     ld hl,#_SpriteTableXN
-    jp _outi_block-MAXSPRITES*4
+    call _outi_block-MAXSPRITES*4
   __endasm;
 }
 
+void OUTI32(void *src) __z88dk_fastcall;
+void OUTI64(void *src) __z88dk_fastcall;
+void OUTI128(void *src) __z88dk_fastcall;
+
+#define SETVDPDATAPORT  __asm ld c,#_VDPDataPort __endasm
+
 void UNSAFE_SMS_VRAMmemcpy32 (unsigned int dst, void *src) {
   SMS_set_address_VRAM(dst);
-  __asm
-    ld c,#_VDPDataPort
-    ld l, 2 (iy)
-    ld h, 3 (iy)
-    call _outi_block-32*2
-  __endasm;
+  SETVDPDATAPORT;
+  OUTI32(src);
 }
 
 void UNSAFE_SMS_VRAMmemcpy64 (unsigned int dst, void *src) {
   SMS_set_address_VRAM(dst);
-  __asm
-    ld c,#_VDPDataPort
-    ld l, 2 (iy)
-    ld h, 3 (iy)
-    call _outi_block-64*2
-  __endasm;
+  SETVDPDATAPORT;
+  OUTI64(src);
 }
 
 void UNSAFE_SMS_VRAMmemcpy128 (unsigned int dst, void *src) {
   SMS_set_address_VRAM(dst);
-  __asm
-    ld c,#_VDPDataPort
-    ld l, 2 (iy)
-    ld h, 3 (iy)
-    call _outi_block-128*2
-  __endasm;
+  SETVDPDATAPORT;
+  OUTI128(src);
 }
 
 /* Interrupt Service Routines */

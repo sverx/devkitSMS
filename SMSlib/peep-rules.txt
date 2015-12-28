@@ -6,3 +6,24 @@ replace restart {
 } by {
 	dec %1
 } if notUsed('a')
+
+
+replace restart {
+	ld	%1, %2
+	di
+	ld	%2, %1
+} by {
+	; peephole rule 1-with_DI removed dead load from %2 into %1.
+	di
+} if notVolatile(%1), notUsed(%1), notVolatile(%2)
+
+
+replace restart {
+	ld	%1, %2 (%3)
+	di
+	ld	%4, %1
+} by {
+	; peephole rule 11-with_DI loaded %2 (%3) into %4 directly instead of going through %1.
+	ld	%4, %2 (%3)
+	di
+} if canAssign(%4 %2 %3), notVolatile(%1), notUsed(%1)
