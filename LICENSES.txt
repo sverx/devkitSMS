@@ -2,6 +2,7 @@ devkitSMS/crt0/crt0_sms.s  is licensed under GPL2 with a "special exception", pl
 devkitSMS/crt0/crt0_sg.s   is licensed under GPL2 with a "special exception", please read note in crt0/src/crt0_sg.s
 devkitSMS/ihx2sms          is public domain. For more information, please refer to http://unlicense.org
 devkitSMS/folder2c         is public domain. For more information, please refer to http://unlicense.org
-devkitSMS/SGlib            is public domain. For more information, please refer to http://unlicense.org
+devkitSMS/SGlib            is public domain, as agreed with na_th_an. For more information, please refer to http://unlicense.org
 devkitSMS/SMSlib           is public domain. For more information, please refer to http://unlicense.org
 devkitSMS/PSGlib           is public domain. For more information, please refer to http://unlicense.org
+devkitSMS/aPLib            is public domain, as agreed with Maxim and DWEdit. For more information, please refer to http://unlicense.org
