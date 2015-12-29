@@ -1,4 +1,8 @@
-/*
+/* ****************************************************
+   aPLib - decompression library for the SMS/GG/SG-1000
+   ( part of devkitSMS - github.com/sverx/devkitSMS )
+   ****************************************************
+
   Z80/SMS aPLib decompression library
   version 1.2
   1/12/2008
@@ -22,6 +26,7 @@ unsigned int  aPLib_R0;
 
 #pragma save
 #pragma disable_warning 85
+#ifndef DEPACK_VRAM_ONLY
 void aPLib_depack (void *dest, void *src) {
 __asm
   pop bc
@@ -180,6 +185,7 @@ _plus4:
   jr _aploop
 __endasm;
 }
+#endif
 
 void aPLib_depack_VRAM (unsigned int dest, void *src) {
 __asm
