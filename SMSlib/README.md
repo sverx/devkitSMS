@@ -37,7 +37,7 @@ void SMS_loadPSGaidencompressedTiles (void *src, unsigned int Tilefrom);
 void SMS_loadTileMap (unsigned char x, unsigned char y, void *src, unsigned int len);
 void SMS_loadSTMcompressedTileMap (unsigned char x, unsigned char y, unsigned char *src);
 void SMS_loadTileMapArea (unsigned char x, unsigned char y,  unsigned int *src, unsigned char width, unsigned char height);
-void SMS_setTileatXY (unsigned char x, unsigned char y, unsigned int tile);
+(*deprecated*) void SMS_setTileatXY (unsigned char x, unsigned char y, unsigned int tile);
 void SMS_setNextTileatXY (unsigned char x, unsigned char y);
 void SMS_setTile (unsigned int tile);
 

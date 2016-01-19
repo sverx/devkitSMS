@@ -1,0 +1,1 @@
+in SMSlib/src folder there's a note about building SMSlib yourself

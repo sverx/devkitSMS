@@ -1,4 +1,0 @@
-# build SMS version:
-sdcc -o SMSlib.rel -c -mz80 --peep-file peep-rules.txt --peep-asm SMSlib.c
-# build GG version:
-sdcc -o SMSlib_GG.rel -c -mz80 --peep-file peep-rules.txt --peep-asm -DTARGET_GG SMSlib.c

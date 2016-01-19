@@ -6,19 +6,15 @@
 // #define TARGET_GG
 /* uncomment previous line to compile for the GameGear */
 
-// #define NO_MD_PAD_SUPPORT
-/* uncomment previous line to remove support for the Genesis/MegaDrive pad (SMS only) */
-
-#ifdef TARGET_GG
-#define NO_MD_PAD_SUPPORT          /* no MD pad support on GG! */
-#endif
+// #define MD_PAD_SUPPORT
+/* uncomment previous line to add support for the Genesis/MegaDrive pad (SMS only) */
 
 /* library initialization. you don't need to call this if you use devkitSMS crt0.rel */
 void SMS_init (void);
 
 /* VDP operative mode handling functions */
-void SMS_VDPturnOnFeature (unsigned int feature);
-void SMS_VDPturnOffFeature (unsigned int feature);
+void SMS_VDPturnOnFeature (unsigned int feature) __z88dk_fastcall;
+void SMS_VDPturnOffFeature (unsigned int feature)__z88dk_fastcall;
 /* turns on/off a VDP feature */
 /* feature can be one of the following: */
 
@@ -67,8 +63,8 @@ void SMS_waitForVBlank (void);
 /* GG functions to set a color / load a palette */
 void GG_setBGPaletteColor (unsigned char entry, unsigned int color);
 void GG_setSpritePaletteColor (unsigned char entry, unsigned int color);
-void GG_loadBGPalette (void *palette);
-void GG_loadSpritePalette (void *palette);
+void GG_loadBGPalette (void *palette) __z88dk_fastcall;
+void GG_loadSpritePalette (void *palette) __z88dk_fastcall;
 /* GG macros for colors */
 #define RGB(r,g,b)        ((r)|((g)<<4)|((b)<<8))
 #define RGB8(r,g,b)       (((r)>>4)|(((g)>>4)<<4)|(((b)>>4)<<8))
@@ -77,8 +73,8 @@ void GG_loadSpritePalette (void *palette);
 /* functions to set a color / load a palette */
 void SMS_setBGPaletteColor (unsigned char entry, unsigned char color);
 void SMS_setSpritePaletteColor (unsigned char entry, unsigned char color);
-void SMS_loadBGPalette (void *palette);
-void SMS_loadSpritePalette (void *palette);
+void SMS_loadBGPalette (void *palette) __z88dk_fastcall;
+void SMS_loadSpritePalette (void *palette) __z88dk_fastcall;
 /* SMS macros for colors */
 #define RGB(r,g,b)        ((r)|((g)<<2)|((b)<<4))
 #define RGB8(r,g,b)       (((r)>>6)|(((g)>>6)<<2)|(((b)>>6)<<4))
@@ -93,9 +89,17 @@ void SMS_loadPSGaidencompressedTiles (void *src, unsigned int tilefrom);
 void SMS_loadTileMap (unsigned char x, unsigned char y, void *src, unsigned int size);
 void SMS_loadSTMcompressedTileMap (unsigned char x, unsigned char y, unsigned char *src);
 void SMS_loadTileMapArea (unsigned char x, unsigned char y, void *src, unsigned char width, unsigned char height);
-void SMS_setTileatXY (unsigned char x, unsigned char y, unsigned int tile);
-void SMS_setNextTileatXY (unsigned char x, unsigned char y);
-void SMS_setTile (unsigned int tile);
+
+/* function for setting tiles/moving 'cursor' */
+void SMS_setTile (unsigned int tile)__z88dk_fastcall;
+void SMS_setNextTileatAddr (unsigned int addr)__z88dk_fastcall;
+/* PNT define (has address and VDP flags) */
+#define SMS_PNTAddress            ((unsigned int)0x7800)
+/* macro for turning x,y into VRAM addr */
+#define XYtoADDR(x,y)             (SMS_PNTAddress+(((unsigned int)(y)<<6)|((unsigned char)(x)<<1)))
+#define SMS_setNextTileatXY(x,y)  SMS_setNextTileatAddr(XYtoADDR((x),(y)))
+#define SMS_setNextTileatLoc(loc) SMS_setNextTileatAddr(SMS_PNTAddress+((unsigned int)(loc)<<1))
+#define SMS_setTileatXY(x,y,tile) {SMS_setNextTileatAddr(XYtoADDR((x),(y)));SMS_setTile(tile);}
 
 /* handy defines for tilemaps entry */
 #define TILE_FLIPPED_X            0x0200
@@ -146,7 +150,7 @@ unsigned int SMS_getKeysReleased (void);
 #define GG_KEY_START            0x8000          /* START key on GG */
 #endif
 
-#ifndef NO_MD_PAD_SUPPORT
+#ifdef MD_PAD_SUPPORT
 /* functions to read additional MD buttons */
 unsigned int SMS_getMDKeysStatus (void);
 unsigned int SMS_getMDKeysPressed (void);
@@ -238,7 +242,7 @@ void UNSAFE_SMS_VRAMmemcpy128 (unsigned int dst, void *src);
 
 /* to set SDSC header date to 0000-00-00 so that ihx2sms updates that with compilation date */
 #define SMS_EMBED_SDSC_HEADER_AUTO_DATE(verMaj,verMin,author,name,descr)                       \
-                                  SMS_EMBED_SDSC_HEADER(verMaj,verMin,0,0,0,author,name,descr)
+                        SMS_EMBED_SDSC_HEADER((verMaj),(verMin),0,0,0,(author),(name),(descr))
 
 /* the Interrupt Service Routines (do not modify) */
 void SMS_isr (void) __interrupt;
