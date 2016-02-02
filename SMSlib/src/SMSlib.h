@@ -91,8 +91,8 @@ void SMS_loadSTMcompressedTileMap (unsigned char x, unsigned char y, unsigned ch
 void SMS_loadTileMapArea (unsigned char x, unsigned char y, void *src, unsigned char width, unsigned char height);
 
 /* function for setting tiles/moving 'cursor' */
-void SMS_setTile (unsigned int tile)__z88dk_fastcall;
-void SMS_setNextTileatAddr (unsigned int addr)__z88dk_fastcall;
+void SMS_setTile (unsigned int tile) __z88dk_fastcall __preserves_regs(b,c,d,e,h,l,iyh,iyl);
+void SMS_setNextTileatAddr (unsigned int addr) __z88dk_fastcall __preserves_regs(a,b,d,e,h,l,iyh,iyl);
 /* PNT define (has address and VDP flags) */
 #define SMS_PNTAddress            ((unsigned int)0x7800)
 /* macro for turning x,y into VRAM addr */
@@ -140,7 +140,7 @@ unsigned int SMS_getKeysReleased (void);
 #define PORT_B_KEY_2            0x0800
 #define PORT_B_KEY_START        PORT_B_KEY_1    /* handy alias */
 
-#define RESET_KEY_NOT           0x1000          /* 0 = pressed */
+#define RESET_KEY               0x1000          /* (absent on SMS II) */
 #define CARTRIDGE_SLOT          0x2000          /* ??? */
 #define PORT_A_TH               0x4000          /* for light gun */
 #define PORT_B_TH               0x8000          /* for light gun */

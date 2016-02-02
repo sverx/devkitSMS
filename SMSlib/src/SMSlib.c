@@ -275,12 +275,12 @@ void SMS_setTile (unsigned int tile) __z88dk_fastcall {
 
 #pragma save
 #pragma disable_warning 85
-void SMS_setNextTileatAddr (unsigned int addr) __z88dk_fastcall /* __preserves_regs(a,b,d,e,h,l,iyh,iyl); */ {
+void SMS_setNextTileatAddr (unsigned int addr) __z88dk_fastcall __preserves_regs(a,b,d,e,h,l,iyh,iyl) {
   // addr will be in HL
   ASM_HL_TO_VDP_CONTROL;
 }
 
-void SMS_setTile (unsigned int tile) __z88dk_fastcall /* __preserves_regs(b,c,d,e,h,l,iyh,iyl); */ {
+void SMS_setTile (unsigned int tile) __z88dk_fastcall __preserves_regs(b,c,d,e,h,l,iyh,iyl) {
   // tile will be in HL
   ASM_HL_TO_VDP_DATA;
 }
@@ -494,8 +494,8 @@ void SMS_isr (void) __interrupt __naked {
 2$:
     pop hl
     pop af                                  ; Z80 disable the interrupts on ISR,
-    ei                                      ; so we should re-enable them explicitly
-    reti                                    ; because function is __naked
+    ei                                      ; so we should re-enable them explicitly.
+    reti                                    ; this is here because function is __naked
   __endasm;
 }
 #endif
