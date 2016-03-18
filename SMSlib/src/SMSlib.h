@@ -41,8 +41,8 @@ void SMS_VDPturnOffFeature (unsigned int feature)__z88dk_fastcall;
 #define SMS_displayOn()   SMS_VDPturnOnFeature(VDPFEATURE_SHOWDISPLAY)   /* turns on display */
 #define SMS_displayOff()  SMS_VDPturnOffFeature(VDPFEATURE_SHOWDISPLAY)  /* turns off display */
 
-void SMS_setBGScrollX (int scrollX);
-void SMS_setBGScrollY (int scrollY);
+void SMS_setBGScrollX (unsigned char scrollX);
+void SMS_setBGScrollY (unsigned char scrollY);
 void SMS_setBackdropColor (unsigned char entry);
 void SMS_useFirstHalfTilesforSprites (_Bool usefirsthalf);
 void SMS_setSpriteMode (unsigned char mode);

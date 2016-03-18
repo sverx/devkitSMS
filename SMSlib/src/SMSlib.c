@@ -124,12 +124,12 @@ void SMS_VDPturnOffFeature (unsigned int feature) __z88dk_fastcall {
   SMS_write_to_VDPRegister (HI(feature),VDPReg[HI(feature)]);
 }
 
-void SMS_setBGScrollX (int scrollX) {
-  SMS_write_to_VDPRegister(0x08,LO(scrollX));
+void SMS_setBGScrollX (unsigned char scrollX) {
+  SMS_write_to_VDPRegister(0x08,scrollX);
 }
 
-void SMS_setBGScrollY (int scrollY) {
-  SMS_write_to_VDPRegister(0x09,LO(scrollY));
+void SMS_setBGScrollY (unsigned char scrollY) {
+  SMS_write_to_VDPRegister(0x09,scrollY);
 }
 
 void SMS_setBackdropColor (unsigned char entry) {
