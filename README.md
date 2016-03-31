@@ -28,7 +28,7 @@ a collection of tools and code (with a very presumptuous name) to help in SEGA M
 ```
 * link your program with crt0_sms.rel and the library:
 ```
-  sdcc -mz80 --no-std-crt0 --data-loc 0xC000 crt0_sms.rel your_program.rel SMSlib.lib
+  sdcc -o your_program.ihx -mz80 --no-std-crt0 --data-loc 0xC000 crt0_sms.rel your_program.rel SMSlib.lib
 ```
   note that you should put crt0_sms.rel *first*, and you should put the library after your code.
   
@@ -41,7 +41,7 @@ a collection of tools and code (with a very presumptuous name) to help in SEGA M
 ```
 * link your program with crt0_sg.rel and 'library':
 ```
-  sdcc -mz80 --no-std-crt0 --data-loc 0xC000 crt0_sg.rel your_program.rel SGlib.rel
+  sdcc -o your_program.ihx -mz80 --no-std-crt0 --data-loc 0xC000 crt0_sg.rel your_program.rel SGlib.rel
 ```
   note that you should put crt0_sg.rel *first*, and you should put the library after your code.
   
@@ -54,7 +54,7 @@ a collection of tools and code (with a very presumptuous name) to help in SEGA M
 ```
 * link your program with proper crt0 and libraries, adding PSGlib.rel too after the proper library:
 ```
-  sdcc -mz80 --no-std-crt0 --data-loc 0xC000 crt0_sms.rel your_program.rel SMSlib.lib PSGlib.rel
+  sdcc -o your_program.ihx -mz80 --no-std-crt0 --data-loc 0xC000 crt0_sms.rel your_program.rel SMSlib.lib PSGlib.rel
 ```
 
 #####How to add external data into your ROM:
@@ -83,7 +83,7 @@ If a numerical third parameter is specified (it's optional), its value will be u
 ```
 * link all the objects together adding a parameter for the linker for each bank (_BANK#) and adding each .rel file to be linked (*proper* crt0 file goes *always* first) then all the bank#.rel files last, in ascending order:
 ```
-  sdcc -mz80 --no-std-crt0 --data-loc 0xC000 -Wl-b_BANK2=0x8000 -Wl-b_BANK3=0x8000 crt0_sms.rel your_program.rel SMSlib.lib bank2.rel bank3.rel
+  sdcc -o your_program.ihx -mz80 --no-std-crt0 --data-loc 0xC000 -Wl-b_BANK2=0x8000 -Wl-b_BANK3=0x8000 crt0_sms.rel your_program.rel SMSlib.lib bank2.rel bank3.rel
 ```
 
 #####How to build the final .sms/.gg/.sg file
