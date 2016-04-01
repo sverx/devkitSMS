@@ -234,9 +234,11 @@ void UNSAFE_SMS_VRAMmemcpy128 (unsigned int dst, void *src);
                                               SMS_BYTE_TO_BCD(verMaj),SMS_BYTE_TO_BCD(verMin), \
                                           SMS_BYTE_TO_BCD(dateDay),SMS_BYTE_TO_BCD(dateMonth), \
                               SMS_BYTE_TO_BCD((dateYear)%100),SMS_BYTE_TO_BCD((dateYear)/100), \
-                                      (0x7fe0-sizeof(author))&0xff,(0x7fe0-sizeof(author))>>8, \
-            (0x7fe0-sizeof(author)-sizeof(name))&0xff,(0x7fe0-sizeof(author)-sizeof(name))>>8, \
-                                      (0x7fe0-sizeof(author)-sizeof(name)-sizeof(descr))&0xff, \
+                                                                  (0x7fe0-sizeof(author))%256, \
+                                                                   (0x7fe0-sizeof(author))>>8, \
+                                                     (0x7fe0-sizeof(author)-sizeof(name))%256, \
+                                                      (0x7fe0-sizeof(author)-sizeof(name))>>8, \
+                                       (0x7fe0-sizeof(author)-sizeof(name)-sizeof(descr))%256, \
                                         (0x7fe0-sizeof(author)-sizeof(name)-sizeof(descr))>>8}
 /* pretty nice, isn't it? :) */
 
