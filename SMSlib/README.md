@@ -74,6 +74,11 @@ SMS_disableLineInterrupt()                                            /* macro -
 /* ROM banking */
 SMS_mapROMBank(n);                        /* macro - maps bank n at address 0x8000 (slot 2) */
 
+/* SRAM access/banking */
+#define SMS_enableSRAM();                 /* macro - enable SRAM at address 0x8000 (slot 2) */
+#define SMS_enableSRAMBank(n);            /* macro - enable SRAM bank n (0 or 1) at address 0x8000 (slot 2) */
+#define SMS_disableSRAM();                /* macro - disable SRAM */
+
 /* low level functions */
 void SMS_VRAMmemcpy (unsigned int dst, void *src, unsigned int size);              /* memcpy to VRAM */
 void SMS_VRAMmemcpy_brief (unsigned int dst, void *src, unsigned char size);       /* memcpy to VRAM (256 bytes max) */

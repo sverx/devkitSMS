@@ -52,9 +52,18 @@ void SMS_setSpriteMode (unsigned char mode);
 #define SPRITEMODE_ZOOMED         0x02
 #define SPRITEMODE_TALL_ZOOMED    0x03
 
-/* macro for bankswitching */
-volatile __at (0xffff) unsigned char bank_to_be_mapped_on_slot2;
-#define SMS_mapROMBank(n)       bank_to_be_mapped_on_slot2=n
+/* macro for ROM bankswitching */
+volatile __at (0xffff) unsigned char ROM_bank_to_be_mapped_on_slot2;
+#define SMS_mapROMBank(n)       ROM_bank_to_be_mapped_on_slot2=(n)
+
+/* macro for SRAM access */
+volatile __at (0xfffc) unsigned char SRAM_bank_to_be_mapped_on_slot2;
+#define SMS_enableSRAM()        SRAM_bank_to_be_mapped_on_slot2=0x08
+#define SMS_enableSRAMBank(n)   SRAM_bank_to_be_mapped_on_slot2=((((n)<<2)|0x08)&0x0C)
+#define SMS_disableSRAM()       SRAM_bank_to_be_mapped_on_slot2=0x00
+
+/* SRAM access is as easy as accessing an array of char */
+__at (0x8000) unsigned char SMS_SRAM[];
 
 /* wait until next VBlank starts */
 void SMS_waitForVBlank (void);
@@ -180,6 +189,10 @@ unsigned char SMS_VDPType (void);
 #define VDP_PAL                 0x80
 #define VDP_NTSC                0x40
 #endif
+
+extern volatile unsigned char SMS_VDPFlags;
+#define VDPFLAG_SPRITEOVERFLOW  0x40
+#define VDPFLAG_SPRITECOLLISION 0x20
 
 /* line interrupt */
 void SMS_setLineInterruptHandler (void (*theHandlerFunction)(void));

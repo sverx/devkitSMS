@@ -25,7 +25,7 @@ __sfr __at 0x3F IOPortCtrl;
 #define TH_LO                 0xD5
 #endif
 
-/* the VDP registers initialization value */
+/* the VDP registers initialization value (ROM) */
 const unsigned char VDPReg_init[11]={
                   0x04, /* reg0: Mode 4 */
                   0x20, /* reg1: display OFF - frame int (vblank) ON */
@@ -40,19 +40,18 @@ const unsigned char VDPReg_init[11]={
                   0xFF  /* regA: line interrupt count (offscreen) */
                                     };
 
-/* the VDP registers #0 and #1 'shadow' RAM */
+/* the VDP registers #0 and #1 'shadow' (initialized RAM) */
 unsigned char VDPReg[2]={0x04, 0x20};
 
 volatile bool VDPBlank;               /* used by INTerrupt */
+volatile unsigned char SMS_VDPFlags;  /* holds the sprite overflow and sprite collision flags */
+
 #ifndef TARGET_GG
 volatile bool PauseRequested;         /* used by NMI (SMS only) */
 unsigned char VDPType;                /* used by NTSC/PAL and VDP type detection (SMS only) */
 #endif
-/*
-volatile bool VDPSpriteOverflow=false;
-volatile bool VDPSpriteCollision=false;
-*/                
 
+/* variables for pad handling */
 volatile unsigned int KeysStatus,PreviousKeysStatus;
 #ifdef MD_PAD_SUPPORT
 volatile unsigned int MDKeysStatus,PreviousMDKeysStatus;
@@ -60,7 +59,6 @@ volatile unsigned int MDKeysStatus,PreviousMDKeysStatus;
 
 /* variables for sprite windowing and clipping */
 unsigned int  spritesHeight=8, spritesWidth=8;
-
 #if MAXSPRITES==64
 unsigned char SpriteTableY[MAXSPRITES];
 #else
@@ -69,6 +67,7 @@ unsigned char SpriteTableY[MAXSPRITES+1];
 unsigned char SpriteTableXN[MAXSPRITES*2];
 unsigned char SpriteNextFree;
 
+/* 'empty' line interrupt handler */
 void (*SMS_theLineInterruptHandler)(void);
 
 #ifndef TARGET_GG
@@ -434,7 +433,8 @@ unsigned char SMS_getHCount (void) {
 /* Interrupt Service Routines */
 #ifdef MD_PAD_SUPPORT
 void SMS_isr (void) __interrupt {
-  if (VDPStatusPort & 0x80) {              /* this also aknowledge interrupt at VDP */
+  SMS_VDPFlags=VDPStatusPort;              /* read status port and write it to SMS_VDPFlags */
+  if (SMS_VDPFlags & 0x80) {               /* this also aknowledge interrupt at VDP */
     VDPBlank=true;                         /* frame interrupt */
     PreviousKeysStatus=KeysStatus;
     PreviousMDKeysStatus=MDKeysStatus;
@@ -463,6 +463,7 @@ void SMS_isr (void) __interrupt __naked {
     push af
     push hl
     in a,(_VDPStatusPort)                   ; also aknowledge interrupt at VDP
+    ld (_SMS_VDPFlags),a                    ; write flags to SMS_VDPFlags variable
     rlca
     jr nc,1$
     ld hl,#_VDPBlank                        ; frame interrupt
