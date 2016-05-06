@@ -68,22 +68,34 @@ __at (0x8000) unsigned char SMS_SRAM[];
 /* wait until next VBlank starts */
 void SMS_waitForVBlank (void);
 
+/* ***************************************************************** */
+/* Colors / palettes handling                                        */
+/* ***************************************************************** */
+
+/* SMS_CRAMAddress define (has address and VDP flags) */
+#define SMS_CRAMAddress                    0xC000
+
 #ifdef TARGET_GG
 /* GG functions to set a color / load a palette */
 void GG_setBGPaletteColor (unsigned char entry, unsigned int color);
 void GG_setSpritePaletteColor (unsigned char entry, unsigned int color);
 void GG_loadBGPalette (void *palette) __z88dk_fastcall;
 void GG_loadSpritePalette (void *palette) __z88dk_fastcall;
+#define GG_setNextBGColoratIndex(i)       SMS_setAddr(SMS_CRAMAddress|((i)<<1))
+void GG_setColor (unsigned char color) __z88dk_fastcall __preserves_regs(b,c,d,e,h,l,iyh,iyl);
 /* GG macros for colors */
 #define RGB(r,g,b)        ((r)|((g)<<4)|((b)<<8))
 #define RGB8(r,g,b)       (((r)>>4)|(((g)>>4)<<4)|(((b)>>4)<<8))
 #define RGBHTML(RGB24bit) (((RGB24bit)>>20)|((((RGB24bit)&0xFFFF)>>12)<<4)|((((RGB24bit)&0xFF)>>4)<<8))
 #else
-/* functions to set a color / load a palette */
+/* SMS functions to set a color / load a palette */
 void SMS_setBGPaletteColor (unsigned char entry, unsigned char color);
 void SMS_setSpritePaletteColor (unsigned char entry, unsigned char color);
 void SMS_loadBGPalette (void *palette) __z88dk_fastcall;
 void SMS_loadSpritePalette (void *palette) __z88dk_fastcall;
+#define SMS_setNextBGColoratIndex(i)       SMS_setAddr(SMS_CRAMAddress|(i))
+#define SMS_setNextSpriteColoratIndex(i)   SMS_setAddr(SMS_CRAMAddress|0x10|(i))
+void SMS_setColor (unsigned char color) __z88dk_fastcall __preserves_regs(b,c,d,e,h,l,iyh,iyl);
 /* SMS macros for colors */
 #define RGB(r,g,b)        ((r)|((g)<<2)|((b)<<4))
 #define RGB8(r,g,b)       (((r)>>6)|(((g)>>6)<<2)|(((b)>>6)<<4))
@@ -101,14 +113,15 @@ void SMS_loadTileMapArea (unsigned char x, unsigned char y, void *src, unsigned 
 
 /* function for setting tiles/moving 'cursor' */
 void SMS_setTile (unsigned int tile) __z88dk_fastcall __preserves_regs(b,c,d,e,h,l,iyh,iyl);
-void SMS_setNextTileatAddr (unsigned int addr) __z88dk_fastcall __preserves_regs(a,b,d,e,h,l,iyh,iyl);
+void SMS_setAddr (unsigned int addr) __z88dk_fastcall __preserves_regs(a,b,d,e,h,l,iyh,iyl);
 /* PNT define (has address and VDP flags) */
-#define SMS_PNTAddress            ((unsigned int)0x7800)
+#define SMS_PNTAddress            0x7800
 /* macro for turning x,y into VRAM addr */
-#define XYtoADDR(x,y)             (SMS_PNTAddress+(((unsigned int)(y)<<6)|((unsigned char)(x)<<1)))
-#define SMS_setNextTileatXY(x,y)  SMS_setNextTileatAddr(XYtoADDR((x),(y)))
-#define SMS_setNextTileatLoc(loc) SMS_setNextTileatAddr(SMS_PNTAddress+((unsigned int)(loc)<<1))
-#define SMS_setTileatXY(x,y,tile) {SMS_setNextTileatAddr(XYtoADDR((x),(y)));SMS_setTile(tile);}
+#define XYtoADDR(x,y)             (SMS_PNTAddress|((unsigned int)(y)<<6)|((unsigned char)(x)<<1))
+#define SMS_setNextTileatXY(x,y)  SMS_setAddr(XYtoADDR((x),(y)))
+#define SMS_setNextTileatLoc(loc) SMS_setAddr(SMS_PNTAddress|((unsigned int)(loc)<<1))
+#define SMS_setNextTileatAddr(a)  SMS_setAddr(a)
+#define SMS_setTileatXY(x,y,tile) {SMS_setAddr(XYtoADDR((x),(y)));SMS_setTile(tile);}
 
 /* handy defines for tilemaps entry */
 #define TILE_FLIPPED_X            0x0200

@@ -17,17 +17,23 @@ void SMS_setBackdropColor (unsigned char entry);    /* set which sprite palette 
 void SMS_setSpriteMode (unsigned char mode);        /* check modes list in SMSlib.h */
 void SMS_useFirstHalfTilesforSprites (_Bool usefirsthalf);  /* use tiles 0-255 for sprites if true, 256-511 if false */
 
-/* palettes functions: SMS only */
+/* colors/palettes functions: SMS only */
 void SMS_setBGPaletteColor (unsigned char entry, unsigned char color);
 void SMS_setSpritePaletteColor (unsigned char entry, unsigned char color);
 void SMS_loadBGPalette (void *palette);
 void SMS_loadSpritePalette (void *palette);
+SMS_setNextBGColoratIndex(i);                       /* macro - sets which BG color to set next */
+SMS_setNextSpriteColoratIndex(i);                   /* macro - sets which sprite color to set next */
+void SMS_setColor (unsigned char color);            /* set color */ 
 
-/* palettes functions: GG only */
+/* colors/palettes functions: GG only */
 void GG_setBGPaletteColor (unsigned char entry, unsigned int color);
 void GG_setSpritePaletteColor (unsigned char entry, unsigned int color);
 void GG_loadBGPalette (void *palette);
 void GG_loadSpritePalette (void *palette);
+GG_setNextBGColoratIndex(i);                        /* macro - sets which BG color to set next */
+GG_setNextSpriteColoratIndex(i);                    /* macro - sets which sprite color to set next */
+void GG_setColor (unsigned char color);             /* set color */ 
 
 /* functions to load tiles into VRAM */
 void SMS_loadTiles (void *src, unsigned int Tilefrom, unsigned int size);
