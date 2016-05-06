@@ -82,6 +82,7 @@ void GG_setSpritePaletteColor (unsigned char entry, unsigned int color);
 void GG_loadBGPalette (void *palette) __z88dk_fastcall;
 void GG_loadSpritePalette (void *palette) __z88dk_fastcall;
 #define GG_setNextBGColoratIndex(i)       SMS_setAddr(SMS_CRAMAddress|((i)<<1))
+#define GG_setNextSpriteColoratIndex(i)   SMS_setAddr(SMS_CRAMAddress|0x20|((i)<<1))
 void GG_setColor (unsigned char color) __z88dk_fastcall __preserves_regs(b,c,d,e,h,l,iyh,iyl);
 /* GG macros for colors */
 #define RGB(r,g,b)        ((r)|((g)<<4)|((b)<<8))
