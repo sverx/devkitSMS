@@ -48,12 +48,16 @@ void SMS_setNextTileatXY (unsigned char x, unsigned char y);
 void SMS_setTile (unsigned int tile);
 
 /* sprite handling */
-void SMS_initSprites (void);              /* we're going to start declaring sprites, in front-to-back order */
-_Bool SMS_addSprite (unsigned char x, unsigned char y, unsigned char tile);  /* declare a sprite - returns false if no more sprites are available */
-void SMS_setClippingWindow (unsigned char x0, unsigned char y0, unsigned char x1, unsigned char y1);   /* set the sprite window. sprites completely outside the window will be clipped */ 
-_Bool SMS_addSpriteClipping (int x, int y, unsigned char tile);  /* declare a sprite inside the window - returns false if sprite isn't added */
-void SMS_finalizeSprites (void);          /* we're done declaring sprites */
-void SMS_copySpritestoSAT (void);         /* copy sprites to Sprites Attribute Table (do that during vBlank) */
+void SMS_initSprites (void);                /* we're going to start declaring sprites, in front-to-back order */
+signed char SMS_addSprite (unsigned char x, unsigned char y, unsigned char tile);  /* declare a sprite - returns -1 if no more sprites are available */
+signed char SMS_reserveSprite (void);
+void SMS_updateSpritePosition (signed char sprite, unsigned char x, unsigned char y);
+void SMS_updateSpriteImage (signed char sprite, unsigned char image);
+void SMS_hideSprite (signed char sprite);
+void SMS_setClippingWindow (unsigned char x0, unsigned char y0, unsigned char x1, unsigned char y1); /* set the sprite window. sprites completely outside the window will be clipped */
+signed char SMS_addSpriteClipping (int x, int y, unsigned char tile);   /* declare a sprite inside the window - returns -1 if no more sprites are available or sprite clipped */
+void SMS_finalizeSprites (void);            /* we're done declaring sprites */
+void SMS_copySpritestoSAT (void);           /* copy sprites to Sprites Attribute Table (do that during vBlank) */
 
 /* input handling */
 unsigned int SMS_getKeysStatus (void);    /* the current status of the keys */

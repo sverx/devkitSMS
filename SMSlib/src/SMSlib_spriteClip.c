@@ -29,7 +29,7 @@ void SMS_setClippingWindow (unsigned char x0, unsigned char y0, unsigned char x1
   clipWin_y1=y1;
 }
 
-_Bool SMS_addSpriteClipping (int x, int y, unsigned char tile) {
+signed char SMS_addSpriteClipping (int x, int y, unsigned char tile) {
   unsigned char *stXN;
   if (SpriteNextFree<MAXSPRITES) {
     if ((x>clipWin_x1) || (x<((int)clipWin_x0-spritesWidth)))
@@ -45,9 +45,8 @@ _Bool SMS_addSpriteClipping (int x, int y, unsigned char tile) {
       SpriteTableXN[SpriteNextFree*2]=x;
       SpriteTableXN[SpriteNextFree*2+1]=tile;
       */
-      SpriteNextFree++;
+      return(SpriteNextFree++);
     }
-    return (true);
-  } else
-    return (false);
+  }
+  return (-1);
 }

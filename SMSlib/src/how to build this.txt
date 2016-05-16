@@ -4,6 +4,9 @@ sdcc -o SMSlib.rel -c -mz80 --peep-file peep-rules.txt --peep-asm SMSlib.c
 sdcc -o SMSlib_GG.rel -c -mz80 -DTARGET_GG --peep-file peep-rules.txt --peep-asm SMSlib.c
 @if %errorlevel% NEQ 0 goto :EOF
 
+sdcc -o SMSlib_spriteAdv.rel -c -mz80 --peep-file peep-rules.txt --peep-asm SMSlib_spriteAdv.c
+@if %errorlevel% NEQ 0 goto :EOF
+
 sdcc -o SMSlib_spriteClip.rel -c -mz80 --peep-file peep-rules.txt --peep-asm SMSlib_spriteClip.c
 @if %errorlevel% NEQ 0 goto :EOF
 
@@ -35,8 +38,8 @@ sdcc -o SMSlib_PSGaiden.rel -c -mz80 SMSlib_PSGaiden.c
 @if %errorlevel% NEQ 0 goto :EOF
 
 
-sdar r SMSlib.lib SMSlib.rel SMSlib_spriteClip.rel SMSlib_PSGaiden.rel SMSlib_STMcomp.rel SMSlib_loadTileMap.rel SMSlib_loadTileMapArea.rel SMSlib_loadTiles.rel SMSlib_VRAMmemcpy.rel SMSlib_VRAMmemset.rel SMSlib_UNSAFE.rel
+sdar r SMSlib.lib SMSlib.rel SMSlib_spriteAdv.rel SMSlib_spriteClip.rel SMSlib_PSGaiden.rel SMSlib_STMcomp.rel SMSlib_loadTileMap.rel SMSlib_loadTileMapArea.rel SMSlib_loadTiles.rel SMSlib_VRAMmemcpy.rel SMSlib_VRAMmemset.rel SMSlib_UNSAFE.rel
 @if %errorlevel% NEQ 0 goto :EOF
 
-sdar r SMSlib_GG.lib SMSlib_GG.rel SMSlib_spriteClip_GG.rel SMSlib_PSGaiden.rel SMSlib_STMcomp.rel SMSlib_loadTileMap.rel SMSlib_loadTileMapArea.rel SMSlib_loadTiles.rel SMSlib_VRAMmemcpy.rel SMSlib_VRAMmemset.rel SMSlib_UNSAFE.rel
+sdar r SMSlib_GG.lib SMSlib_GG.rel SMSlib_spriteAdv.rel SMSlib_spriteClip_GG.rel SMSlib_PSGaiden.rel SMSlib_STMcomp.rel SMSlib_loadTileMap.rel SMSlib_loadTileMapArea.rel SMSlib_loadTiles.rel SMSlib_VRAMmemcpy.rel SMSlib_VRAMmemset.rel SMSlib_UNSAFE.rel
 @if %errorlevel% NEQ 0 goto :EOF

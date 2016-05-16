@@ -132,9 +132,13 @@ void SMS_setAddr (unsigned int addr) __z88dk_fastcall __preserves_regs(a,b,d,e,h
 
 /* functions for sprites handling */
 void SMS_initSprites (void);
-_Bool SMS_addSprite (unsigned char x, unsigned char y, unsigned char tile);  /* returns false if no more sprites are available */
+signed char SMS_addSprite (unsigned char x, unsigned char y, unsigned char tile);  /* returns -1 if no more sprites are available */
+signed char SMS_reserveSprite (void);
+void SMS_updateSpritePosition (signed char sprite, unsigned char x, unsigned char y);
+void SMS_updateSpriteImage (signed char sprite, unsigned char image);
+void SMS_hideSprite (signed char sprite);
 void SMS_setClippingWindow (unsigned char x0, unsigned char y0, unsigned char x1, unsigned char y1);
-_Bool SMS_addSpriteClipping (int x, int y, unsigned char tile); /* returns false if no more sprites are available or sprite clipped */
+signed char SMS_addSpriteClipping (int x, int y, unsigned char tile);   /* returns -1 if no more sprites are available or sprite clipped */
 void SMS_finalizeSprites (void);
 void SMS_copySpritestoSAT (void);
 

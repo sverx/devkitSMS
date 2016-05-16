@@ -343,10 +343,10 @@ void SMS_initSprites (void) {
   SpriteNextFree=0;
 }
 
-_Bool SMS_addSprite (unsigned char x, unsigned char y, unsigned char tile) {
+signed char SMS_addSprite (unsigned char x, unsigned char y, unsigned char tile) {
   unsigned char *stXN;
   if (SpriteNextFree<MAXSPRITES) {
-    if ((unsigned char)(y-1)!=0xD0) {                   // avoid placing sprites at this Y!
+    if (y!=0xD1) {                     // avoid placing sprites at this Y!
       SpriteTableY[SpriteNextFree]=(unsigned char)(y-1);
       stXN=&SpriteTableXN[SpriteNextFree*2];
       *stXN++=x;
@@ -355,11 +355,10 @@ _Bool SMS_addSprite (unsigned char x, unsigned char y, unsigned char tile) {
       SpriteTableXN[SpriteNextFree*2]=x;
       SpriteTableXN[SpriteNextFree*2+1]=tile;
       */
-      SpriteNextFree++;
+      return(SpriteNextFree++);
     }
-    return (true);
-  } else
-    return (false);
+  }
+  return (-1);
 }
 
 void SMS_finalizeSprites (void) {
