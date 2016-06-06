@@ -43,19 +43,19 @@ void SMS_loadPSGaidencompressedTiles (void *src, unsigned int Tilefrom);
 void SMS_loadTileMap (unsigned char x, unsigned char y, void *src, unsigned int size);
 void SMS_loadSTMcompressedTileMap (unsigned char x, unsigned char y, unsigned char *src);
 void SMS_loadTileMapArea (unsigned char x, unsigned char y,  unsigned int *src, unsigned char width, unsigned char height);
-(*deprecated*) void SMS_setTileatXY (unsigned char x, unsigned char y, unsigned int tile);
+/* *deprecated* */ void SMS_setTileatXY (unsigned char x, unsigned char y, unsigned int tile);
 void SMS_setNextTileatXY (unsigned char x, unsigned char y);
 void SMS_setTile (unsigned int tile);
 
 /* sprite handling */
 void SMS_initSprites (void);                /* we're going to start declaring sprites, in front-to-back order */
-signed char SMS_addSprite (unsigned char x, unsigned char y, unsigned char tile);  /* declare a sprite - returns -1 if no more sprites are available */
+signed char SMS_addSprite (unsigned char x, unsigned char y, unsigned char tile);  /* declare a sprite - returns handle or -1 if no more sprites are available */
 signed char SMS_reserveSprite (void);
 void SMS_updateSpritePosition (signed char sprite, unsigned char x, unsigned char y);
 void SMS_updateSpriteImage (signed char sprite, unsigned char image);
 void SMS_hideSprite (signed char sprite);
 void SMS_setClippingWindow (unsigned char x0, unsigned char y0, unsigned char x1, unsigned char y1); /* set the sprite window. sprites completely outside the window will be clipped */
-signed char SMS_addSpriteClipping (int x, int y, unsigned char tile);   /* declare a sprite inside the window - returns -1 if no more sprites are available or sprite clipped */
+signed char SMS_addSpriteClipping (int x, int y, unsigned char tile);   /* declare a sprite inside the window - returns handle or -1 if no more sprites are available or sprite clipped */
 void SMS_finalizeSprites (void);            /* we're done declaring sprites */
 void SMS_copySpritestoSAT (void);           /* copy sprites to Sprites Attribute Table (do that during vBlank) */
 
@@ -85,9 +85,9 @@ SMS_disableLineInterrupt()                                            /* macro -
 SMS_mapROMBank(n);                        /* macro - maps bank n at address 0x8000 (slot 2) */
 
 /* SRAM access/banking */
-#define SMS_enableSRAM();                 /* macro - enable SRAM at address 0x8000 (slot 2) */
-#define SMS_enableSRAMBank(n);            /* macro - enable SRAM bank n (0 or 1) at address 0x8000 (slot 2) */
-#define SMS_disableSRAM();                /* macro - disable SRAM */
+SMS_enableSRAM();                         /* macro - enable SRAM at address 0x8000 (slot 2) */
+SMS_enableSRAMBank(n);                    /* macro - enable SRAM bank n (0 or 1) at address 0x8000 (slot 2) */
+SMS_disableSRAM();                        /* macro - disable SRAM */
 
 /* low level functions */
 void SMS_VRAMmemcpy (unsigned int dst, void *src, unsigned int size);              /* memcpy to VRAM */

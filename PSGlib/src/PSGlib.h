@@ -1,5 +1,5 @@
 /* **************************************************
-   PSGlib - C programming library for the SMS' PSG
+   PSGlib - C programming library for the SEGA PSG
    ( part of devkitSMS - github.com/sverx/devkitSMS )
    ************************************************** */
 
@@ -15,12 +15,16 @@ void PSGCancelLoop (void);
 void PSGPlayNoRepeat (void *song);
 void PSGStop (void);
 unsigned char PSGGetStatus (void);
+void PSGSetMusicVolumeAttenuation (unsigned char attenuation);
 
 void PSGSFXPlay (void *sfx, unsigned char channels);
 void PSGSFXPlayLoop (void *sfx, unsigned char channels);
 void PSGSFXCancelLoop (void);
 void PSGSFXStop (void);
 unsigned char PSGSFXGetStatus (void);
+
+void PSGSilenceChannels (void);
+void PSGRestoreVolumes (void);
 
 void PSGFrame (void);
 void PSGSFXFrame (void);
