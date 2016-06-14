@@ -7,6 +7,7 @@
 */
 
 #include <stdio.h>
+#include <stdbool.h>
 #include <string.h>
 #include <stdlib.h>
 #include <dirent.h>
@@ -21,6 +22,9 @@ struct dirent *entry;
 unsigned char buf[BUFSIZE];
 #define SUBST_NUM   4
 char *subst[SUBST_NUM]={" ",".","(",")"};
+
+char paramshift=0;
+bool verbose=false;
 
 void cleanstr(char *str) {
   int i;
@@ -39,41 +43,49 @@ int main(int argc, char const* *argv) {
   
   printf("*** sverx's folder2c converter ***\n");
 	
-  if (argc<3 || argc>4) {
-    printf("Usage: folder2c folder outfilename [bank number]\n");
+  if (argc<3 || argc>5) {
+    printf("Usage: folder2c [-v] folder outfilename [bank number]\n");
     printf("creates outfilename.c and outfilename.h with contents of every\nfile found in folder.\n");
+    printf("-v : verbose\n");
     return(1);
   }
   
-  if (argc==4) {
-    bank_num=atoi(argv[3]);
+  if (strcmp("-v",argv[1])==0) {
+    verbose=true;
+    paramshift=1;
+    printf("Info: verbose mode; will print file names while converting.\n");
+  }  	
+  	
+  
+  if ((argc+paramshift)==4) {
+    bank_num=atoi(argv[3+paramshift]);
     if (bank_num<=0) {
       printf("Fatal: invalid bank number\n");
       return(1);
     }
   }
   
-  dp = opendir(argv[1]);
+  dp = opendir(argv[1+paramshift]);
   if (dp == NULL) {
-    printf("Fatal: can't open %s folder\n",argv[1]);
+    printf("Fatal: can't open %s folder\n",argv[1+paramshift]);
     return (1);
   }
   
-  cname=malloc(strlen(argv[2])+3);
-  hname=malloc(strlen(argv[2])+3);
+  cname=malloc(strlen(argv[2+paramshift])+3);
+  hname=malloc(strlen(argv[2+paramshift])+3);
   
-  sprintf(cname,"%s.c",argv[2]);
-  sprintf(hname,"%s.h",argv[2]);
+  sprintf(cname,"%s.c",argv[2+paramshift]);
+  sprintf(hname,"%s.h",argv[2+paramshift]);
   
   fc=fopen(cname,"w");
   if (!fc) {
-    printf("Fatal: can't open output %s.c file\n",argv[2]);
+    printf("Fatal: can't open output %s.c file\n",argv[2+paramshift]);
     return(1);
   }
   
   fh=fopen(hname,"w");
   if (!fh) {
-    printf("Fatal: can't open output %s.h file\n",argv[2]);
+    printf("Fatal: can't open output %s.h file\n",argv[2+paramshift]);
     return(1);
   }
   
@@ -84,10 +96,11 @@ int main(int argc, char const* *argv) {
       strcpy(clean,entry->d_name);
       cleanstr(clean);
       
-      iname=malloc(strlen(argv[1])+strlen(entry->d_name)+2);
-      sprintf(iname,"%s/%s",argv[1],entry->d_name);
+      iname=malloc(strlen(argv[1+paramshift])+strlen(entry->d_name)+2);
+      sprintf(iname,"%s/%s",argv[1+paramshift],entry->d_name);
       
-      printf("Info: converting %s ...\n",entry->d_name);
+      if (verbose)
+        printf("Info: converting %s ...\n",entry->d_name);
       
       fIN=fopen(iname,"rb");
       if (!fc) {
@@ -133,6 +146,6 @@ int main(int argc, char const* *argv) {
   free(cname);
   free(hname);
 
-  printf("Info: conversion completed. File \"%s.c\" defines %d total bytes.\n",argv[2],total_size);
+  printf("Info: conversion completed. File \"%s.c\" defines %d total bytes.\n",argv[2+paramshift],total_size);
   return (0);
 }
