@@ -68,41 +68,6 @@ __at (0x8000) unsigned char SMS_SRAM[];
 /* wait until next VBlank starts */
 void SMS_waitForVBlank (void);
 
-/* ***************************************************************** */
-/* Colors / palettes handling                                        */
-/* ***************************************************************** */
-
-/* SMS_CRAMAddress define (has address and VDP flags) */
-#define SMS_CRAMAddress                    0xC000
-
-#ifdef TARGET_GG
-/* GG functions to set a color / load a palette */
-void GG_setBGPaletteColor (unsigned char entry, unsigned int color);
-void GG_setSpritePaletteColor (unsigned char entry, unsigned int color);
-void GG_loadBGPalette (void *palette) __z88dk_fastcall;
-void GG_loadSpritePalette (void *palette) __z88dk_fastcall;
-#define GG_setNextBGColoratIndex(i)       SMS_setAddr(SMS_CRAMAddress|((i)<<1))
-#define GG_setNextSpriteColoratIndex(i)   SMS_setAddr(SMS_CRAMAddress|0x20|((i)<<1))
-void GG_setColor (unsigned char color) __z88dk_fastcall __preserves_regs(b,c,d,e,h,l,iyh,iyl);
-/* GG macros for colors */
-#define RGB(r,g,b)        ((r)|((g)<<4)|((b)<<8))
-#define RGB8(r,g,b)       (((r)>>4)|(((g)>>4)<<4)|(((b)>>4)<<8))
-#define RGBHTML(RGB24bit) (((RGB24bit)>>20)|((((RGB24bit)&0xFFFF)>>12)<<4)|((((RGB24bit)&0xFF)>>4)<<8))
-#else
-/* SMS functions to set a color / load a palette */
-void SMS_setBGPaletteColor (unsigned char entry, unsigned char color);
-void SMS_setSpritePaletteColor (unsigned char entry, unsigned char color);
-void SMS_loadBGPalette (void *palette) __z88dk_fastcall;
-void SMS_loadSpritePalette (void *palette) __z88dk_fastcall;
-#define SMS_setNextBGColoratIndex(i)       SMS_setAddr(SMS_CRAMAddress|(i))
-#define SMS_setNextSpriteColoratIndex(i)   SMS_setAddr(SMS_CRAMAddress|0x10|(i))
-void SMS_setColor (unsigned char color) __z88dk_fastcall __preserves_regs(b,c,d,e,h,l,iyh,iyl);
-/* SMS macros for colors */
-#define RGB(r,g,b)        ((r)|((g)<<2)|((b)<<4))
-#define RGB8(r,g,b)       (((r)>>6)|(((g)>>6)<<2)|(((b)>>6)<<4))
-#define RGBHTML(RGB24bit) (((RGB24bit)>>22)|((((RGB24bit)&0xFFFF)>>14)<<2)|((((RGB24bit)&0xFF)>>6)<<4))
-#endif
-
 /* functions to load tiles into VRAM */
 void SMS_loadTiles (void *src, unsigned int tilefrom, unsigned int size);
 void SMS_loadPSGaidencompressedTiles (void *src, unsigned int tilefrom);
@@ -112,9 +77,14 @@ void SMS_loadTileMap (unsigned char x, unsigned char y, void *src, unsigned int 
 void SMS_loadSTMcompressedTileMap (unsigned char x, unsigned char y, unsigned char *src);
 void SMS_loadTileMapArea (unsigned char x, unsigned char y, void *src, unsigned char width, unsigned char height);
 
+
+void SMS_crt0_RST08(unsigned int addr) __z88dk_fastcall __preserves_regs(a,b,d,e,h,l,iyh,iyl);
+void SMS_crt0_RST18(unsigned int tile) __z88dk_fastcall __preserves_regs(b,c,d,e,h,l,iyh,iyl);
+
 /* function for setting tiles/moving 'cursor' */
-void SMS_setTile (unsigned int tile) __z88dk_fastcall __preserves_regs(b,c,d,e,h,l,iyh,iyl);
-void SMS_setAddr (unsigned int addr) __z88dk_fastcall __preserves_regs(a,b,d,e,h,l,iyh,iyl);
+#define SMS_setTile(tile)         SMS_crt0_RST18(tile)
+#define SMS_setAddr(addr)         SMS_crt0_RST08(addr)
+
 /* PNT define (has address and VDP flags) */
 #define SMS_PNTAddress            0x7800
 /* macro for turning x,y into VRAM addr */
@@ -141,6 +111,42 @@ void SMS_setClippingWindow (unsigned char x0, unsigned char y0, unsigned char x1
 signed char SMS_addSpriteClipping (int x, int y, unsigned char tile);   /* returns -1 if no more sprites are available or sprite clipped */
 void SMS_finalizeSprites (void);
 void SMS_copySpritestoSAT (void);
+
+/* ***************************************************************** */
+/* Colors / palettes handling                                        */
+/* ***************************************************************** */
+
+/* SMS_CRAMAddress define (has address and VDP flags) */
+#define SMS_CRAMAddress                    0xC000
+
+#ifdef TARGET_GG
+/* GG functions to set a color / load a palette */
+void GG_setBGPaletteColor (unsigned char entry, unsigned int color);
+void GG_setSpritePaletteColor (unsigned char entry, unsigned int color);
+void GG_loadBGPalette (void *palette) __z88dk_fastcall;
+void GG_loadSpritePalette (void *palette) __z88dk_fastcall;
+#define GG_setNextBGColoratIndex(i)       SMS_setAddr(SMS_CRAMAddress|((i)<<1))
+#define GG_setNextSpriteColoratIndex(i)   SMS_setAddr(SMS_CRAMAddress|0x20|((i)<<1))
+// void GG_setColor (unsigned int color) __z88dk_fastcall __preserves_regs(b,c,d,e,h,l,iyh,iyl);
+#define GG_setColor(color)       SMS_crt0_RST18(color)
+/* GG macros for colors */
+#define RGB(r,g,b)        ((r)|((g)<<4)|((b)<<8))
+#define RGB8(r,g,b)       (((r)>>4)|(((g)>>4)<<4)|(((b)>>4)<<8))
+#define RGBHTML(RGB24bit) (((RGB24bit)>>20)|((((RGB24bit)&0xFFFF)>>12)<<4)|((((RGB24bit)&0xFF)>>4)<<8))
+#else
+/* SMS functions to set a color / load a palette */
+void SMS_setBGPaletteColor (unsigned char entry, unsigned char color);
+void SMS_setSpritePaletteColor (unsigned char entry, unsigned char color);
+void SMS_loadBGPalette (void *palette) __z88dk_fastcall;
+void SMS_loadSpritePalette (void *palette) __z88dk_fastcall;
+#define SMS_setNextBGColoratIndex(i)       SMS_setAddr(SMS_CRAMAddress|(i))
+#define SMS_setNextSpriteColoratIndex(i)   SMS_setAddr(SMS_CRAMAddress|0x10|(i))
+void SMS_setColor (unsigned char color) __z88dk_fastcall __preserves_regs(b,c,d,e,h,l,iyh,iyl);
+/* SMS macros for colors */
+#define RGB(r,g,b)        ((r)|((g)<<2)|((b)<<4))
+#define RGB8(r,g,b)       (((r)>>6)|(((g)>>6)<<2)|(((b)>>6)<<4))
+#define RGBHTML(RGB24bit) (((RGB24bit)>>22)|((((RGB24bit)&0xFFFF)>>14)<<2)|((((RGB24bit)&0xFF)>>6)<<4))
+#endif
 
 /* functions to read joypad(s) */
 unsigned int SMS_getKeysStatus (void);

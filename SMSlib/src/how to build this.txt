@@ -34,7 +34,7 @@ sdcc -o SMSlib_VRAMmemset.rel -c -mz80 --peep-file peep-rules.txt --peep-asm SMS
 sdcc -o SMSlib_UNSAFE.rel -c -mz80 --peep-file peep-rules.txt --peep-asm SMSlib_UNSAFE.c
 @if %errorlevel% NEQ 0 goto :EOF
 
-sdcc -o SMSlib_PSGaiden.rel -c -mz80 SMSlib_PSGaiden.c
+sdcc -o SMSlib_PSGaiden.rel -c -mz80 --peep-file peep-rules.txt SMSlib_PSGaiden.c
 @if %errorlevel% NEQ 0 goto :EOF
 
 

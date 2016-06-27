@@ -58,7 +58,7 @@ volatile unsigned int MDKeysStatus,PreviousMDKeysStatus;
 #endif
 
 /* variables for sprite windowing and clipping */
-unsigned int  spritesHeight=8, spritesWidth=8;
+unsigned char spritesHeight=8, spritesWidth=8;
 #if MAXSPRITES==64
 unsigned char SpriteTableY[MAXSPRITES];
 #else
@@ -159,13 +159,17 @@ void SMS_setSpriteMode (unsigned char mode) {
 
 #ifdef TARGET_GG
 void GG_setBGPaletteColor (unsigned char entry, unsigned int color) {
-  SMS_set_address_CRAM(entry*2);
-  SMS_word_to_VDP_data(color);
+  // SMS_set_address_CRAM(entry*2);
+  SMS_setAddr(0xC000+(entry*2));
+  // SMS_word_to_VDP_data(color);
+  SMS_setTile(color);
 }
 
 void GG_setSpritePaletteColor (unsigned char entry, unsigned int color) {
-  SMS_set_address_CRAM((entry*2)|0x20);
-  SMS_word_to_VDP_data(color);
+  // SMS_set_address_CRAM((entry*2)|0x20);
+  SMS_setAddr(0xC020+(entry*2));
+  // SMS_word_to_VDP_data(color);
+  SMS_setTile(color);
 }
 /*
 // OLD CODE
@@ -181,12 +185,14 @@ void GG_loadSpritePalette (void *palette) {
 */
 #else
 void SMS_setBGPaletteColor (unsigned char entry, unsigned char color) {
-  SMS_set_address_CRAM(entry);
+  // SMS_set_address_CRAM(entry);
+  SMS_setAddr(0xC000+entry);
   SMS_byte_to_VDP_data(color);
 }
 
 void SMS_setSpritePaletteColor (unsigned char entry, unsigned char color) {
-  SMS_set_address_CRAM(entry|0x10);
+  // SMS_set_address_CRAM(entry|0x10);
+  SMS_setAddr(0xC010+entry);
   SMS_byte_to_VDP_data(color);
 }
 /*
@@ -212,10 +218,7 @@ void SMS_setNextTileatAddr (unsigned int addr) __z88dk_fastcall {
 void SMS_setTile (unsigned int tile) __z88dk_fastcall {
   SMS_word_to_VDP_data(tile);
 }
-*/
 
-/* ************************************************************************************ */
-// NEW CODE
 #define ASM_HL_TO_VDP_CONTROL  \
   __asm                        \
     ld c,#_VDPControlPort      \
@@ -227,18 +230,6 @@ void SMS_setTile (unsigned int tile) __z88dk_fastcall {
   // writes a control word to VDP
   // it's INTerrupt safe (DI/EI around control port writes)
   // controlword in HL
-
-#define ASM_DE_TO_VDP_CONTROL  \
-  __asm                        \
-    ld c,#_VDPControlPort      \
-    di                         \
-    out (c),e                  \
-    out (c),d                  \
-    ei                         \
-  __endasm
-  // writes a control word to VDP
-  // it's INTerrupt safe (DI/EI around control port writes)
-  // controlword in DE
 
 #define ASM_HL_TO_VDP_DATA                                \
   __asm                                                   \
@@ -252,7 +243,20 @@ void SMS_setTile (unsigned int tile) __z88dk_fastcall {
   // writes two bytes (a word) to VDP
   // it's VRAM safe (at least 26 cycles between writes)
   // word will be passed in HL
-  
+*/
+
+#define ASM_DE_TO_VDP_CONTROL  \
+  __asm                        \
+    ld c,#_VDPControlPort      \
+    di                         \
+    out (c),e                  \
+    out (c),d                  \
+    ei                         \
+  __endasm
+  // writes a control word to VDP
+  // it's INTerrupt safe (DI/EI around control port writes)
+  // controlword in DE
+
 #define ASM_L_TO_VDP_DATA                                 \
   __asm                                                   \
     ld a,l                                                \
@@ -280,9 +284,10 @@ void SMS_setTile (unsigned int tile) __z88dk_fastcall {
   __asm                               \
     ld b,imm                          \
   __endasm
-
+  
 #pragma save
 #pragma disable_warning 85
+/*
 void SMS_setAddr (unsigned int addr) __z88dk_fastcall __preserves_regs(a,b,d,e,h,l,iyh,iyl) {
   // addr will be in HL
   ASM_HL_TO_VDP_CONTROL;
@@ -292,6 +297,7 @@ void SMS_setTile (unsigned int tile) __z88dk_fastcall __preserves_regs(b,c,d,e,h
   // tile will be in HL
   ASM_HL_TO_VDP_DATA;
 }
+*/
 
 #ifdef TARGET_GG
 void GG_loadBGPalette (void *palette) __z88dk_fastcall {
@@ -309,11 +315,12 @@ void GG_loadSpritePalette (void *palette) __z88dk_fastcall {
   ASM_LD_B_IMM(#32);
   ASM_SHORT_XFER_TO_VDP_DATA;
 }
-
-void GG_setColor (unsigned char color) __z88dk_fastcall __preserves_regs(b,c,d,e,h,l,iyh,iyl) {
-  // color will be in L
-  ASM_L_TO_VDP_DATA;
+/*
+void GG_setColor (unsigned int color) __z88dk_fastcall __preserves_regs(b,c,d,e,h,l,iyh,iyl) {
+  // color will be in HL
+  ASM_HL_TO_VDP_DATA;
 }
+*/
 #else
 void SMS_loadBGPalette (void *palette) __z88dk_fastcall {
   // *palette will be in HL
@@ -369,13 +376,15 @@ void SMS_finalizeSprites (void) {
 }
 
 void SMS_copySpritestoSAT (void) {
-  SMS_set_address_VRAM(SMS_SATAddress);
+  // SMS_set_address_VRAM(SMS_SATAddress);
+  SMS_setAddr(SMS_SATAddress);
 #if MAXSPRITES==64
   SMS_byte_brief_array_to_VDP_data(SpriteTableY,MAXSPRITES);
 #else
   SMS_byte_brief_array_to_VDP_data(SpriteTableY,MAXSPRITES+1);
 #endif
-  SMS_set_address_VRAM(SMS_SATAddress+128);
+  // SMS_set_address_VRAM(SMS_SATAddress+128);
+  SMS_setAddr(SMS_SATAddress+128);
   SMS_byte_brief_array_to_VDP_data(SpriteTableXN,MAXSPRITES*2);
 }
 

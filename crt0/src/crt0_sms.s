@@ -33,18 +33,36 @@
 	.globl	_main
 
 	.area	_HEADER (ABS)
-	;; Reset vector
-	.org 	0
+	.org 	0                       ; Reset 00h
 	di				; disable interrupt
         im 1				; interrupt mode 1 (this won't change)
 	jp	init
-
+;--------------------------------------------------------------------------
+_SMS_crt0_RST08::
+	.org    0x08                    ; Reset 08h - write HL to VDP Control Port
+	ld c, #0xBF                     ; set VDP Control Port
+	di                              ; make it interrupt SAFE
+	out (c),l
+        out (c),h
+        ei
+        ret
+;--------------------------------------------------------------------------
+_SMS_crt0_RST18::
+        .org    0x18                    ; Reset 18h - write HL to VDP Data Port
+        ld a,l                          ; (respecting VRAM time costraints)
+        out (#0xBE),a                   ; 11
+        ld a,h                          ; 4
+        sub #0                          ; 7
+        nop                             ; 4 = 26 (VRAM SAFE)
+        out (#0xBE),a
+        ret
+;--------------------------------------------------------------------------
         .org    0x38                    ; handle IRQ
         jp _SMS_isr
-
+;--------------------------------------------------------------------------
         .org     0x66                   ; handle NMI
         jp _SMS_nmi_isr
-
+;--------------------------------------------------------------------------
 	.org	 0x70
 init:
         ld sp, #0xdff0			; set stack pointer at end of RAM
@@ -75,7 +93,7 @@ mapper_loop:
         ; here's a block of 128 OUTI instructions, made for enabling
         ;    UNSAFE but FAST
         ; short data transfers to VRAM
-
+;--------------------------------------------------------------------------
 _OUTI128::                              ; _OUTI128 label points to a block of 128 OUTI and a RET
         .rept	64
 	outi
@@ -90,7 +108,7 @@ _OUTI32::                               ; _OUTI32 label points to a block of 32 
 	.endm
 _outi_block::				; _outi_block label points to END of OUTI block
 	ret
-
+;--------------------------------------------------------------------------
 	;; Ordering of segments for the linker.
 	.area	_HOME
 	.area	_CODE
@@ -131,4 +149,3 @@ gsinit_next:
 
 	.area   _GSFINAL
 	ret
-

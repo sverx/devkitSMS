@@ -17,7 +17,8 @@ extern unsigned char SpriteNextFree;
 
 /* VRAM unsafe functions. Fast, but dangerous! */
 void UNSAFE_SMS_copySpritestoSAT (void) {
-  SMS_set_address_VRAM(SMS_SATAddress);
+  // SMS_set_address_VRAM(SMS_SATAddress);
+  SMS_setAddr(SMS_SATAddress);
   __asm
     ld c,#_VDPDataPort
     ld hl,#_SpriteTableY
@@ -27,7 +28,8 @@ void UNSAFE_SMS_copySpritestoSAT (void) {
     call _outi_block-(MAXSPRITES+1)*2
 #endif
   __endasm;
-  SMS_set_address_VRAM(SMS_SATAddress+128);
+  // SMS_set_address_VRAM(SMS_SATAddress+128);
+  SMS_setAddr(SMS_SATAddress+128);
   __asm
     ld c,#_VDPDataPort
     ld hl,#_SpriteTableXN
@@ -42,19 +44,22 @@ void OUTI128(void *src) __z88dk_fastcall;
 #define SETVDPDATAPORT  __asm ld c,#_VDPDataPort __endasm
 
 void UNSAFE_SMS_VRAMmemcpy32 (unsigned int dst, void *src) {
-  SMS_set_address_VRAM(dst);
+  // SMS_set_address_VRAM(dst);
+  SMS_setAddr(0x4000|dst);
   SETVDPDATAPORT;
   OUTI32(src);
 }
 
 void UNSAFE_SMS_VRAMmemcpy64 (unsigned int dst, void *src) {
-  SMS_set_address_VRAM(dst);
+  // SMS_set_address_VRAM(dst);
+  SMS_setAddr(0x4000|dst);
   SETVDPDATAPORT;
   OUTI64(src);
 }
 
 void UNSAFE_SMS_VRAMmemcpy128 (unsigned int dst, void *src) {
-  SMS_set_address_VRAM(dst);
+  // SMS_set_address_VRAM(dst);
+  SMS_setAddr(0x4000|dst);
   SETVDPDATAPORT;
   OUTI128(src);
 }

@@ -17,7 +17,7 @@
 // unsigned int PNTAddress=0x3800;
 // unsigned int SATAddress=0x3F00;
 // one day we might make these variables, but not for now
-#define SMS_SATAddress    ((unsigned int)0x3F00)
+#define SMS_SATAddress    ((unsigned int)0x7F00)
 
 #ifndef MAXSPRITES
 #define MAXSPRITES            64
@@ -44,6 +44,7 @@ inline void SMS_write_to_VDPRegister (unsigned char VDPReg, unsigned char value)
   ENABLE_INTERRUPTS;
 }
 
+/*
 inline void SMS_set_address_CRAM (unsigned char address) {
   // INTERNAL FUNCTION
   unsigned char a=address;
@@ -55,20 +56,13 @@ inline void SMS_set_address_CRAM (unsigned char address) {
 
 inline void SMS_set_address_VRAM (unsigned int address) {
   // INTERNAL FUNCTION
-  /*
-  unsigned char L=LO(address);
-  unsigned char H=HI(address)|0x40;
-  DISABLE_INTERRUPTS;
-  VDPControlPort=L;
-  VDPControlPort=H;
-  ENABLE_INTERRUPTS;
-  */
   unsigned int a=address;
   DISABLE_INTERRUPTS;
   VDPControlPort=LO(a);
   VDPControlPort=HI(a)|0x40;
   ENABLE_INTERRUPTS;
 }
+*/
 
 inline void SMS_byte_to_VDP_data (unsigned char data) {
   // INTERNAL FUNCTION
@@ -89,12 +83,14 @@ inline void SMS_byte_brief_array_to_VDP_data (const unsigned char *data, unsigne
   } while (--size);
 }
 
+/*
 inline void SMS_word_to_VDP_data (unsigned int data) {
   // INTERNAL FUNCTION
   VDPDataPort=LO(data);
-  WAIT_VRAM;               /* ensure we're not pushing data too fast */
+  WAIT_VRAM;               // ensure we're not pushing data too fast
   VDPDataPort=HI(data);
 }
+*/
 
 /*
 inline void SMS_word_array_to_VDP_data (const unsigned int *data, unsigned int len) {

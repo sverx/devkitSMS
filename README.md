@@ -24,7 +24,7 @@ a collection of tools and code (with a very presumptuous name) to help in SEGA M
 * include SMSlib.h in your sources
 * compile your program:
 ```
-  sdcc -c -mz80 your_program.c
+  sdcc -c -mz80 --peep-file peep-rules.txt your_program.c
 ```
 * link your program with crt0_sms.rel and the library:
 ```
@@ -79,7 +79,7 @@ If a numerical third parameter is specified (it's optional), its value will be u
 ```
 * compile your program:
 ```
-  sdcc -c -mz80 your_program.c
+  sdcc -c -mz80 --peep-file peep-rules.txt your_program.c
 ```
 * link all the objects together adding a parameter for the linker for each bank (_BANK#) and adding each .rel file to be linked (*proper* crt0 file goes *always* first) then all the bank#.rel files last, in ascending order:
 ```

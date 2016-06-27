@@ -18,7 +18,8 @@ void SMS_loadPSGaidencompressedTiles (void *src, unsigned int tilefrom) {
    taken from http://www.smspower.org/Development/PhantasyStarGaidenTileDecoder
    (slightly modified and wrapped into a C function)
 ******************************************************************************* */
-  SMS_set_address_VRAM(tilefrom*32);
+  // SMS_set_address_VRAM(tilefrom*32);
+  SMS_setAddr(0x4000|(tilefrom*32));
 __asm
 
    pop bc                   ; move *src from stack into IX

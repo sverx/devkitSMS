@@ -14,7 +14,8 @@ void SMS_loadSTMcompressedTileMap (unsigned char x, unsigned char y, unsigned ch
   unsigned char cnt;
   bool needRestore=false;
 
-  SMS_set_address_VRAM(SMS_PNTAddress+(y*32+x)*2);
+  // SMS_set_address_VRAM(SMS_PNTAddress+(y*32+x)*2);
+  SMS_setAddr(SMS_PNTAddress+(y*32+x)*2);
   while (true) {
     cur=*src++;
     if (cur & 0x01) {
@@ -23,7 +24,8 @@ void SMS_loadSTMcompressedTileMap (unsigned char x, unsigned char y, unsigned ch
         HH=(HH & 0xFF00)|*src++;
         cnt=(cur>>2)+2;
         while (cnt>0) {
-          SMS_word_to_VDP_data(HH);
+          // SMS_word_to_VDP_data(HH);
+          SMS_setTile(HH);
           if (cnt>1)
             HH++;
           cnt--;
@@ -33,7 +35,8 @@ void SMS_loadSTMcompressedTileMap (unsigned char x, unsigned char y, unsigned ch
         HH=(HH & 0xFF00)|*src++;
         cnt=(cur>>2)+2;
         while (cnt>0) {
-          SMS_word_to_VDP_data(HH);
+          // SMS_word_to_VDP_data(HH);
+          SMS_setTile(HH);
           cnt--;
         }
       }
