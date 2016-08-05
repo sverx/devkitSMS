@@ -24,7 +24,11 @@ void SMS_loadBGPalette (void *palette);
 void SMS_loadSpritePalette (void *palette);
 SMS_setNextBGColoratIndex(i);                       /* macro - sets which BG color to set next */
 SMS_setNextSpriteColoratIndex(i);                   /* macro - sets which sprite color to set next */
-void SMS_setColor (unsigned char color);            /* set color */ 
+void SMS_setColor (unsigned char color);            /* set color */
+void SMS_loadBGPaletteHalfBrightness (void *palette);
+void SMS_loadSpritePaletteHalfBrightness (void *palette);
+void SMS_zeroBGPalette (void);
+void SMS_zeroSpritePalette (void);
 
 /* colors/palettes functions: GG only */
 void GG_setBGPaletteColor (unsigned char entry, unsigned int color);

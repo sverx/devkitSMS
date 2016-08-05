@@ -171,18 +171,6 @@ void GG_setSpritePaletteColor (unsigned char entry, unsigned int color) {
   // SMS_word_to_VDP_data(color);
   SMS_setTile(color);
 }
-/*
-// OLD CODE
-void GG_loadBGPalette (void *palette) {
-  SMS_set_address_CRAM(0x00);
-  SMS_byte_brief_array_to_VDP_data(palette,32);
-}
-
-void GG_loadSpritePalette (void *palette) {
-  SMS_set_address_CRAM(0x20);
-  SMS_byte_brief_array_to_VDP_data(palette,32);
-}
-*/
 #else
 void SMS_setBGPaletteColor (unsigned char entry, unsigned char color) {
   // SMS_set_address_CRAM(entry);
@@ -195,110 +183,10 @@ void SMS_setSpritePaletteColor (unsigned char entry, unsigned char color) {
   SMS_setAddr(0xC010+entry);
   SMS_byte_to_VDP_data(color);
 }
-/*
-// OLD CODE
-void SMS_loadBGPalette (void *palette) {
-  SMS_set_address_CRAM(0x00);
-  SMS_byte_brief_array_to_VDP_data(palette,16);
-}
-
-void SMS_loadSpritePalette (void *palette) {
-  SMS_set_address_CRAM(0x10);
-  SMS_byte_brief_array_to_VDP_data(palette,16);
-}
-*/
 #endif
 
-/*
-// OLD CODE
-void SMS_setNextTileatAddr (unsigned int addr) __z88dk_fastcall {
-  SMS_set_address_VRAM(addr);
-}
-
-void SMS_setTile (unsigned int tile) __z88dk_fastcall {
-  SMS_word_to_VDP_data(tile);
-}
-
-#define ASM_HL_TO_VDP_CONTROL  \
-  __asm                        \
-    ld c,#_VDPControlPort      \
-    di                         \
-    out (c),l                  \
-    out (c),h                  \
-    ei                         \
-  __endasm
-  // writes a control word to VDP
-  // it's INTerrupt safe (DI/EI around control port writes)
-  // controlword in HL
-
-#define ASM_HL_TO_VDP_DATA                                \
-  __asm                                                   \
-    ld a,l                                                \
-    out (_VDPDataPort),a      ; 11                        \
-    ld a,h                    ; 4                         \
-    sub #0                    ; 7                         \
-    nop                       ; 4 = 26 *VRAM SAFE*        \
-    out (_VDPDataPort),a                                  \
-  __endasm
-  // writes two bytes (a word) to VDP
-  // it's VRAM safe (at least 26 cycles between writes)
-  // word will be passed in HL
-*/
-
-#define ASM_DE_TO_VDP_CONTROL  \
-  __asm                        \
-    ld c,#_VDPControlPort      \
-    di                         \
-    out (c),e                  \
-    out (c),d                  \
-    ei                         \
-  __endasm
-  // writes a control word to VDP
-  // it's INTerrupt safe (DI/EI around control port writes)
-  // controlword in DE
-
-#define ASM_L_TO_VDP_DATA                                 \
-  __asm                                                   \
-    ld a,l                                                \
-    out (_VDPDataPort),a      ; 11                        \
-  __endasm
-  // writes one byte to VDP
-  // it's VRAM safe since it's used by SMS_setColor which adds enough overhead (call/ret)
-  // byte will be passed in L
-
-#define ASM_SHORT_XFER_TO_VDP_DATA                                \
-  __asm                                                           \
-    ld c,#_VDPDataPort                                            \
-1$: outi                       ; 16                               \
-    jr nz,1$                   ; 12 = 28 *VRAM SAFE*              \
-  __endasm
-  // writes B bytes from (HL) on to VDP
-  // it's VRAM safe (at least 26 cycles between writes)
-
-#define ASM_LD_DE_IMM(imm)            \
-  __asm                               \
-    ld de,imm                         \
-  __endasm
-
-#define ASM_LD_B_IMM(imm)             \
-  __asm                               \
-    ld b,imm                          \
-  __endasm
-  
 #pragma save
 #pragma disable_warning 85
-/*
-void SMS_setAddr (unsigned int addr) __z88dk_fastcall __preserves_regs(a,b,d,e,h,l,iyh,iyl) {
-  // addr will be in HL
-  ASM_HL_TO_VDP_CONTROL;
-}
-
-void SMS_setTile (unsigned int tile) __z88dk_fastcall __preserves_regs(b,c,d,e,h,l,iyh,iyl) {
-  // tile will be in HL
-  ASM_HL_TO_VDP_DATA;
-}
-*/
-
 #ifdef TARGET_GG
 void GG_loadBGPalette (void *palette) __z88dk_fastcall {
   // *palette will be in HL
@@ -315,12 +203,6 @@ void GG_loadSpritePalette (void *palette) __z88dk_fastcall {
   ASM_LD_B_IMM(#32);
   ASM_SHORT_XFER_TO_VDP_DATA;
 }
-/*
-void GG_setColor (unsigned int color) __z88dk_fastcall __preserves_regs(b,c,d,e,h,l,iyh,iyl) {
-  // color will be in HL
-  ASM_HL_TO_VDP_DATA;
-}
-*/
 #else
 void SMS_loadBGPalette (void *palette) __z88dk_fastcall {
   // *palette will be in HL

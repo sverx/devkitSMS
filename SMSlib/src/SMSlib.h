@@ -146,6 +146,10 @@ void SMS_setColor (unsigned char color) __z88dk_fastcall __preserves_regs(b,c,d,
 #define RGB(r,g,b)        ((r)|((g)<<2)|((b)<<4))
 #define RGB8(r,g,b)       (((r)>>6)|(((g)>>6)<<2)|(((b)>>6)<<4))
 #define RGBHTML(RGB24bit) (((RGB24bit)>>22)|((((RGB24bit)&0xFFFF)>>14)<<2)|((((RGB24bit)&0xFF)>>6)<<4))
+void SMS_loadBGPaletteHalfBrightness (void *palette) __z88dk_fastcall;
+void SMS_loadSpritePaletteHalfBrightness (void *palette) __z88dk_fastcall;
+void SMS_zeroBGPalette (void);
+void SMS_zeroSpritePalette (void);
 #endif
 
 /* functions to read joypad(s) */
