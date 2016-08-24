@@ -43,32 +43,38 @@ else:
     print ("Usage: assets2banks path")
     exit(1)
 
-in_a_group = False                                          # read config and create assets and assets group accordingly
-config_file = open (os.path.join(assets_path, "assets2banks.cfg"),"r").readlines()
-for l in config_file:
-    if l[0] == "#":                                         # if line starts with #, it is a comment, we can skip it
-        pass
-    elif l[0] == "{":                                       # if line starts with {, it means we are beginning a group
-        ag = AssetGroup()
-        AssetGroupList.append(ag)
-        in_a_group = True;
-    elif l[0] == "}":                                       # if line starts with }, it means we are closing an open group
-        in_a_group = False;
-    elif l[0] == ":":                                       # if line starts with :, it means we have an attribute
-        if l.strip('\n')==":format unsigned int":
-          a.set_style(1)
-    else:                                                   # else it's an asset
-        st = os.stat(os.path.join(assets_path, str(l.strip('\n')))) 
-        a = Asset(str(l.strip('\n')),st.st_size)
-        AssetList.append(a)
-        if not in_a_group:
+in_a_group = False                                              # read cfg file (if present) and create assets and assets group accordingly
+try:
+    config_file = open (os.path.join(assets_path, "assets2banks.cfg"),"r").readlines()
+    for l in config_file:
+        if l[0] == "#":                                         # if line starts with #, it is a comment, we can skip it
+            pass
+        elif l[0] == "{":                                       # if line starts with {, it means we are beginning a group
             ag = AssetGroup()
             AssetGroupList.append(ag)
-        ag.add_asset(a)
+            in_a_group = True;
+        elif l[0] == "}":                                       # if line starts with }, it means we are closing an open group
+            in_a_group = False;
+        elif l[0] == ":":                                       # if line starts with :, it means we have an attribute
+            if l.strip('\n')==":format unsigned int":
+              a.set_style(1)
+        else:                                                   # else it's an asset
+            st = os.stat(os.path.join(assets_path, str(l.strip('\n')))) 
+            a = Asset(str(l.strip('\n')),st.st_size)
+            AssetList.append(a)
+            if not in_a_group:
+                ag = AssetGroup()
+                AssetGroupList.append(ag)
+            ag.add_asset(a)
+except:
+    pass
 
-st = os.stat(os.path.join(assets_path, "assets2banks.cfg")) # fake asset, to skip config file, if present in folder
-a = Asset("assets2banks.cfg",st.st_size)                    
-AssetList.append(a)
+try:
+    st = os.stat(os.path.join(assets_path, "assets2banks.cfg")) # fake asset, to skip config file, if present in folder
+    a = Asset("assets2banks.cfg",st.st_size)                    
+    AssetList.append(a)
+except:
+    pass
 
 #for a in AssetList:
 #    print (a.name, a.size, len(a.name))
@@ -85,10 +91,6 @@ for f in os.listdir(assets_path):                          # read directory cont
             AssetGroupList.append(ag)
 #        else:             
 #            print (a.name, a.size, "already in list!")
-
-
-
-            
 
 AssetGroupList.sort(key=lambda g: g.size, reverse=True)    # sort the AssetGroupList by size, descending
 
@@ -152,5 +154,8 @@ for bank_n, b in enumerate (BankList):
     out_file_h.close()
     out_file_c.close()
 else:
-    print ("Info: " + str(bank_n + 1) + " banks generated\n")
-    
+    if len(BankList)==0:
+        print ("Fatal: no banks generated\n")
+        exit(1)
+    else:
+        print ("Info: " + str(bank_n + 1) + " banks generated\n")
