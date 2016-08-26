@@ -1,7 +1,6 @@
-assets2banks
-============
+####assets2banks
 
-#####How to use assets2banks
+###How to use assets2banks
 
 ```
   assets2banks <asset folder> [--bank1size=<size in bytes>]
@@ -37,3 +36,33 @@ When using this option, also a bank1.c and bank1.h files will be created, and th
 (we assumed we had bank1.rel, bank2.rel and bank3.rel - then they should be placed at the end of the object list, in ascending order. Note that there is no '-Wl-b_BANK1=0x8000'.)
 
 Finally, this option can even be used to allocate an asset bigger than 16 KB, of course only if the available space is enough.
+
+Beside that, assets2banks behavior regarding specific assets can optionally be configured using a config file that should be placed in the very same asset folder.
+
+This **must** be named *assets2banks.cfg* and it can define/contain:
+ * grouping of assets. listed assets will be allocated in the same bank (groups are defined using open and close curly braces "{" and "}")
+ * asset attribute ":format unsigned int": this will create a "const unsigned int" array instead of a "const unsigned char" array (asset attributes starts with ':' and there's at most one attribute for each new line. They are relative to the last previously listed asset)
+ * line comments (using the # as first char on the line) - empty lines are ignored
+
+Here's an example of a short (but feature complete) configuration file:
+
+```
+# line comment and an empty line next
+
+# next line starts an asset group:
+{ 
+asset1 (tiles).bin 
+asset1 (tilemap).bin 
+:format unsigned int 
+# 'asset1 (tilemap).bin' will be a const unsigned int array
+}
+# asset group complete
+
+# other assets (ungrouped) 
+asset2 (tiles).psgcompr
+asset3 (tilemap).bin 
+:format unsigned int
+```
+
+Of course all the assets in the asset folder which are not mentioned in the config file will be handled as ungrouped and without special attributes.
+A config file is absolutely not mandatory, and if you don't need grouping and/or special attributes there's no advantage in having one.
