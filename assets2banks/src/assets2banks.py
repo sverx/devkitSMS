@@ -7,6 +7,14 @@
 from __future__ import absolute_import, division, generators, unicode_literals, print_function, nested_scopes
 import sys
 import os.path
+import array
+
+
+class OverWrite:
+    def __init__(self, start, length, replace):
+        self.start = start
+        self.length = length
+        self.replace = replace
 
 
 class Asset:
@@ -14,9 +22,13 @@ class Asset:
         self.name = name
         self.size = size
         self.style = 0
+        self.overwrites = []
 
     def set_style(self, style):
         self.style = style
+
+    def add_overwrite(self, overwrite):
+        self.overwrites.append(overwrite)
 
 
 class AssetGroup:
@@ -82,17 +94,25 @@ try:
     for l in config_file:
         if len(l.strip()) == 0:                                 # if line is empty or made of just spaces, skip it
             pass
-        elif l[0] == "#":                                       # if line starts with #, it is a comment, we can skip it
+        elif l.strip()[0] == "#":                               # if line starts with #, it is a comment, we can skip it
             pass
-        elif l[0] == "{":                                       # if line starts with {, it means we start a group
+        elif l.strip()[0] == "{":                               # if line starts with {, it means we start a group
             ag = AssetGroup()
             AssetGroupList.append(ag)
             in_a_group = True
-        elif l[0] == "}":                                       # if line starts with }, it means we close a group
+        elif l.strip()[0] == "}":                               # if line starts with }, it means we close a group
             in_a_group = False
-        elif l[0] == ":":                                       # if line starts with :, it means we have an attribute
+        elif l.strip()[0] == ":":                               # if line starts with :, it means we have an attribute
             if l.strip('\n') == ":format unsigned int":
                 a.set_style(1)
+            elif l.strip('\n')[:11] == ":overwrite ":
+                ovp = l.strip('\n')[11:].split()
+                try:
+                    ov = OverWrite(int(ovp[0], 0), int(ovp[1], 0), ovp[2:])
+                except ValueError:
+                    print("Fatal: invalid overwrite attribute parameter(s)")
+                    sys.exit(1)
+                a.add_overwrite(ov)
         else:                                                   # else it's an asset
             st = os.stat(os.path.join(assets_path, str(l.strip('\n'))))
             a = Asset(str(l.strip('\n')), st.st_size)
@@ -111,22 +131,16 @@ try:
 except OSError:
     pass
 
-# for a in AssetList:
-#    print (a.name, a.size, len(a.name))
-
 try:
     for f in os.listdir(assets_path):  # read directory content and create missing assets and assetgroup (one per asset)
         if os.path.isfile(os.path.join(assets_path, f)):
             st = os.stat(os.path.join(assets_path, f))
             a = Asset(str(f), st.st_size)
             if not find(lambda asset: asset.name == str(f), AssetList):
-                # print (a.name, a.size, "not in list!")
                 AssetList.append(a)
                 ag = AssetGroup()
                 ag.add_asset(a)
                 AssetGroupList.append(ag)
-#        else:
-#            print (a.name, a.size, "already in list!")
 except OSError:
     print("Fatal: can't access '{0}' folder".format(assets_path))
     sys.exit(1)
@@ -148,48 +162,49 @@ for ag in AssetGroupList:                                  # now find a place fo
             sys.exit(1)
 
 for bank_n, b in enumerate(BankList):
-    out_file_h = open("bank{0!s}.h".format(bank_n + first_bank), "w")
-    out_file_c = open("bank{0!s}.c".format(bank_n + first_bank), "w")
+    out_file_h = open("bank{0!s}.h".format(bank_n + first_bank), 'w')
+    out_file_c = open("bank{0!s}.c".format(bank_n + first_bank), 'w')
     for ag in b.assetgroups:
         for a in ag.assets:
-            in_file = open(os.path.join(assets_path, a.name), "rb")
+            in_file = open(os.path.join(assets_path, a.name), 'rb')
             if a.style == 0:
                 out_file_c.write("const unsigned char {0}[{1!s}]={{\n".format(fix_name(a.name), a.size))
                 out_file_h.write("extern const unsigned char\t{0}[{1!s}];\n".format(fix_name(a.name), a.size))
             else:
-                out_file_c.write("const unsigned int {0}[{1!s}]={{\n".format(fix_name(a.name), a.size // 2))
-                out_file_h.write("extern const unsigned int\t{0}[{1!s}];\n".format(fix_name(a.name), a.size // 2))
+                out_file_c.write("const unsigned int {0}[{1!s}]={{\n".format(fix_name(a.name), a.size//2))
+                out_file_h.write("extern const unsigned int\t{0}[{1!s}];\n".format(fix_name(a.name), a.size//2))
 
             out_file_h.write("#define\t\t\t\t{0}_size {1!s}\n".format(fix_name(a.name), a.size))
             out_file_h.write("#define\t\t\t\t{0}_bank {1!s}\n".format(fix_name(a.name), bank_n + first_bank))
 
             if a.style == 0:
-                cnt = 0
-                byte = in_file.read(1)
-                while byte:
-                    out_file_c.write("0x{0}".format(format(ord(byte), '02x')))
-                    cnt += 1
-                    byte = in_file.read(1)
-                    if byte:
-                        out_file_c.write(",")
-                    if byte and cnt == 16:
+                ar = array.array('B')
+                ar.fromfile(in_file, a.size)
+            else:
+                ar = array.array('H')                  # 'I' was trying to load 32 bits integers, of course!
+                ar.fromfile(in_file, a.size//2)
+                if a.size % 2:
+                    # odd file size... as this shouldn't happen and last byte won't be read, return a warning
+                    print("Warning: asset '{0}' has odd size but declared as 'unsigned int'".format(a.name))
+                    print("         last byte has beed discarded")
+
+            for o in a.overwrites:
+                for cnt in range(o.length):
+                    ar[o.start+cnt] = int(o.replace[cnt % len(o.replace)], 0)
+
+            cnt = 0
+            for i in range(len(ar)):
+                if a.style == 0:
+                    out_file_c.write("0x{0}".format(format(ar[i], "02x")))
+                else:
+                    out_file_c.write("0x{0}".format(format(ar[i], '04x')))
+                cnt += 1
+                if i < len(ar)-1:
+                    out_file_c.write(",")
+                    if a.style == 0 and cnt == 16:
                         out_file_c.write("\n")
                         cnt = 0
-            else:
-                cnt = 0
-                word = in_file.read(2)
-                while word:
-                    if len(word) == 2:
-                        out_file_c.write("0x{0}{1}".format(format(word[1], '02x'), format(word[0], '02x')))
-                    else:
-                        out_file_c.write("0x{0}".format(format(word[0], '02x')))
-                        # a lone byte... this shouldn't happen, return a warning
-                        print("Warning: odd number of bytes in asset '{0}' declared as 'unsigned int'".format(a.name))
-                    cnt += 1
-                    word = in_file.read(2)
-                    if word:
-                        out_file_c.write(",")
-                    if word and cnt == 8:
+                    elif a.style != 0 and cnt == 8:
                         out_file_c.write("\n")
                         cnt = 0
 

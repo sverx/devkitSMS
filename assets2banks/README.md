@@ -42,6 +42,7 @@ Beside that, assets2banks behavior regarding specific assets can optionally be c
 This **must** be named *assets2banks.cfg* and it can define/contain:
  * grouping of assets. listed assets will be allocated in the same bank (groups are defined using open and close curly braces "{" and "}")
  * asset attribute ":format unsigned int": this will create a "const unsigned int" array instead of a "const unsigned char" array (asset attributes starts with ':' and there's at most one attribute for each new line. They are relative to the last previously listed asset)
+ * overwrite array elements using ":overwrite <start> <length> <value> [<value>[...]]": this will replace <length> elements from <start> with the listed values. Accept decimal values, or 0x-prefixed hex values. Is it also possible to specify more than one overwrite for a single asset, of course they are relative to the last previously listed asset.
  * line comments (using the # as first char on the line) - empty lines are ignored
 
 Here's an example of a short (but feature complete) configuration file:
@@ -59,9 +60,19 @@ asset1 (tilemap).bin
 # asset group complete
 
 # other assets (ungrouped) 
+asset2 (palette).bin
+:overwrite 0 1 0x00
+# 'asset2 (palette).bin' the zero-indexed element of the array will be set to 0x00
+
 asset2 (tiles).psgcompr
 asset3 (tilemap).bin 
 :format unsigned int
+
+asset4.bin
+:format unsigned int
+:overwrite 32 128 0x010a 0x01FF 0x0123
+# 'asset4.bin' 128 elements starting from array[32] will be set to the values listed
+# (values list will be reitered until 128 array elements are replaced)
 ```
 
 Of course all the assets in the asset folder which are not mentioned in the config file will be handled as ungrouped and without special attributes.
