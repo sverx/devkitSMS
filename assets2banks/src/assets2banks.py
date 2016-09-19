@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 # Author: sverx
-# Version: 1.0.2
+# Version: 1.1.0
 
 from __future__ import absolute_import, division, generators, unicode_literals, print_function, nested_scopes
 import sys
@@ -78,7 +78,7 @@ if len(sys.argv) == 3:
         try:
             b = Bank(int("+{0!s}".format(sys.argv[2][12:])))
             BankList.append(b)
-            first_bank = 1                                          # first bank should be number 1
+            first_bank = 1                                      # first bank should be number 1
             print("Info: bank1 size set at {0!s} bytes".format(b.free))
         except ValueError:
             print("Fatal: invalid bank1 size parameter")
@@ -92,30 +92,41 @@ in_a_group = False
 try:
     config_file = open(os.path.join(assets_path, "assets2banks.cfg"), "r").readlines()
     for l in config_file:
-        if len(l.strip()) == 0:                                 # if line is empty or made of just spaces, skip it
+        ls = l.strip()
+        if len(ls) == 0:                                 # if line is empty or made of just spaces, skip it
             pass
-        elif l.strip()[0] == "#":                               # if line starts with #, it is a comment, we can skip it
+        elif ls[0] == "#":                               # if line starts with # it is a comment, we can skip it
             pass
-        elif l.strip()[0] == "{":                               # if line starts with {, it means we start a group
+        elif ls[0] == "{":                               # if line starts with { it means we start a group
             ag = AssetGroup()
             AssetGroupList.append(ag)
             in_a_group = True
-        elif l.strip()[0] == "}":                               # if line starts with }, it means we close a group
+        elif ls[0] == "}":                               # if line starts with } it means we close a group
             in_a_group = False
-        elif l.strip()[0] == ":":                               # if line starts with :, it means we have an attribute
-            if l.strip('\n') == ":format unsigned int":
+        elif ls[0] == ":":                               # if line starts with : it means we have an attribute
+            if ls == ":format unsigned int":
                 a.set_style(1)
-            elif l.strip('\n')[:11] == ":overwrite ":
-                ovp = l.strip('\n')[11:].split()
+            elif ls[:11] == ":overwrite ":
+                ovp = ls[11:].split()
                 try:
-                    ov = OverWrite(int(ovp[0], 0), int(ovp[1], 0), ovp[2:])
+                    if len(ovp) == 2:                    # if there are two values only, we overwrite just one value
+                        ov = OverWrite(int(ovp[0], 0), 1, ovp[1:])
+                    else:
+                        ov = OverWrite(int(ovp[0], 0), int(ovp[1], 0), ovp[2:])
                 except ValueError:
                     print("Fatal: invalid overwrite attribute parameter(s)")
                     sys.exit(1)
                 a.add_overwrite(ov)
+            else:
+                print("Fatal: unknown attribute '{0}'".format(ls))
+                sys.exit(1)
         else:                                                   # else it's an asset
-            st = os.stat(os.path.join(assets_path, str(l.strip('\n'))))
-            a = Asset(str(l.strip('\n')), st.st_size)
+            try:
+                st = os.stat(os.path.join(assets_path, str(ls)))
+            except OSError:
+                print("Fatal: can't find asset '{0}'".format(ls))
+                sys.exit(1)
+            a = Asset(ls, st.st_size)
             AssetList.append(a)
             if not in_a_group:
                 ag = AssetGroup()
@@ -186,7 +197,7 @@ for bank_n, b in enumerate(BankList):
                 if a.size % 2:
                     # odd file size... as this shouldn't happen and last byte won't be read, return a warning
                     print("Warning: asset '{0}' has odd size but declared as 'unsigned int'".format(a.name))
-                    print("         last byte has beed discarded")
+                    print("         so the last byte has been discarded")
 
             for o in a.overwrites:
                 for cnt in range(o.length):

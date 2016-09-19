@@ -54,8 +54,14 @@ By using:
 ```
 :overwrite <start> <length> <value> [<value>[...]]
 ```
-*length* elements from *start* will be replaced with the listed value(s).
+*length* array elements from *start* will be replaced with the listed value(s), repeating them if needed.
 Accept decimal values, or 0x-prefixed hex values.
+There's also a shorter form. By using:
+```
+:overwrite <index> <value>
+```
+the element element at *index* will be replaced with the provided value.
+
 Is it also possible to specify more than one overwrite for a single asset, of course they are relative to the last previously listed asset.
  * line comments (using the # as first char on the line)
  * (empty lines are ignored)
@@ -76,7 +82,7 @@ asset1 (tilemap).bin
 
 # other assets (ungrouped) 
 asset2 (palette).bin
-:overwrite 0 1 0x00
+:overwrite 0 0x00
 # 'asset2 (palette).bin' the zero-indexed element of the array will be set to 0x00
 
 asset2 (tiles).psgcompr
