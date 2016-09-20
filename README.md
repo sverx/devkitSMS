@@ -5,7 +5,7 @@ a collection of tools and code (with a *very* presumptuous name) for SEGA Master
 
 #####How to code your own programs using devkitSMS:
 
-* download and install SDCC - version 3.5.5 (build #9487) or newer **required** - get a snapshot build at http://sdcc.sourceforge.net/snap.php )
+* download and install SDCC - version 3.5.5 (build #9487) or newer **required** - get a [snapshot build](http://sdcc.sourceforge.net/snap.php)
 * read its [manual](http://sdcc.sourceforge.net/doc/sdccman.pdf)
 * make sure that your installation works - details are at page 20 of the PDF manual
 * place `ihx2sms.exe` from this package into your SDCC `bin` folder
@@ -13,8 +13,8 @@ a collection of tools and code (with a *very* presumptuous name) for SEGA Master
 * place `assets2banks.exe` and/or `folder2c.exe` from this package into your SDCC `bin` folder
   (both are optional as you can use other tools to convert your data assets. If you're not on Windows please compile `folder2c.c` yourself from the sources. `assets2banks.py` python source is also provided)
 * for SMS/GG:  place `crt0_sms.rel` from this package into your project folder (or a crt0 folder on your projects root)
-* for SMS: place `SMSlib.h` in your project folder and SMSlib.lib in SDCC `lib/z80` folder
-* for GG:  place `SMSlib.h` in your project folder and SMSlib_GG.lib in SDCC `lib/z80` folder
+* for SMS: place `SMSlib.h` in your project folder and `SMSlib.lib` in SDCC `lib/z80` folder
+* for GG:  place `SMSlib.h` in your project folder and `SMSlib_GG.lib` in SDCC `lib/z80` folder
 * for SG-1000: place `crt0_sg.rel` from this package into your project folder (or a crt0 folder on your projects root)
 * for SG-1000: place `SGlib.h` and `SGlib.rel` in your project folder (or a SGlib folder on your projects root)
 * optionally, if you plan to use PSG music/SFX, place `PSGlib.h` and `PSGlib.rel` in your project folder
@@ -30,7 +30,7 @@ a collection of tools and code (with a *very* presumptuous name) for SEGA Master
 ```
   sdcc -o your_program.ihx -mz80 --no-std-crt0 --data-loc 0xC000 crt0_sms.rel your_program.rel SMSlib.lib
 ```
-  note that you should put `crt0_sms.rel` *first*, and you should put the library after your code.
+  note that you should put `crt0_sms.rel` *first*, and you should put the library *after* your code.
   
 #####How to use devkitSMS/SGlib to code your own SG program:
 
@@ -39,11 +39,11 @@ a collection of tools and code (with a *very* presumptuous name) for SEGA Master
 ```
   sdcc -c -mz80 your_program.c
 ```
-* link your program with `crt0_sg.rel` and the "library":
+* link your program with `crt0_sg.rel` and `SGlib.rel` (a.k.a. "the SG library"):
 ```
   sdcc -o your_program.ihx -mz80 --no-std-crt0 --data-loc 0xC000 crt0_sg.rel your_program.rel SGlib.rel
 ```
-  note that you should put `crt0_sg.rel` *first*, and you should put the "library" after your code.
+  note that you should put `crt0_sg.rel` *first*, and you should put `SGlib.rel` *after* your code.
   
 #####How to use devkitSMS/PSGlib to use PSG audio/SFX in your SMS/GG/SG program:
 
@@ -60,7 +60,7 @@ a collection of tools and code (with a *very* presumptuous name) for SEGA Master
 #####How to add external data into your ROM:
 
 * use the assets2banks utility included, for example.
-  It's the suggested way, read its [documentation](https://github.com/sverx/devkitSMS/blob/master/assets2banks/README.md)
+  This is **the suggested way**. Read its [documentation](https://github.com/sverx/devkitSMS/blob/master/assets2banks/README.md)
 
 * alternatively, you use the folder2c utility included
   It creates a .c source file (with its .h header file) containing one constant data array for each single file found in the specified dir:
@@ -74,8 +74,7 @@ If a numerical third parameter is specified (it's optional), its value will be u
 #####How to use more than 48KB in your ROM ('ROM paging'):
 
 * in your program, use the SMSlib provided `SMS_mapROMBank(n)` macro to map the bank you need (your code should be restrained to the first 32KB as the last 16KB will be paged out)
-* put your data into a separate .c file for each 16KB ROM bank starting from bank2, for example bank2.c, bank3.c etc... (you can use folder2c described above) compiling each one with a different CONST segment name.
-  I suggest using `BANK#` for descriptiveness:
+* put your data into a separate .c file for each 16KB ROM bank starting from bank2, for example bank2.c, bank3.c etc... (you can use the assets2banks and folder2c tools described above) compiling each one with a different CONST segment name, I suggest using `BANK#` for descriptiveness:
 ```
   sdcc -c -mz80 --constseg BANK2 bank2.c
   sdcc -c -mz80 --constseg BANK3 bank3.c
