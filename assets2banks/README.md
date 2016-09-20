@@ -1,6 +1,6 @@
-###assets2banks
+##assets2banks
 
-##How to use assets2banks
+###How to use assets2banks
 
 ```
 assets2banks <asset folder> [--bank1size=<size in bytes>]
