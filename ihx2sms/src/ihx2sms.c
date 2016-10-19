@@ -127,6 +127,8 @@ int main(int argc, char const* *argv) {
       buf[SEGA_HEADER_ADDR+10]=checksum&0x00FF;
       buf[SEGA_HEADER_ADDR+11]=checksum>>8;
       printf("Info: SEGA header found, checksum updated\n");
+    } else {
+      printf("Warning: SEGA header NOT found, ROM won't be bootable on european/american Master System\n");
     }
   }
 
