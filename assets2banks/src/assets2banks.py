@@ -52,7 +52,7 @@ class Bank(object):
 
 def fix_name(name):
     '''Replace special character with underscore'''
-    return "".join(map(lambda ch: ch if ch not in ('(', ')', ' ', '.') else '_', self.name))
+    return "".join(map(lambda ch: ch if ch not in ('(', ')', ' ', '.') else '_', name))
 
 def find(fun, seq):
     for item in seq:
