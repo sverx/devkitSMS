@@ -5,7 +5,7 @@ a collection of tools and code (with a *very* presumptuous name) for SEGA Master
 
 #####How to code your own programs using devkitSMS:
 
-* download and install SDCC - version 3.5.5 (build #9487) or newer **required** - get a [snapshot build](http://sdcc.sourceforge.net/snap.php)
+* download and install SDCC - version 3.6 or newer **required** - get it [here](http://sdcc.sourceforge.net/)
 * read its [manual](http://sdcc.sourceforge.net/doc/sdccman.pdf)
 * make sure that your installation works - details are at page 20 of the PDF manual
 * place `ihx2sms.exe` from this package into your SDCC `bin` folder

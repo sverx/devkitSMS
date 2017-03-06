@@ -87,8 +87,14 @@ inline void SMS_detect_VDP_type (void) {
 #endif
 
 void SMS_init (void) {
-  /* Initializes the lib */
+  // Initializes the lib
   unsigned char i;
+  /* set sprite palette color 0 to black */
+#ifndef TARGET_GG
+  SMS_setSpritePaletteColor(0, RGB(0,0,0));
+#else
+  GG_setSpritePaletteColor(0, RGB(0,0,0));
+#endif
   /* VDP initialization */
   for (i=0;i<0x0B;i++)
     SMS_write_to_VDPRegister(i,VDPReg_init[i]);
@@ -123,23 +129,23 @@ void SMS_VDPturnOffFeature (unsigned int feature) __z88dk_fastcall {
   SMS_write_to_VDPRegister (HI(feature),VDPReg[HI(feature)]);
 }
 
-void SMS_setBGScrollX (unsigned char scrollX) {
+void SMS_setBGScrollX (unsigned char scrollX) __z88dk_fastcall {
   SMS_write_to_VDPRegister(0x08,scrollX);
 }
 
-void SMS_setBGScrollY (unsigned char scrollY) {
+void SMS_setBGScrollY (unsigned char scrollY) __z88dk_fastcall {
   SMS_write_to_VDPRegister(0x09,scrollY);
 }
 
-void SMS_setBackdropColor (unsigned char entry) {
+void SMS_setBackdropColor (unsigned char entry) __z88dk_fastcall {
   SMS_write_to_VDPRegister(0x07,entry);
 }
 
-void SMS_useFirstHalfTilesforSprites (_Bool usefirsthalf) {
+void SMS_useFirstHalfTilesforSprites (_Bool usefirsthalf) __z88dk_fastcall {
   SMS_write_to_VDPRegister(0x06,usefirsthalf?0xFB:0xFF);
 }
 
-void SMS_setSpriteMode (unsigned char mode) {
+void SMS_setSpriteMode (unsigned char mode) __z88dk_fastcall {
   if (mode & SPRITEMODE_TALL) {
     SMS_VDPturnOnFeature(VDPFEATURE_USETALLSPRITES);
     spritesHeight=16;

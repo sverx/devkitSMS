@@ -1,43 +1,45 @@
-sdcc -o SMSlib.rel -c -mz80 --peep-file peep-rules.txt --peep-asm SMSlib.c
+set OPT=--max-allocs-per-node 100000
+
+sdcc -o SMSlib.rel -c -mz80 %OPT% --peep-file peep-rules.txt --peep-asm SMSlib.c
 @if %errorlevel% NEQ 0 goto :EOF
 
-sdcc -o SMSlib_GG.rel -c -mz80 -DTARGET_GG --peep-file peep-rules.txt --peep-asm SMSlib.c
+sdcc -o SMSlib_GG.rel -c -mz80 %OPT% -DTARGET_GG --peep-file peep-rules.txt --peep-asm SMSlib.c
 @if %errorlevel% NEQ 0 goto :EOF
 
-sdcc -o SMSlib_paletteAdv.rel -c -mz80 --peep-file peep-rules.txt --peep-asm SMSlib_paletteAdv.c
+sdcc -o SMSlib_paletteAdv.rel -c -mz80 %OPT% --peep-file peep-rules.txt --peep-asm SMSlib_paletteAdv.c
 @if %errorlevel% NEQ 0 goto :EOF
 
-sdcc -o SMSlib_spriteAdv.rel -c -mz80 --peep-file peep-rules.txt --peep-asm SMSlib_spriteAdv.c
+sdcc -o SMSlib_spriteAdv.rel -c -mz80 %OPT% --peep-file peep-rules.txt --peep-asm SMSlib_spriteAdv.c
 @if %errorlevel% NEQ 0 goto :EOF
 
-sdcc -o SMSlib_spriteClip.rel -c -mz80 --peep-file peep-rules.txt --peep-asm SMSlib_spriteClip.c
+sdcc -o SMSlib_spriteClip.rel -c -mz80 %OPT% --peep-file peep-rules.txt --peep-asm SMSlib_spriteClip.c
 @if %errorlevel% NEQ 0 goto :EOF
 
-sdcc -o SMSlib_spriteClip_GG.rel -c -mz80 -DTARGET_GG --peep-file peep-rules.txt --peep-asm SMSlib_spriteClip.c
+sdcc -o SMSlib_spriteClip_GG.rel -c -mz80 %OPT% -DTARGET_GG --peep-file peep-rules.txt --peep-asm SMSlib_spriteClip.c
 @if %errorlevel% NEQ 0 goto :EOF
 
-sdcc -o SMSlib_loadTileMap.rel -c -mz80 --peep-file peep-rules.txt --peep-asm SMSlib_loadTileMap.c
+sdcc -o SMSlib_loadTileMap.rel -c -mz80 %OPT% --peep-file peep-rules.txt --peep-asm SMSlib_loadTileMap.c
 @if %errorlevel% NEQ 0 goto :EOF
 
-sdcc -o SMSlib_loadTileMapArea.rel -c -mz80 --peep-file peep-rules.txt --peep-asm SMSlib_loadTileMapArea.c
+sdcc -o SMSlib_loadTileMapArea.rel -c -mz80 %OPT% --peep-file peep-rules.txt --peep-asm SMSlib_loadTileMapArea.c
 @if %errorlevel% NEQ 0 goto :EOF
 
-sdcc -o SMSlib_loadTiles.rel -c -mz80 --peep-file peep-rules.txt --peep-asm SMSlib_loadTiles.c
+sdcc -o SMSlib_loadTiles.rel -c -mz80 %OPT% --peep-file peep-rules.txt --peep-asm SMSlib_loadTiles.c
 @if %errorlevel% NEQ 0 goto :EOF
 
-sdcc -o SMSlib_STMcomp.rel -c -mz80 --peep-file peep-rules.txt --peep-asm SMSlib_STMcomp.c
+sdcc -o SMSlib_STMcomp.rel -c -mz80 %OPT% --peep-file peep-rules.txt --peep-asm SMSlib_STMcomp.c
 @if %errorlevel% NEQ 0 goto :EOF
 
-sdcc -o SMSlib_VRAMmemcpy.rel -c -mz80 --peep-file peep-rules.txt --peep-asm SMSlib_VRAMmemcpy.c
+sdcc -o SMSlib_VRAMmemcpy.rel -c -mz80 %OPT% --peep-file peep-rules.txt --peep-asm SMSlib_VRAMmemcpy.c
 @if %errorlevel% NEQ 0 goto :EOF
 
-sdcc -o SMSlib_VRAMmemset.rel -c -mz80 --peep-file peep-rules.txt --peep-asm SMSlib_VRAMmemset.c
+sdcc -o SMSlib_VRAMmemset.rel -c -mz80 %OPT% --peep-file peep-rules.txt --peep-asm SMSlib_VRAMmemset.c
 @if %errorlevel% NEQ 0 goto :EOF
 
-sdcc -o SMSlib_UNSAFE.rel -c -mz80 --peep-file peep-rules.txt --peep-asm SMSlib_UNSAFE.c
+sdcc -o SMSlib_UNSAFE.rel -c -mz80 %OPT% --peep-file peep-rules.txt --peep-asm SMSlib_UNSAFE.c
 @if %errorlevel% NEQ 0 goto :EOF
 
-sdcc -o SMSlib_PSGaiden.rel -c -mz80 --peep-file peep-rules.txt SMSlib_PSGaiden.c
+sdcc -o SMSlib_PSGaiden.rel -c -mz80 %OPT% --peep-file peep-rules.txt SMSlib_PSGaiden.c
 @if %errorlevel% NEQ 0 goto :EOF
 
 
