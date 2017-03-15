@@ -5,9 +5,8 @@
 
 #include "SMSlib.h"
 #include "SMSlib_common.c"
-#include <stdbool.h>
 
-extern unsigned int  spritesHeight, spritesWidth;
+extern unsigned char spritesHeight, spritesWidth;
 #ifdef TARGET_GG
 unsigned char clipWin_x0=48,clipWin_y0=24,clipWin_x1=207,clipWin_y1=167;
 #else
@@ -32,10 +31,10 @@ void SMS_setClippingWindow (unsigned char x0, unsigned char y0, unsigned char x1
 signed char SMS_addSpriteClipping (int x, int y, unsigned char tile) {
   unsigned char *stXN;
   if (SpriteNextFree<MAXSPRITES) {
-    if ((x>clipWin_x1) || (x<((int)clipWin_x0-spritesWidth)))
-      return (false);                               // sprite clipped
-    if ((y>clipWin_y1) || (y<((int)clipWin_y0-spritesHeight)))
-      return (false);                               // sprite clipped
+    if ((x>clipWin_x1) || (x<((int)(clipWin_x0)-(int)(spritesWidth))))
+      return (-1);                                  // sprite clipped
+    if ((y>clipWin_y1) || (y<((int)(clipWin_y0)-(int)(spritesHeight))))
+      return (-1)   ;                               // sprite clipped
     if ((y-1)!=0xD0) {                              // avoid placing sprites at this Y!
       SpriteTableY[SpriteNextFree]=y-1;
       stXN=&SpriteTableXN[SpriteNextFree*2];
