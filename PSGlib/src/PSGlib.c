@@ -132,17 +132,19 @@ void PSGSilenceChannels (void) {
 
 void PSGRestoreVolumes (void) {
 /* *********************************************************************
-  restore all the PSG channels volumes
+  restore the PSG channels volumes (if a tune or an SFX uses them!)
 */
-  PSGPort=PSGLatch|PSGChannel0|PSGVolumeData|((PSGChan0Volume+PSGMusicVolumeAttenuation>15)?15:PSGChan0Volume+PSGMusicVolumeAttenuation);
-  PSGPort=PSGLatch|PSGChannel1|PSGVolumeData|((PSGChan1Volume+PSGMusicVolumeAttenuation>15)?15:PSGChan1Volume+PSGMusicVolumeAttenuation);
+  if (PSGMusicStatus) {
+    PSGPort=PSGLatch|PSGChannel0|PSGVolumeData|((PSGChan0Volume+PSGMusicVolumeAttenuation>15)?15:PSGChan0Volume+PSGMusicVolumeAttenuation);
+    PSGPort=PSGLatch|PSGChannel1|PSGVolumeData|((PSGChan1Volume+PSGMusicVolumeAttenuation>15)?15:PSGChan1Volume+PSGMusicVolumeAttenuation);
+  }
   if (PSGChannel2SFX)
     PSGPort=PSGLatch|PSGChannel2|PSGVolumeData|PSGSFXChan2Volume;
-  else
+  else if (PSGMusicStatus)
     PSGPort=PSGLatch|PSGChannel2|PSGVolumeData|((PSGChan2Volume+PSGMusicVolumeAttenuation>15)?15:PSGChan2Volume+PSGMusicVolumeAttenuation);
   if (PSGChannel3SFX)
     PSGPort=PSGLatch|PSGChannel3|PSGVolumeData|PSGSFXChan3Volume;
-  else
+  else if (PSGMusicStatus)
     PSGPort=PSGLatch|PSGChannel3|PSGVolumeData|((PSGChan3Volume+PSGMusicVolumeAttenuation>15)?15:PSGChan3Volume+PSGMusicVolumeAttenuation);
 }
 
@@ -170,7 +172,7 @@ void PSGSFXStop (void) {
       if (PSGMusicStatus) {
         PSGPort=PSGLatch|PSGChannel2|(PSGChan2LowTone&0x0F);
         PSGPort=PSGChan2HighTone&0x3F;
-        PSGPort=PSGLatch|PSGChannel2|PSGVolumeData|((PSGChan2Volume+PSGMusicVolumeAttenuation>15)?15:PSGChan2Volume+PSGMusicVolumeAttenuation);
+        PSGPort=PSGLatch|PSGChannel2|PSGVolumeData|(((PSGChan2Volume&0x0F)+PSGMusicVolumeAttenuation>15)?15:(PSGChan2Volume&0x0F)+PSGMusicVolumeAttenuation);
       } else {
         PSGPort=PSGLatch|PSGChannel2|PSGVolumeData|0x0F;
       }
@@ -180,7 +182,7 @@ void PSGSFXStop (void) {
     if (PSGChannel3SFX) {
       if (PSGMusicStatus) {
         PSGPort=PSGLatch|PSGChannel3|(PSGChan3LowTone&0x0F);
-        PSGPort=PSGLatch|PSGChannel3|PSGVolumeData|((PSGChan3Volume+PSGMusicVolumeAttenuation>15)?15:PSGChan3Volume+PSGMusicVolumeAttenuation);
+        PSGPort=PSGLatch|PSGChannel3|PSGVolumeData|(((PSGChan3Volume&0x0F)+PSGMusicVolumeAttenuation>15)?15:(PSGChan3Volume&0x0F)+PSGMusicVolumeAttenuation);
       } else {
         PSGPort=PSGLatch|PSGChannel3|PSGVolumeData|0x0F;
       }
