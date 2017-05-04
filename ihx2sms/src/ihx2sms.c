@@ -25,31 +25,117 @@ char data[256];
 unsigned int bank_addr=0x8000;
 
 #define BANK_SIZE           0x4000
+#define MAX_SLOT2_BANKS     62
 #define SEGA_HEADER_ADDR    0x7ff0
 #define SDSC_HEADER_ADDR    0x7fe0
 #define CRT0_END            0x200
 
 #define BYTE_TO_BCD(n) (((n)/10)*16+((n)%10))
 
+unsigned char map_loc[MAX_SLOT2_BANKS];
+unsigned int num_map_loc=0;
+
+int get_slot2_bank_order(const char* map_file) {
+
+    enum map_parse_states {
+        PARSE_SEGMENT_NAMES,
+        PARSE_SEGMENT_ORDER,
+    };
+
+    char map_bank_name[MAX_SLOT2_BANKS][128];
+    char line[128];
+    int parse_state = PARSE_SEGMENT_NAMES;
+    int nameidx = 0;
+    int locidx = 0;
+
+    FILE* fMAP = fopen(map_file,"rb");
+    if (!fMAP) {
+        printf("Fatal: can't open MAP file\n");
+        return 1;
+    }
+    memset(map_loc, 0, MAX_SLOT2_BANKS);
+
+    while (!feof(fMAP)) {
+        fgets(line, sizeof(line), fMAP);
+
+        if (parse_state == PARSE_SEGMENT_NAMES) {
+            // search for segments assigned to 0x8000 (ROM slot 2)
+            char* def = strstr(line, "=0x8000");
+            if (def) {
+                int len = def - line;
+                strncpy(map_bank_name[nameidx], line, len);
+                map_bank_name[nameidx++][len] = '\0';
+                if (nameidx >= MAX_SLOT2_BANKS) {
+                    printf("Fatal: Exceeded %d slot2 segment definitions\n", MAX_SLOT2_BANKS);
+                    return 1;
+                }
+            }
+            
+            if (feof(fMAP)) {
+                if (nameidx == 0) {
+                    return 0; // no slot2 segments found
+                }
+                // start from the top now that we know what to look for
+                fseek(fMAP, 0, SEEK_SET);
+                parse_state = PARSE_SEGMENT_ORDER;
+            }
+        } else if (parse_state == PARSE_SEGMENT_ORDER) {
+            // the order the code areas appear == data order in the ihx file
+            int i;
+            for (i = 0; i < nameidx; i++) {
+                if (strstr(line, map_bank_name[i]) == line && strstr(line, "=0x8000") == 0) {
+                    map_loc[locidx++] = i;
+                    if (locidx >= MAX_SLOT2_BANKS) {
+                        printf("Fatal: Exceeded %d slot2 code areas\n", MAX_SLOT2_BANKS);
+                        return 1;
+                    }
+                }
+            }
+        }
+    }
+
+    fclose(fMAP);
+    if (nameidx != locidx) {
+        // parser is bugged or we weren't reading a map file?
+        printf("Fatal: segment definition count != area count\n");
+        return 1;
+    }
+    num_map_loc = locidx;
+
+    return 0;
+}
+
 int main(int argc, char const* *argv) {
 	
   unsigned int i,dest_addr;
   char tmp[3];
   unsigned int checksum=0;
+  int using_map=0;
   
   printf("*** sverx's ihx2sms converter ***\n");
-	
-  if (argc!=3) {
-    printf("Usage: ihx2sms infile.ihx outfile.sms\n");
+
+  if (argc==5 && strcmp(argv[1], "-m")==0) {
+    using_map=1;
+  }
+
+  if (argc!=3 && !using_map) {
+    printf("Usage: ihx2sms [-m file.map] infile.ihx outfile.sms\n");
     return(1);
   }
   
-  fIN=fopen(argv[1],"rb");
+  fIN=fopen(argv[using_map ? 3 : 1],"rb");
   if (!fIN) {
     printf("Fatal: can't open input IHX file\n");
     return(1);
   }
-  
+
+  if (using_map) {
+    int ret=get_slot2_bank_order(argv[2]);
+    if (ret) {
+      return ret;
+    }
+  }
+
   while (!feof(fIN)) {
     fscanf(fIN,":%2x%4x%2x%s\n", &count, &addr, &type, data);
     
@@ -63,12 +149,20 @@ int main(int argc, char const* *argv) {
             add_banks++;
           else
             use_additional_banks=1;
+          if (add_banks>=MAX_SLOT2_BANKS) {
+            printf("Fatal: Exceeded %d slot2 banks\n", MAX_SLOT2_BANKS);
+            return 1;
+          }
         }
       
         for (i=0;i<count;i++) {
-
-          if ((addr+i)>=bank_addr)
-            dest_addr=addr+i+add_banks*BANK_SIZE;
+          if ((addr+i)>=bank_addr) {
+            if (using_map) {
+              dest_addr=addr+i+map_loc[add_banks]*BANK_SIZE;
+            } else {
+              dest_addr=addr+i+add_banks*BANK_SIZE;
+            }
+          }
           else
             dest_addr=addr+i;  
           
@@ -132,7 +226,7 @@ int main(int argc, char const* *argv) {
     }
   }
 
-  fOUT=fopen(argv[2],"wb");
+  fOUT=fopen(argv[using_map ? 4 : 2],"wb");
   if (!fOUT) {
     printf("Fatal: can't open output SMS file\n");
     return(1);
