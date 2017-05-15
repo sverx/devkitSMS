@@ -68,19 +68,6 @@ __at (0x8000) unsigned char SMS_SRAM[];
 /* wait until next VBlank starts */
 void SMS_waitForVBlank (void);
 
-/* functions to load tiles into VRAM */
-void SMS_loadTiles (void *src, unsigned int tilefrom, unsigned int size);
-void SMS_loadPSGaidencompressedTiles (void *src, unsigned int tilefrom);
-
-/* functions for the tilemap */
-void SMS_loadTileMap (unsigned char x, unsigned char y, void *src, unsigned int size);
-void SMS_loadSTMcompressedTileMapArea (unsigned char x, unsigned char y, unsigned char *src, unsigned char width);
-void SMS_loadTileMapArea (unsigned char x, unsigned char y, void *src, unsigned char width, unsigned char height);
-
-// turning SMS_loadSTMcompressedTileMap into a define
-// void SMS_loadSTMcompressedTileMap (unsigned char x, unsigned char y, unsigned char *src);
-#define SMS_loadSTMcompressedTileMap(x,y,src)     SMS_loadSTMcompressedTileMapArea(x,y,src,32)
-
 void SMS_crt0_RST08(unsigned int addr) __z88dk_fastcall __preserves_regs(a,b,d,e,h,l,iyh,iyl);
 void SMS_crt0_RST18(unsigned int tile) __z88dk_fastcall __preserves_regs(b,c,d,e,h,l,iyh,iyl);
 
@@ -102,6 +89,21 @@ void SMS_crt0_RST18(unsigned int tile) __z88dk_fastcall __preserves_regs(b,c,d,e
 #define TILE_FLIPPED_Y            0x0400
 #define TILE_USE_SPRITE_PALETTE   0x0800
 #define TILE_PRIORITY             0x1000
+
+/* functions to load tiles into VRAM */
+void SMS_loadTiles (void *src, unsigned int tilefrom, unsigned int size);
+void SMS_loadPSGaidencompressedTiles (void *src, unsigned int tilefrom);
+
+/* functions for the tilemap */
+// turning SMS_loadTileMap into a define
+// void SMS_loadTileMap (unsigned char x, unsigned char y, void *src, unsigned int size);
+#define SMS_loadTileMap(x,y,src,size)            SMS_VRAMmemcpy (XYtoADDR((x),(y)),(src),(size));
+void SMS_loadSTMcompressedTileMapArea (unsigned char x, unsigned char y, unsigned char *src, unsigned char width);
+void SMS_loadTileMapArea (unsigned char x, unsigned char y, void *src, unsigned char width, unsigned char height);
+
+// turning SMS_loadSTMcompressedTileMap into a define
+// void SMS_loadSTMcompressedTileMap (unsigned char x, unsigned char y, unsigned char *src);
+#define SMS_loadSTMcompressedTileMap(x,y,src)     SMS_loadSTMcompressedTileMapArea((x),(y),(src),32)
 
 /* functions for sprites handling */
 void SMS_initSprites (void);
