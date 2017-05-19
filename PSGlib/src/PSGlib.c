@@ -44,8 +44,8 @@ unsigned char PSGChan1Volume;              // the volume for channel 1
 unsigned char PSGChan2Volume;              // the volume for channel 2
 unsigned char PSGChan3Volume;              // the volume for channel 3
 unsigned char PSGChan2LowTone;             // the low tone bits for channels 2
-unsigned char PSGChan3LowTone;             //  the low tone bits for channels 3
-unsigned char PSGChan2HighTone;            //  the high tone bits for channel 2
+unsigned char PSGChan2HighTone;            // the high tone bits for channel 2
+unsigned char PSGChan3LowTone;             // the tone bits for channels 3
 
 // flags for channels 2-3 access
 unsigned char PSGChannel2SFX=0;            // !0 means channel 2 is allocated to SFX
@@ -74,12 +74,32 @@ void PSGStop (void) {
   if (PSGMusicStatus) {
     PSGPort=PSGLatch|PSGChannel0|PSGVolumeData|0x0F;   // latch channel 0, volume=0xF (silent)
     PSGPort=PSGLatch|PSGChannel1|PSGVolumeData|0x0F;   // latch channel 1, volume=0xF (silent)
-    if (!(PSGChannel2SFX))
+    if (!PSGChannel2SFX)
       PSGPort=PSGLatch|PSGChannel2|PSGVolumeData|0x0F;   // latch channel 2, volume=0xF (silent)
-    if (!(PSGChannel3SFX))
+    if (!PSGChannel3SFX)
       PSGPort=PSGLatch|PSGChannel3|PSGVolumeData|0x0F;   // latch channel 3, volume=0xF (silent)
     PSGMusicStatus=PSG_STOPPED;
   }
+}
+
+void PSGResume (void) {
+/* *********************************************************************
+  resume the previously playing music
+*/
+ if (!PSGMusicStatus) {
+    PSGPort=PSGLatch|PSGChannel0|PSGVolumeData|PSGChan0Volume;   // restore channel 0 volume
+    PSGPort=PSGLatch|PSGChannel1|PSGVolumeData|PSGChan1Volume;   // restore channel 1 volume
+    if (!PSGChannel2SFX) {
+      PSGPort=PSGLatch|PSGChannel2|(PSGChan2LowTone&0x0F);       // restore channel 2 frequency
+      PSGPort=PSGChan2HighTone&0x3F;
+      PSGPort=PSGLatch|PSGChannel2|PSGVolumeData|PSGChan2Volume; // restore channel 2 volume
+    }
+    if (!PSGChannel3SFX) {
+      PSGPort=PSGLatch|PSGChannel3|(PSGChan3LowTone&0x0F);       // restore channel 3 frequency
+      PSGPort=PSGLatch|PSGChannel3|PSGVolumeData|PSGChan3Volume; // restore channel 3 volume
+    }
+    PSGMusicStatus=PSG_PLAYING;
+ }
 }
 
 void PSGPlay (void *song) {
@@ -156,9 +176,9 @@ void PSGSetMusicVolumeAttenuation (unsigned char attenuation) {
   if (PSGMusicStatus) {
     PSGPort=PSGLatch|PSGChannel0|PSGVolumeData|((PSGChan0Volume+PSGMusicVolumeAttenuation>15)?15:PSGChan0Volume+PSGMusicVolumeAttenuation);
     PSGPort=PSGLatch|PSGChannel1|PSGVolumeData|((PSGChan1Volume+PSGMusicVolumeAttenuation>15)?15:PSGChan1Volume+PSGMusicVolumeAttenuation);
-    if (!(PSGChannel2SFX))
+    if (!PSGChannel2SFX)
       PSGPort=PSGLatch|PSGChannel2|PSGVolumeData|((PSGChan2Volume+PSGMusicVolumeAttenuation>15)?15:PSGChan2Volume+PSGMusicVolumeAttenuation);
-    if (!(PSGChannel3SFX))
+    if (!PSGChannel3SFX)
       PSGPort=PSGLatch|PSGChannel3|PSGVolumeData|((PSGChan3Volume+PSGMusicVolumeAttenuation>15)?15:PSGChan3Volume+PSGMusicVolumeAttenuation);
   }
 }

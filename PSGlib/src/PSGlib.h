@@ -14,6 +14,7 @@ void PSGPlay (void *song);
 void PSGCancelLoop (void);
 void PSGPlayNoRepeat (void *song);
 void PSGStop (void);
+void PSGResume (void);
 unsigned char PSGGetStatus (void);
 void PSGSetMusicVolumeAttenuation (unsigned char attenuation);
 
