@@ -25,7 +25,7 @@
 __sfr __at 0x7F PSGPort;
 
 // fundamental vars
-unsigned char PSGMusicStatus=PSG_STOPPED;  // are we playing a background music?
+unsigned char PSGMusicStatus;              // are we playing a background music?
 void *PSGMusicStart;                       // the pointer to the beginning of music
 void *PSGMusicPointer;                     // the pointer to the current
 void *PSGMusicLoopPoint;                   // the pointer to the loop begin
@@ -48,15 +48,15 @@ unsigned char PSGChan2HighTone;            // the high tone bits for channel 2
 unsigned char PSGChan3LowTone;             // the tone bits for channels 3
 
 // flags for channels 2-3 access
-unsigned char PSGChannel2SFX=0;            // !0 means channel 2 is allocated to SFX
-unsigned char PSGChannel3SFX=0;            // !0 means channel 3 is allocated to SFX
+unsigned char PSGChannel2SFX;              // !0 means channel 2 is allocated to SFX
+unsigned char PSGChannel3SFX;              // !0 means channel 3 is allocated to SFX
 
 // volume/frequence buffering for SFX
 unsigned char PSGSFXChan2Volume;           // the volume for SFX channel 2
 unsigned char PSGSFXChan3Volume;           // the volume for SFX channel 3
 
 // fundamental vars for SFX
-unsigned char PSGSFXStatus=PSG_STOPPED;    // are we playing a SFX?
+unsigned char PSGSFXStatus;                // are we playing a SFX?
 void *PSGSFXStart;                         // the pointer to the beginning of SFX
 void *PSGSFXPointer;                       // the pointer to the current address
 void *PSGSFXLoopPoint;                     // the pointer to the loop begin

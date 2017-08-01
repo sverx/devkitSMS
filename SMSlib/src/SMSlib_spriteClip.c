@@ -10,7 +10,7 @@ extern unsigned char spritesHeight, spritesWidth;
 #ifdef TARGET_GG
 unsigned char clipWin_x0=48,clipWin_y0=24,clipWin_x1=207,clipWin_y1=167;
 #else
-unsigned char clipWin_x0=0,clipWin_y0=0,clipWin_x1=255,clipWin_y1=191;
+unsigned char clipWin_x0,clipWin_y0,clipWin_x1=255,clipWin_y1=191;
 #endif
 
 #if MAXSPRITES==64
