@@ -59,13 +59,6 @@ volatile unsigned int MDKeysStatus,PreviousMDKeysStatus;
 
 /* variables for sprite windowing and clipping */
 unsigned char spritesHeight=8, spritesWidth=8;
-#if MAXSPRITES==64
-unsigned char SpriteTableY[MAXSPRITES];
-#else
-unsigned char SpriteTableY[MAXSPRITES+1];
-#endif
-unsigned char SpriteTableXN[MAXSPRITES*2];
-unsigned char SpriteNextFree;
 
 /* 'empty' line interrupt handler */
 void (*SMS_theLineInterruptHandler)(void);
@@ -234,9 +227,13 @@ void SMS_setColor (unsigned char color) __z88dk_fastcall __preserves_regs(b,c,d,
 #pragma restore
 /* ************************************************************************************ */
 
+
+/*
+
 void SMS_initSprites (void) {
   SpriteNextFree=0;
 }
+
 
 signed char SMS_addSprite (unsigned char x, unsigned char y, unsigned char tile) {
   unsigned char *stXN;
@@ -246,10 +243,9 @@ signed char SMS_addSprite (unsigned char x, unsigned char y, unsigned char tile)
       stXN=&SpriteTableXN[SpriteNextFree*2];
       *stXN++=x;
       *stXN=tile;
-      /* old code was:
-      SpriteTableXN[SpriteNextFree*2]=x;
-      SpriteTableXN[SpriteNextFree*2+1]=tile;
-      */
+      // old code was:
+      // SpriteTableXN[SpriteNextFree*2]=x;
+      // SpriteTableXN[SpriteNextFree*2+1]=tile;
       return(SpriteNextFree++);
     }
   }
@@ -275,6 +271,7 @@ void SMS_copySpritestoSAT (void) {
   SMS_setAddr(SMS_SATAddress+128);
   SMS_byte_brief_array_to_VDP_data(SpriteTableXN,MAXSPRITES*2);
 }
+*/
 
 void SMS_waitForVBlank (void) {
   VDPBlank=false;
