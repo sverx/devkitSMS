@@ -107,7 +107,7 @@ void SMS_loadTileMapArea (unsigned char x, unsigned char y, void *src, unsigned 
 
 /* functions for sprites handling */
 void SMS_initSprites (void);
-signed char SMS_addSprite (unsigned char x, unsigned char y, unsigned char tile);  /* returns -1 if no more sprites are available */
+signed char SMS_addSprite (unsigned char x, unsigned char y, unsigned char tile);  /* returns -1 if no more sprites are available, -2 if invalid Y coord */
 signed char SMS_reserveSprite (void);
 void SMS_updateSpritePosition (signed char sprite, unsigned char x, unsigned char y);
 void SMS_updateSpriteImage (signed char sprite, unsigned char image);
