@@ -92,6 +92,7 @@ void SMS_crt0_RST18(unsigned int tile) __z88dk_fastcall __preserves_regs(b,c,d,e
 
 /* functions to load tiles into VRAM */
 void SMS_loadTiles (void *src, unsigned int tilefrom, unsigned int size);
+void SMS_load1bppTiles (void *src, unsigned int tilefrom, unsigned int size, unsigned char color0, unsigned char color1);
 void SMS_loadPSGaidencompressedTiles (void *src, unsigned int tilefrom);
 
 /* functions for the tilemap */
@@ -156,6 +157,10 @@ void SMS_loadSpritePaletteHalfBrightness (void *palette) __z88dk_fastcall;
 void SMS_zeroBGPalette (void);
 void SMS_zeroSpritePalette (void);
 #endif
+
+/* text renderer */
+void SMS_configureTextRenderer (signed int ascii_to_tile_offset);
+/*  void SMS_autoSetUpTextRenderer (void);   not yet! */
 
 /* functions to read joypad(s) */
 unsigned int SMS_getKeysStatus (void);
