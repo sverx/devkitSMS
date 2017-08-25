@@ -160,7 +160,7 @@ void SMS_zeroSpritePalette (void);
 
 /* text renderer */
 void SMS_configureTextRenderer (signed int ascii_to_tile_offset);
-/*  void SMS_autoSetUpTextRenderer (void);   not yet! */
+void SMS_autoSetUpTextRenderer (void);
 
 /* functions to read joypad(s) */
 unsigned int SMS_getKeysStatus (void);

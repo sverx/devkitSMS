@@ -63,6 +63,10 @@ signed char SMS_addSpriteClipping (int x, int y, unsigned char tile);   /* decla
 void SMS_finalizeSprites (void);            /* we're done declaring sprites */
 void SMS_copySpritestoSAT (void);           /* copy sprites to Sprites Attribute Table (do that during vBlank) */
 
+/* text renderer */
+void SMS_configureTextRenderer (signed int ascii_to_tile_offset);  /* set the value you should add to ASCII value to get the tile number */
+void SMS_autoSetUpTextRenderer (void);                             /* load a standard font character set into tiles 0-95, set BG palette to B/W and turn on the screen */
+
 /* input handling */
 unsigned int SMS_getKeysStatus (void);    /* the current status of the keys */
 unsigned int SMS_getKeysPressed (void);   /* the keys that were up last frame and down now */
