@@ -16,7 +16,7 @@
 ;  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 ;  GNU General Public License for more details.
 ;
-;  You should have received a copy of the GNU General Public License 
+;  You should have received a copy of the GNU General Public License
 ;  along with this library; see the file COPYING. If not, write to the
 ;  Free Software Foundation, 51 Franklin Street, Fifth Floor, Boston,
 ;   MA 02110-1301, USA.
@@ -36,7 +36,8 @@
 	.org 	0                       ; Reset 00h
 	di				; disable interrupt
         im 1				; interrupt mode 1 (this won't change)
-	jp	init
+        ld sp, #0xdff0			; set stack pointer at end of RAM
+	jr	init
 ;--------------------------------------------------------------------------
 _SMS_crt0_RST08::
 	.org    0x08                    ; Reset 08h - write HL to VDP Control Port
@@ -57,17 +58,9 @@ _SMS_crt0_RST18::
         out (#0xBE),a
         ret
 ;--------------------------------------------------------------------------
-        .org    0x38                    ; handle IRQ
-        jp _SMS_isr
-;--------------------------------------------------------------------------
-        .org     0x66                   ; handle NMI
-        jp _SMS_nmi_isr
-;--------------------------------------------------------------------------
-	.org	 0x70
 init:
-        ld sp, #0xdff0			; set stack pointer at end of RAM
         ld de, #0xfffc			; initialize mappers
-        xor a				
+        xor a
         ld (de),a			; [0xfffc]=$00
         ld b,#3
 mapper_loop:
@@ -75,7 +68,12 @@ mapper_loop:
         ld (de),a			; [0xfffd]=$00,[0xfffe]=$01,[0xffff]=$02
         inc a
         djnz mapper_loop
-        
+        jr   clear_ram
+;--------------------------------------------------------------------------
+        .org    0x38                    ; handle IRQ
+        jp _SMS_isr
+;--------------------------------------------------------------------------
+clear_ram:
         xor a				; clear RAM (to value 0x00)
         ld hl,#0xc000			;   by setting value 0 to $c000 and
 	ld (hl),a			;   to $c000 and
@@ -88,8 +86,15 @@ mapper_loop:
         call    _SMS_init
         ei				; re-enable interrupts before going to main()
 	call	_main
-	jp	_exit
-
+1$:
+	halt
+	jr	1$
+;--------------------------------------------------------------------------
+        .ascii 'devkitSMS'	
+;--------------------------------------------------------------------------
+        .org     0x66                   ; handle NMI
+        jp _SMS_nmi_isr
+;--------------------------------------------------------------------------
         ; here's a block of 128 OUTI instructions, made for enabling
         ;    UNSAFE but FAST
         ; short data transfers to VRAM
@@ -123,19 +128,6 @@ _outi_block::				; _outi_block label points to END of OUTI block
 	.area   _HEAP
 
 	.area   _CODE
-__clock::
-	ld	a,#2
-	rst     0x08
-	ret
-
-_exit::
-	;; Exit - special code to the emulator
-	ld	a,#0
-	rst     0x08
-1$:
-	halt
-	jr	1$
-
 	.area   _GSINIT
 gsinit::
 	ld	bc, #l__INITIALIZER
