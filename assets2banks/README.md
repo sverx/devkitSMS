@@ -3,21 +3,33 @@
 ###How to use assets2banks
 
 ```
-assets2banks <asset folder> [--bank1size=<size in bytes>]
+assets2banks <asset folder> [--bank1size=<size in bytes>][--compile]
 ```
 
-Using the assets2banks utility you can create .c source files (and their .h header files) containing one constant data array for each single file found in the specified asset folder.
-For example:
+Using the assets2banks utility you can create .c source files and their respective .h header files containing one constant data array for each single file found in the specified asset folder.
+Also, if you add the --compile option to your command line, object files (RELs) will be generated in place of the C source files, so you won't have to compile them yourself.
+
+Example usage:
 
 ```
 assets2banks assets
 ```
 
-  this creates a set of bank*n*.c and bank*n*.h files (starting from n=2) with data taken from the files found inside *assets* subfolder.
+this creates a set of bank*n*.c and bank*n*.h files (starting from n=2) with data taken from the files found inside *assets* subfolder.
 Each array will be named from the original filename, replacing spaces, periods and brackets with an underscore (it doesn't convert any other char so please use only alphanumeric chars).
 
 For each array there will be a #define into the .h file specifying the size in bytes, and it'll be called [arrayname]_size.
 Also, there will be an additional #define called [arrayname]_bank for each asset, so you know in which bank your asset has been placed.
+
+Generating RELs instead of C source files:
+
+```
+assets2banks assets --compile
+```
+
+this creates a set of bank*n*.rel and bank*n*.h files (starting from n=2) with data taken from the files found inside *assets* subfolder.
+The data in the object files will be inside a BANK*n* segment, ready as you needed them for the linking phase.
+
 
 Finally, in case you've got some free space in your ROM lower 32 KB, you can ask assets2banks to create a data block which can fit up to the whole space available.
 For example, let's suppose you have more than 8 KB free in your lower 32 KB, you can inform assets2banks of this available space using:
