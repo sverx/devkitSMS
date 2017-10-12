@@ -58,7 +58,7 @@ volatile unsigned int MDKeysStatus,PreviousMDKeysStatus;
 #endif
 
 /* variables for sprite windowing and clipping */
-unsigned char spritesHeight=8, spritesWidth=8;
+unsigned char spritesHeight=8, spritesWidth=8, spritesTileOffset=1;
 
 /* 'empty' line interrupt handler */
 void (*SMS_theLineInterruptHandler)(void);
@@ -142,9 +142,11 @@ void SMS_setSpriteMode (unsigned char mode) __z88dk_fastcall {
   if (mode & SPRITEMODE_TALL) {
     SMS_VDPturnOnFeature(VDPFEATURE_USETALLSPRITES);
     spritesHeight=16;
+    spritesTileOffset=2;
   } else {
     SMS_VDPturnOffFeature(VDPFEATURE_USETALLSPRITES);
     spritesHeight=8;
+    spritesTileOffset=1;
   }
   if (mode & SPRITEMODE_ZOOMED) {
     SMS_VDPturnOnFeature(VDPFEATURE_ZOOMSPRITES);

@@ -54,6 +54,7 @@ void SMS_setTile (unsigned int tile);
 /* sprite handling */
 void SMS_initSprites (void);                /* we're going to start declaring sprites, in front-to-back order */
 signed char SMS_addSprite (unsigned char x, unsigned char y, unsigned char tile);  /* declare a sprite - returns handle or -1 if no more sprites are available */
+void SMS_addTwoAdjoiningSprites (unsigned char x, unsigned char y, unsigned char tile);   /* doesn't return anything */
 signed char SMS_reserveSprite (void);
 void SMS_updateSpritePosition (signed char sprite, unsigned char x, unsigned char y);
 void SMS_updateSpriteImage (signed char sprite, unsigned char image);
