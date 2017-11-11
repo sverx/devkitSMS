@@ -1,1 +1,0 @@
-sdcc -mz80 --std-sdcc99 --fomit-frame-pointer -c SMSlib.c
