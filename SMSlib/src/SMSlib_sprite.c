@@ -69,13 +69,56 @@ _returnInvalidHandle2:
 }
 #pragma restore
 
-void SMS_finalizeSprites (void) {
-#if MAXSPRITES==64
-  if (SpriteNextFree<MAXSPRITES)
-#endif
-    SpriteTableY[SpriteNextFree]=0xD0;
+void SMS_copySpritestoSAT (void) {
+  /*
+  SMS_setAddr(SMS_SATAddress);
+  if (SpriteNextFree)
+    SMS_byte_brief_array_to_VDP_data(SpriteTableY,SpriteNextFree);
+  if (SpriteNextFree<64)
+    SMS_byte_to_VDP_data(0xD0);  // write sprite terminator byte if needed
+  if (SpriteNextFree) {
+    SMS_setAddr(SMS_SATAddress+128);
+    SMS_byte_brief_array_to_VDP_data(SpriteTableXN,SpriteNextFree*2);
+  }
+  */
+  SMS_setAddr(SMS_SATAddress);
+  __asm
+    ld a,(#_SpriteNextFree)
+    or a
+    jr z,_no_sprites
+    ld b,a
+    ld c,#_VDPDataPort    
+    ld hl,#_SpriteTableY
+_next_spriteY:
+    outi                    ; 16 cycles
+    jp nz,_next_spriteY     ; 10 cycles   =>  VRAM safe
+    cp #64                  ;  7 cycles
+    jr z,_no_sprite_term    ;  7 cycles
+    ld a,#0xD0              ;  7 cycles   =>  VRAM safe
+    out (c),a
+_no_sprite_term:
+  __endasm;
+  SMS_setAddr(SMS_SATAddress+128);
+  __asm
+    ld c,#_VDPDataPort
+    ld a,(#_SpriteNextFree)
+    add a,a
+    ld b,a
+    ld hl,#_SpriteTableXN
+_next_spriteXN:
+    outi                    ; 16       cycles
+    jp nz,_next_spriteXN    ; 10       cycles   =>  VRAM safe
+    ret
+
+_no_sprites:
+    ld a,#0xD0
+    out (#_VDPDataPort),a
+  __endasm;
 }
 
+/*
+// previous code: copies the whole SAT, even unused entries
+//     profiling: 10916 cycles (48 screen lines)
 void SMS_copySpritestoSAT (void) {
   // SMS_set_address_VRAM(SMS_SATAddress);
   SMS_setAddr(SMS_SATAddress);
@@ -88,3 +131,4 @@ void SMS_copySpritestoSAT (void) {
   SMS_setAddr(SMS_SATAddress+128);
   SMS_byte_brief_array_to_VDP_data(SpriteTableXN,MAXSPRITES*2);
 }
+*/

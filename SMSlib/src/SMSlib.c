@@ -93,7 +93,7 @@ void SMS_init (void) {
     SMS_write_to_VDPRegister(i,VDPReg_init[i]);
   /* reset sprites */
   SMS_initSprites();
-  SMS_finalizeSprites();
+  // SMS_finalizeSprites();   // useless now!
   SMS_copySpritestoSAT();
 #ifndef TARGET_GG
   /* init Pause (SMS only) */
@@ -227,53 +227,6 @@ void SMS_setColor (unsigned char color) __z88dk_fastcall __preserves_regs(b,c,d,
 }
 #endif
 #pragma restore
-/* ************************************************************************************ */
-
-
-/*
-
-void SMS_initSprites (void) {
-  SpriteNextFree=0;
-}
-
-
-signed char SMS_addSprite (unsigned char x, unsigned char y, unsigned char tile) {
-  unsigned char *stXN;
-  if (SpriteNextFree<MAXSPRITES) {
-    if (y!=0xD1) {                     // avoid placing sprites at this Y!
-      SpriteTableY[SpriteNextFree]=(unsigned char)(y-1);
-      stXN=&SpriteTableXN[SpriteNextFree*2];
-      *stXN++=x;
-      *stXN=tile;
-      // old code was:
-      // SpriteTableXN[SpriteNextFree*2]=x;
-      // SpriteTableXN[SpriteNextFree*2+1]=tile;
-      return(SpriteNextFree++);
-    }
-  }
-  return (-1);
-}
-
-void SMS_finalizeSprites (void) {
-#if MAXSPRITES==64
-  if (SpriteNextFree<MAXSPRITES)
-#endif
-    SpriteTableY[SpriteNextFree]=0xD0;
-}
-
-void SMS_copySpritestoSAT (void) {
-  // SMS_set_address_VRAM(SMS_SATAddress);
-  SMS_setAddr(SMS_SATAddress);
-#if MAXSPRITES==64
-  SMS_byte_brief_array_to_VDP_data(SpriteTableY,MAXSPRITES);
-#else
-  SMS_byte_brief_array_to_VDP_data(SpriteTableY,MAXSPRITES+1);
-#endif
-  // SMS_set_address_VRAM(SMS_SATAddress+128);
-  SMS_setAddr(SMS_SATAddress+128);
-  SMS_byte_brief_array_to_VDP_data(SpriteTableXN,MAXSPRITES*2);
-}
-*/
 
 void SMS_waitForVBlank (void) {
   VDPBlank=false;
@@ -419,24 +372,4 @@ void SMS_nmi_isr (void) __critical __interrupt {          /* this is for NMI */
 #endif
 }
 
-
-/* *********** LEFTOVER/INCOMPLETE CODE (do not use) *********************** */
-
-/*
-void SMS_VDPSetSATLocation (unsigned int location) {
-  VDPReg[5]=(location>>7)|0b10000001;
-  SMS_write_to_VDPRegister (5,VDPReg[5]);
-}
-
-void SMS_VDPSetPNTLocation (unsigned int location) {
-  VDPReg[2]=(location>>10)|0b11110001;
-  SMS_write_to_VDPRegister (2,VDPReg[2]);
-}
-
-void SMS_VDPSetSpritesLocation (unsigned int location) {
-  VDPReg[6]=(location>>11)|0b11111011;
-  SMS_write_to_VDPRegister (6,VDPReg[6]);
-}
-*/
-
-/* *********** END ********************************************************* */
+/* EOF */

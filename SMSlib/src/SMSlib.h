@@ -116,7 +116,7 @@ void SMS_updateSpriteImage (signed char sprite, unsigned char image);
 void SMS_hideSprite (signed char sprite);
 void SMS_setClippingWindow (unsigned char x0, unsigned char y0, unsigned char x1, unsigned char y1);
 signed char SMS_addSpriteClipping (int x, int y, unsigned char tile);   /* returns -1 if no more sprites are available or sprite clipped */
-void SMS_finalizeSprites (void);
+void SMS_finalizeSprites (void);     // *DEPRECATED* - will be dropped at some point in 2018
 void SMS_copySpritestoSAT (void);
 
 /* ***************************************************************** */
@@ -134,7 +134,6 @@ void GG_loadBGPalette (void *palette) __z88dk_fastcall;
 void GG_loadSpritePalette (void *palette) __z88dk_fastcall;
 #define GG_setNextBGColoratIndex(i)       SMS_setAddr(SMS_CRAMAddress|((i)<<1))
 #define GG_setNextSpriteColoratIndex(i)   SMS_setAddr(SMS_CRAMAddress|0x20|((i)<<1))
-// void GG_setColor (unsigned int color) __z88dk_fastcall __preserves_regs(b,c,d,e,h,l,iyh,iyl);
 #define GG_setColor(color)       SMS_crt0_RST18(color)
 /* GG macros for colors */
 #define RGB(r,g,b)        ((r)|((g)<<4)|((b)<<8))
@@ -302,8 +301,4 @@ void UNSAFE_SMS_VRAMmemcpy128 (unsigned int dst, void *src);
 void SMS_isr (void) __interrupt;
 void SMS_nmi_isr (void) __critical __interrupt;
 
-/* STILL MISSING
-void SMS_VDPSetSATLocation (unsigned int location);
-void SMS_VDPSetPNTLocation (unsigned int location);
-void SMS_VDPSetSpritesLocation (unsigned int location);
-*/
+/* EOF */

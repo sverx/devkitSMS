@@ -14,8 +14,58 @@ extern unsigned char SpriteTableY[MAXSPRITES+1];
 extern unsigned char SpriteTableXN[MAXSPRITES*2];
 extern unsigned char SpriteNextFree;
 
+// VRAM unsafe functions. Fast, but dangerous!
+void UNSAFE_SMS_copySpritestoSAT (void) {
+  SMS_setAddr(SMS_SATAddress);
+  __asm
+    ld a,(#_SpriteNextFree)
+    or a
+    jr z,_no_sprites
+    ld b,a
+    ld a,#64
+    sub a,b
+    add a,a
+    ld c,a
+    ld b,#0
+    ld hl,#_OUTI64
+    add hl,bc
+    ex de,hl
+    ld hl,#_SpriteTableY
+    call _start_cpy
+    ld a,(#_SpriteNextFree)
+    cp #64
+    jr z,_no_sprite_term
+    ld a,#0xD0
+    out (c),a
+_no_sprite_term:
+  __endasm;
+ SMS_setAddr(SMS_SATAddress+128);
+  __asm
+    ld a,(#_SpriteNextFree)
+    ld b,a
+    ld a,#64
+    sub a,b
+    add a,a
+    add a,a
+    ld c,a
+    ld b,#0
+    ld hl,#_OUTI128
+    add hl,bc    
+    ex de,hl
+    ld hl,#_SpriteTableXN
+_start_cpy:
+    ld c,#_VDPDataPort
+    push de
+    pop iy
+    jp (iy)
+_no_sprites:
+    ld a,#0xD0
+    out (#_VDPDataPort),a
+  __endasm;
+}
 
-/* VRAM unsafe functions. Fast, but dangerous! */
+/*
+// previous version - profiling: 3283 cycles (14 scanlines)
 void UNSAFE_SMS_copySpritestoSAT (void) {
   // SMS_set_address_VRAM(SMS_SATAddress);
   SMS_setAddr(SMS_SATAddress);
@@ -36,6 +86,7 @@ void UNSAFE_SMS_copySpritestoSAT (void) {
     call _outi_block-MAXSPRITES*4
   __endasm;
 }
+*/
 
 void OUTI32(void *src) __z88dk_fastcall;
 void OUTI64(void *src) __z88dk_fastcall;
