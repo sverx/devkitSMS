@@ -45,11 +45,14 @@ void SMS_loadPSGaidencompressedTiles (void *src, unsigned int Tilefrom);
 
 /* functions for tilemap loading/handling */
 void SMS_loadTileMap (unsigned char x, unsigned char y, void *src, unsigned int size);
-void SMS_loadSTMcompressedTileMap (unsigned char x, unsigned char y, unsigned char *src);
 void SMS_loadTileMapArea (unsigned char x, unsigned char y,  unsigned int *src, unsigned char width, unsigned char height);
 /* *deprecated* */ void SMS_setTileatXY (unsigned char x, unsigned char y, unsigned int tile);
 void SMS_setNextTileatXY (unsigned char x, unsigned char y);
 void SMS_setTile (unsigned int tile);
+
+/* functions to load STM compressed tilemaps */
+void SMS_loadSTMcompressedTileMap (unsigned char x, unsigned char y, unsigned char *src);   /* can be used only for full width images */
+void SMS_loadSTMcompressedTileMapArea (unsigned char x, unsigned char y, unsigned char *src, unsigned char width);
 
 /* sprite handling */
 void SMS_initSprites (void);                /* we're going to start declaring sprites, in front-to-back order */
@@ -61,7 +64,7 @@ void SMS_updateSpriteImage (signed char sprite, unsigned char image);
 void SMS_hideSprite (signed char sprite);
 void SMS_setClippingWindow (unsigned char x0, unsigned char y0, unsigned char x1, unsigned char y1); /* set the sprite window. sprites completely outside the window will be clipped */
 signed char SMS_addSpriteClipping (int x, int y, unsigned char tile);   /* declare a sprite inside the window - returns handle or -1 if no more sprites are available or sprite clipped */
-void SMS_finalizeSprites (void);            /* we're done declaring sprites */
+void SMS_finalizeSprites (void);            /* *DEPRECATED* - will be dropped sometime in 2018 */
 void SMS_copySpritestoSAT (void);           /* copy sprites to Sprites Attribute Table (do that during vBlank) */
 
 /* text renderer */

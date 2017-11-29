@@ -52,16 +52,16 @@ Finally, this option can even be used to allocate an asset bigger than 16 KB, of
 Beside that, assets2banks behavior regarding specific assets can optionally be configured using a config file that should be placed in the very same asset folder.
 
 This **must** be named *assets2banks.cfg* and it can define/contain:
- * grouping of assets.
+ * grouping of assets
 Listed assets will be allocated in the same bank (groups are defined using open and close curly braces "{" and "}")
- * asset format attribute.
+ * asset format attribute
 For instance:
 ```
 :format unsigned int
 ```
 will create a **const unsigned int** array instead of a **const unsigned char** array.
 (Asset attributes starts with ':' and there's at most one attribute for each new line. They are relative to the last previously listed asset)
- * overwrite array elements.
+ * overwrite array elements
 By using:
 ```
 :overwrite <start> <length> <value> [<value>[...]]
@@ -75,6 +75,14 @@ There's also a shorter form. By using:
 the element element at *index* will be replaced with the provided value.
 
 Is it also possible to specify more than one overwrite for a single asset, of course they are relative to the last previously listed asset.
+
+ * add leading values (an header) to your asset
+By using:
+```
+:header <value> [<value>[...]]
+```
+the provided value(s) will be placed *before* the asset's data.
+
  * line comments (using the # as first char on the line)
  * (empty lines are ignored)
 

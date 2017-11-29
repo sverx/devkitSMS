@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 # Author: sverx
-# Version: 2.0.0
+# Version: 2.1.0
 
 from __future__ import absolute_import, division, generators, unicode_literals, print_function, nested_scopes
 import sys
@@ -20,15 +20,24 @@ class OverWrite:
 class Asset:
     def __init__(self, name, size):
         self.name = name
+        self.o_size = size
         self.size = size
         self.style = 0
         self.overwrites = []
+        self.header = []
 
     def set_style(self, style):
         self.style = style
 
     def add_overwrite(self, overwrite):
         self.overwrites.append(overwrite)
+
+    def add_header(self, header):
+        self.header = header
+        if self.style == 0:
+            self.size += len(self.header)
+        else:
+            self.size += len(self.header) * 2
 
 
 class AssetGroup:
@@ -90,7 +99,7 @@ for n, arg in enumerate(sys.argv):
             compile_rel = 1
             print("Info: compiled output requested")
         else:
-            print("Usage: assets2banks path [--bank1size=<size>]")
+            print("Usage: assets2banks path [--bank1size=<size>][--compile]")
             sys.exit(1)
 
 
@@ -124,6 +133,9 @@ try:
                     print("Fatal: invalid overwrite attribute parameter(s)")
                     sys.exit(1)
                 a.add_overwrite(ov)
+            elif ls[:8] == ":header ":
+                hdp = ls[8:].split()
+                a.add_header(hdp)
             else:
                 print("Fatal: unknown attribute '{0}'".format(ls))
                 sys.exit(1)
@@ -230,20 +242,26 @@ for bank_n, b in enumerate(BankList):
                                                             format(asset_addr // 256, "02X")))
                 out_file_rel.write("R 00 00 00 00\n")     # this is because we mapped assets in area number 0
 
+            # read the file contents (using original size 'o_size' as len)
             if a.style == 0:
                 ar = array.array('B')
-                ar.fromfile(in_file, a.size)
+                ar.fromfile(in_file, a.o_size)
             else:
-                ar = array.array('H')                  # 'I' was trying to load 32 bits integers, of course!
-                ar.fromfile(in_file, a.size//2)
-                if a.size % 2:
+                ar = array.array('H')                  # 'I' is for 32 bits integers
+                ar.fromfile(in_file, a.o_size//2)
+                if a.o_size % 2:
                     # odd file size... as this shouldn't happen and last byte won't be read, return a warning
                     print("Warning: asset '{0}' has odd size but declared as 'unsigned int'".format(a.name))
                     print("         so the last byte has been discarded")
 
+            # do the requested overwrites to the data
             for o in a.overwrites:
                 for cnt in range(o.length):
                     ar[o.start+cnt] = int(o.replace[cnt % len(o.replace)], 0)
+
+            # now prepend the header
+            for cnt in range(len(a.header)):
+                ar.insert(cnt, int(a.header[cnt], 0))
 
             if compile_rel == 1:
                 out_file_rel.write("T {0!s} {1!s}".format(format(asset_addr % 256, "02X"),
