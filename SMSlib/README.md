@@ -51,8 +51,8 @@ void SMS_setNextTileatXY (unsigned char x, unsigned char y);
 void SMS_setTile (unsigned int tile);
 
 /* functions to load STM compressed tilemaps */
-void SMS_loadSTMcompressedTileMap (unsigned char x, unsigned char y, unsigned char *src);   /* can be used only for full width images */
-void SMS_loadSTMcompressedTileMapArea (unsigned char x, unsigned char y, unsigned char *src, unsigned char width);
+void SMS_loadSTMcompressedTileMap (unsigned char x, unsigned char y, unsigned char *src);
+void SMS_loadSTMcompressedTileMapArea (unsigned char x, unsigned char y, unsigned char *src, unsigned char width); /* *DEPRECATED* ('width' ignored!) */
 
 /* sprite handling */
 void SMS_initSprites (void);                /* we're going to start declaring sprites, in front-to-back order */

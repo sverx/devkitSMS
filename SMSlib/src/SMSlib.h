@@ -99,12 +99,12 @@ void SMS_loadPSGaidencompressedTiles (void *src, unsigned int tilefrom);
 // turning SMS_loadTileMap into a define
 // void SMS_loadTileMap (unsigned char x, unsigned char y, void *src, unsigned int size);
 #define SMS_loadTileMap(x,y,src,size)            SMS_VRAMmemcpy (XYtoADDR((x),(y)),(src),(size));
-void SMS_loadSTMcompressedTileMapArea (unsigned char x, unsigned char y, unsigned char *src, unsigned char width);
 void SMS_loadTileMapArea (unsigned char x, unsigned char y, void *src, unsigned char width, unsigned char height);
 
-// turning SMS_loadSTMcompressedTileMap into a define
-// void SMS_loadSTMcompressedTileMap (unsigned char x, unsigned char y, unsigned char *src);
-#define SMS_loadSTMcompressedTileMap(x,y,src)     SMS_loadSTMcompressedTileMapArea((x),(y),(src),32)
+void SMS_loadSTMcompressedTileMapatAddr (unsigned int dst, void* src);
+#define SMS_loadSTMcompressedTileMap(x,y,src)       SMS_loadSTMcompressedTileMapatAddr(XYtoADDR((x),(y)),(src))
+#define SMS_loadSTMcompressedTileMapArea(x,y,src,w) SMS_loadSTMcompressedTileMapatAddr(XYtoADDR((x),(y)),(src))
+// SMS_loadSTMcompressedTileMapArea *DEPRECATED* - will be dropped at some point in 2018
 
 /* functions for sprites handling */
 void SMS_initSprites (void);

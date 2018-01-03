@@ -15,14 +15,14 @@ unsigned char STM_needRestore;
 unsigned char STM_ttw;
 unsigned char STM_width;
 
-void SMS_loadSTMcompressedTileMapArea (unsigned char x, unsigned char y, unsigned char *src, unsigned char width) {
-  STM_src=src;
-  STM_dest=XYtoADDR(x,y);
+void SMS_loadSTMcompressedTileMapatAddr (unsigned int dst, void* src) {
+  STM_dest=dst;
+  STM_src=(unsigned char *)(src);
+  STM_width=*STM_src++;
+  STM_ttw=STM_width;
   STM_HH=0;
   STM_oldHH=0;
   STM_needRestore=0;
-  STM_width=width;
-  STM_ttw=width;
   __asm
   ld hl,(#_STM_dest)
   call _SMS_crt0_RST08
