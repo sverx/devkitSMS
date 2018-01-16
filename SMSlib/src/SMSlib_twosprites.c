@@ -9,7 +9,7 @@
 #pragma save
 #pragma disable_warning 85
 
-// 1st ASM version: 296 CPU cycles
+// 2nd ASM version: 290 CPU cycles
 void SMS_addTwoAdjoiningSprites (unsigned char x, unsigned char y, unsigned char tile) __naked __preserves_regs(iyh,iyl) {
   __asm
     ld  a,(#_SpriteNextFree)
@@ -36,7 +36,7 @@ void SMS_addTwoAdjoiningSprites (unsigned char x, unsigned char y, unsigned char
     ld (hl),a                        ; write Y again for the second sprite (always as Y-1)
 
     ld hl,#_SpriteTableXN
-    sla c
+    add hl,bc
     add hl,bc
     ld (hl),e                        ; write X
     inc hl
@@ -53,7 +53,7 @@ void SMS_addTwoAdjoiningSprites (unsigned char x, unsigned char y, unsigned char
     inc hl
     ld (hl),a                        ; write tile number + spritesTileOffset
 
-    ld  a,(#_SpriteNextFree)
+    ld  a,c
     add a,#2
     ld (#_SpriteNextFree),a          ; save SpriteNextFree new value
     ret
