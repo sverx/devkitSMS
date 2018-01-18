@@ -221,11 +221,13 @@ void SMS_resetPauseRequest (void);
 #endif
 
 #ifndef TARGET_GG
+#ifdef  VDPTYPE_DETECTION
 /* VDPType handling (SMS only) */
 unsigned char SMS_VDPType (void);
 /* WARNING: these constants may change value later, please use defines */
 #define VDP_PAL                 0x80
 #define VDP_NTSC                0x40
+#endif
 #endif
 
 extern volatile unsigned char SMS_VDPFlags;

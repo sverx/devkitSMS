@@ -48,7 +48,9 @@ volatile unsigned char SMS_VDPFlags;  /* holds the sprite overflow and sprite co
 
 #ifndef TARGET_GG
 volatile bool PauseRequested;         /* used by NMI (SMS only) */
+#ifdef  VDPTYPE_DETECTION
 unsigned char VDPType;                /* used by NTSC/PAL and VDP type detection (SMS only) */
+#endif
 #endif
 
 /* variables for pad handling */
@@ -64,6 +66,7 @@ unsigned char spritesHeight=8, spritesWidth=8, spritesTileOffset=1;
 void (*SMS_theLineInterruptHandler)(void);
 
 #ifndef TARGET_GG
+#ifdef  VDPTYPE_DETECTION
 inline void SMS_detect_VDP_type (void) {
   // INTERNAL FUNCTION
   unsigned char old_value;
@@ -77,6 +80,7 @@ inline void SMS_detect_VDP_type (void) {
   else
     VDPType=VDP_NTSC;                 // old value should be 0xDA
 }
+#endif
 #endif
 
 void SMS_init (void) {
@@ -98,15 +102,19 @@ void SMS_init (void) {
 #ifndef TARGET_GG
   /* init Pause (SMS only) */
   SMS_resetPauseRequest();
+#ifdef  VDPTYPE_DETECTION
   /* PAL/NTSC detection (SMS only) */
   SMS_detect_VDP_type();
+#endif
 #endif
 }
 
 #ifndef TARGET_GG
+#ifdef  VDPTYPE_DETECTION
 unsigned char SMS_VDPType (void) {
   return VDPType;
 }
+#endif
 #endif
 
 void SMS_VDPturnOnFeature (unsigned int feature) __z88dk_fastcall {
