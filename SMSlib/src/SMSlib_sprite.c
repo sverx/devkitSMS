@@ -21,7 +21,7 @@ void SMS_initSprites (void) {
 #pragma save
 #pragma disable_warning 85
 
-// 4th ASM version: 208 CPU cycles
+// 3rd ASM version: 212 CPU cycles
 signed char SMS_addSprite (unsigned char x, unsigned char y, unsigned char tile) __naked __preserves_regs(iyh,iyl) {
   __asm
     ld  a,(#_SpriteNextFree)
@@ -46,13 +46,14 @@ signed char SMS_addSprite (unsigned char x, unsigned char y, unsigned char tile)
     ld (hl),a                        ; write Y  (as Y-1)
 
     ld hl,#_SpriteTableXN
-    ld a,c                           ; save sprite handle to A
+    ld a,c                           ; preserve SpriteNextFree value in a
     sla c
-    add hl,bc                        ; hl+=(bc*2)
+    add hl,bc
     ld (hl),e                        ; write X
     inc hl
     ld (hl),d                        ; write tile number
 
+    ld l,a                           ; sprite handle to return
     inc a                            ; increment and
     ld (#_SpriteNextFree),a          ;    save SpriteNextFree value
     ret
