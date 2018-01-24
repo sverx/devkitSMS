@@ -305,7 +305,15 @@ unsigned char SMS_getHCount (void) {
 
 /* Interrupt Service Routines */
 #ifdef MD_PAD_SUPPORT
-void SMS_isr (void) __interrupt {
+void SMS_isr (void) __interrupt __naked {
+  __asm
+    push af
+    push bc
+    push de
+    push hl
+    push iy
+    push ix
+  __endasm;
   SMS_VDPFlags=VDPStatusPort;              /* read status port and write it to SMS_VDPFlags */
   if (SMS_VDPFlags & 0x80) {               /* this also aknowledge interrupt at VDP */
     VDPBlank=true;                         /* frame interrupt */
@@ -328,7 +336,16 @@ void SMS_isr (void) __interrupt {
       MDKeysStatus=0;                       /* (because one might have detached his MD pad) */
   } else
     SMS_theLineInterruptHandler();          /* line interrupt */
-  ENABLE_INTERRUPTS;                        /* Z80 disable the interrupts on ISR, so we should re-enable them explicitly */
+  __asm
+    pop ix
+    pop iy
+    pop hl
+    pop de
+    pop bc
+    pop af
+    ei                                      ; Z80 disable the interrupts on ISR, so we should re-enable them explicitly
+    reti                                    ; this is here because function is __naked
+  __endasm;
 }
 #else
 void SMS_isr (void) __interrupt __naked {

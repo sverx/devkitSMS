@@ -28,7 +28,6 @@ signed char SMS_addSprite (unsigned char x, unsigned char y, unsigned char tile)
     cp  a,#MAXSPRITES
     jr  nc,_returnInvalidHandle1     ; no sprites left, leave!
     ld  c,a                          ; save SpriteNextFree value in c
-    ld  b,#0x00
 
     ld  hl,#2
     add hl,sp
@@ -41,14 +40,15 @@ signed char SMS_addSprite (unsigned char x, unsigned char y, unsigned char tile)
     ld  d,(hl)                       ; read tile number
 
     ld  hl,#_SpriteTableY
-    add hl,bc
+    ld  b,#0x00
+    add hl,bc                        ; hl+=SpriteNextFree
     dec a
     ld (hl),a                        ; write Y  (as Y-1)
 
     ld hl,#_SpriteTableXN
-    ld a,c                           ; preserve SpriteNextFree value in a
+    ld a,c                           ; save sprite handle to A
     sla c
-    add hl,bc
+    add hl,bc                        ; hl+=(SpriteNextFree*2)
     ld (hl),e                        ; write X
     inc hl
     ld (hl),d                        ; write tile number
