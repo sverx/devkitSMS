@@ -5,5 +5,6 @@ devkitSMS/assets2banks     is public domain. For more information, please refer 
 devkitSMS/folder2c         is public domain. For more information, please refer to http://unlicense.org
 devkitSMS/SGlib            is public domain, as agreed with na_th_an. For more information, please refer to http://unlicense.org
 devkitSMS/SMSlib           is public domain. For more information, please refer to http://unlicense.org
+                      note:it includes ZX7 decompression routines (noted as required by ZX7 license)
 devkitSMS/PSGlib           is public domain. For more information, please refer to http://unlicense.org
 devkitSMS/aPLib            is public domain, as agreed with Maxim and DWEdit. For more information, please refer to http://unlicense.org

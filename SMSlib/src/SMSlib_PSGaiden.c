@@ -12,14 +12,13 @@ unsigned char decompBuffer[32];        /*  decompression buffer */
 #pragma disable_warning 85
 // SMS_loadPSGaidencompressedTiles would otherwise complain:
 // warning 85: unreferenced function argument : 'src'
-void SMS_loadPSGaidencompressedTiles (void *src, unsigned int tilefrom) {
+void SMS_loadPSGaidencompressedTilesatAddr (void *src, unsigned int dst) {
 /* ***********************************************************************************
    Phantasy Star Gaiden Tile Decoder
    taken from http://www.smspower.org/Development/PhantasyStarGaidenTileDecoder
    (slightly modified and wrapped into a C function - and it MUST preserve ix register )
 ************************************************************************************** */
-  // SMS_set_address_VRAM(tilefrom*32);
-  SMS_setAddr(0x4000|(tilefrom*32));
+  SMS_setAddr(dst);
 __asm
 
    pop bc                   ; move *src from stack into hl

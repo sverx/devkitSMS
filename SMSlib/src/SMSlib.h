@@ -84,6 +84,10 @@ void SMS_crt0_RST18(unsigned int tile) __z88dk_fastcall __preserves_regs(b,c,d,e
 #define SMS_setNextTileatAddr(a)  SMS_setAddr(a)
 #define SMS_setTileatXY(x,y,tile) {SMS_setAddr(XYtoADDR((x),(y)));SMS_setTile(tile);}
 
+#define SMS_VDPVRAMWrite          0x4000
+/* macro for turning tile numbers into VRAM addr for writing */
+#define TILEtoADDR(tile)          (SMS_VDPVRAMWrite|((tile)*32))
+
 /* handy defines for tilemaps entry */
 #define TILE_FLIPPED_X            0x0200
 #define TILE_FLIPPED_Y            0x0400
@@ -93,11 +97,16 @@ void SMS_crt0_RST18(unsigned int tile) __z88dk_fastcall __preserves_regs(b,c,d,e
 /* functions to load tiles into VRAM */
 void SMS_loadTiles (void *src, unsigned int tilefrom, unsigned int size);
 void SMS_load1bppTiles (void *src, unsigned int tilefrom, unsigned int size, unsigned char color0, unsigned char color1);
-void SMS_loadPSGaidencompressedTiles (void *src, unsigned int tilefrom);
+
+/* functions to load compressed tiles into VRAM */
+void SMS_loadPSGaidencompressedTilesatAddr (void *src, unsigned int dst);
+#define SMS_loadPSGaidencompressedTiles(src,tilefrom) SMS_loadPSGaidencompressedTilesatAddr((src),TILEtoADDR(tilefrom));
+
+/* UNSAFE functions to load compressed tiles into VRAM */
+void UNSAFE_SMS_loadZX7compressedTilesatAddr (void *src, unsigned int dst);
+#define UNSAFE_SMS_loadZX7compressedTiles(src,tilefrom) UNSAFE_SMS_loadZX7compressedTilesatAddr((src),TILEtoADDR(tilefrom))
 
 /* functions for the tilemap */
-// turning SMS_loadTileMap into a define
-// void SMS_loadTileMap (unsigned char x, unsigned char y, void *src, unsigned int size);
 #define SMS_loadTileMap(x,y,src,size)            SMS_VRAMmemcpy (XYtoADDR((x),(y)),(src),(size));
 void SMS_loadTileMapArea (unsigned char x, unsigned char y, void *src, unsigned char width, unsigned char height);
 
