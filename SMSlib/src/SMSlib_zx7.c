@@ -96,8 +96,10 @@ _f0:
     ; determine offset
     ld e, (hl)   ; load offset flag (1 bit) + offset value (7 bits)
     inc hl
-    .db 0xCB     ; "sll e" 0xCB 0x33
-    .db 0x33     ; (undocumented Z80 instruction! Shifts into carry, inserts 1 in LSB)
+    
+    sla e        ; these two instructions instead of
+    inc e        ; 'sll e' undocumented instruction
+
     jr nc, _f1   ; if offset flag is set, load 4 extra bits
 
     add a, a

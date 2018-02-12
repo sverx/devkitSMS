@@ -43,6 +43,10 @@ void GG_setColor (unsigned char color);             /* set color */
 void SMS_loadTiles (void *src, unsigned int Tilefrom, unsigned int size);
 void SMS_loadPSGaidencompressedTiles (void *src, unsigned int Tilefrom);
 
+/* UNSAFE macros to load compressed tiles into VRAM (can be safely used only when screen is off) */
+UNSAFE_SMS_loadaPLibcompressedTiles(src,tilefrom);
+UNSAFE_SMS_loadZX7compressedTiles(src,tilefrom);
+
 /* functions for tilemap loading/handling */
 void SMS_loadTileMap (unsigned char x, unsigned char y, void *src, unsigned int size);
 void SMS_loadTileMapArea (unsigned char x, unsigned char y,  unsigned int *src, unsigned char width, unsigned char height);
