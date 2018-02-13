@@ -374,9 +374,7 @@ _ldir_vram_to_vram:
 
   ex af, af'
   ; Make hl a read address
-  ld a,h
-  xor #0x40
-  ld h,a
+  res 6,h        ; ld a,h  ; xor #0x40 ; ld h,a
   ; Check if the count is below 256
   ld a,b
   or a

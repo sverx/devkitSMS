@@ -3,8 +3,8 @@ devkitSMS/crt0/crt0_sg.s   is licensed under GPL2 with a "special exception", pl
 devkitSMS/ihx2sms          is public domain. For more information, please refer to http://unlicense.org
 devkitSMS/assets2banks     is public domain. For more information, please refer to http://unlicense.org
 devkitSMS/folder2c         is public domain. For more information, please refer to http://unlicense.org
+devkitSMS/PSGlib           is public domain. For more information, please refer to http://unlicense.org
 devkitSMS/SGlib            is public domain, as agreed with na_th_an. For more information, please refer to http://unlicense.org
 devkitSMS/SMSlib           is public domain. For more information, please refer to http://unlicense.org
-                      note:it includes ZX7 decompression routines (noted as required by ZX7 license)
-devkitSMS/PSGlib           is public domain. For more information, please refer to http://unlicense.org
-devkitSMS/aPLib            is public domain, as agreed with Maxim and DWEdit. For more information, please refer to http://unlicense.org
+                      note:includes ZX7 decompression routines (noted as required by ZX7 license)
+                      note:includes aPLib decompression routines (in public domain, as agreed with Maxim and DWEdit)
