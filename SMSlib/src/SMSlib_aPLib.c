@@ -139,11 +139,12 @@ _emitSingleByte_offset:
     ex de, hl
     push hl
       sbc hl, bc
+      res 6,h
       ld c,#0xbf
+      di
       out (c),l
-      ld a,h
-      xor #0x40
-      out (c),a
+      out (c),h
+      ei
       in a,(#0xbe)
     pop hl
     di

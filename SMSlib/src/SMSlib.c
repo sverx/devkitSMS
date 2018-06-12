@@ -285,11 +285,11 @@ void SMS_resetPauseRequest (void) {
 }
 #endif
 
-void SMS_setLineInterruptHandler (void (*theHandlerFunction)(void)) {
+void SMS_setLineInterruptHandler (void (*theHandlerFunction)(void)) __z88dk_fastcall {
   SMS_theLineInterruptHandler=theHandlerFunction;
 }
 
-void SMS_setLineCounter (unsigned char count) {
+void SMS_setLineCounter (unsigned char count) __z88dk_fastcall {
   SMS_write_to_VDPRegister(0x0A,count);
 }
 
@@ -391,10 +391,16 @@ void SMS_isr (void) __interrupt __naked {
 }
 #endif
 
-void SMS_nmi_isr (void) __critical __interrupt {          /* this is for NMI */
+void SMS_nmi_isr (void) __critical __interrupt __naked {          /* this is for NMI */
+  __asm
 #ifndef TARGET_GG
-  PauseRequested=true;
+    push hl
+    ld hl,#_PauseRequested
+    ld (hl),#0x01
+    pop hl
 #endif
+    retn                                    ; this is here because function is __naked
+  __endasm;
 }
 
 /* EOF */

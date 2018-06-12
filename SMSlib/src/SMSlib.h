@@ -246,8 +246,8 @@ extern volatile unsigned char SMS_VDPFlags;
 #define VDPFLAG_SPRITECOLLISION 0x20
 
 /* line interrupt */
-void SMS_setLineInterruptHandler (void (*theHandlerFunction)(void));
-void SMS_setLineCounter (unsigned char count);
+void SMS_setLineInterruptHandler (void (*theHandlerFunction)(void)) __z88dk_fastcall;
+void SMS_setLineCounter (unsigned char count) __z88dk_fastcall;
 #define SMS_enableLineInterrupt()   SMS_VDPturnOnFeature(0x0010)   /* turns on line IRQ */
 #define SMS_disableLineInterrupt()  SMS_VDPturnOffFeature(0x0010)  /* turns off line IRQ */
 
