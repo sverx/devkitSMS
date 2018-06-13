@@ -17,6 +17,16 @@ replace restart {
 } if notVolatile(%1), notUsed(%1), notVolatile(%2)
 
 replace restart {
+	ld	%1, %2
+	di
+	ld	%3, %1
+} by {
+	; peephole rule 1b-with_DI loaded %2 into %3 directly instead of going through %1.
+	ld	%3, %2
+	di
+} if canAssign(%3 %2), notVolatile(%1), notUsed(%1)
+
+replace restart {
 	ld	%1, %2 (%3)
 	di
 	ld	%4, %1

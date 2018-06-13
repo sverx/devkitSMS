@@ -8,7 +8,7 @@
 
 signed int SMS_TextRenderer_offset;
 
-void SMS_configureTextRenderer (signed int ascii_to_tile_offset) {
+void SMS_configureTextRenderer (signed int ascii_to_tile_offset) __z88dk_fastcall {
   SMS_TextRenderer_offset=ascii_to_tile_offset;
 }
 

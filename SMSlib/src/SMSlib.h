@@ -170,7 +170,7 @@ void SMS_zeroSpritePalette (void);
 #endif
 
 /* text renderer */
-void SMS_configureTextRenderer (signed int ascii_to_tile_offset);
+void SMS_configureTextRenderer (signed int ascii_to_tile_offset) __z88dk_fastcall;
 void SMS_autoSetUpTextRenderer (void);
 
 /* functions to read joypad(s) */

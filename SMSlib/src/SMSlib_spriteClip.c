@@ -13,11 +13,7 @@ unsigned char clipWin_x0=48,clipWin_y0=24,clipWin_x1=207,clipWin_y1=167;
 unsigned char clipWin_x0,clipWin_y0,clipWin_x1=255,clipWin_y1=191;
 #endif
 
-#if MAXSPRITES==64
 extern unsigned char SpriteTableY[MAXSPRITES];
-#else
-extern unsigned char SpriteTableY[MAXSPRITES+1];
-#endif
 extern unsigned char SpriteTableXN[MAXSPRITES*2];
 extern unsigned char SpriteNextFree;
 

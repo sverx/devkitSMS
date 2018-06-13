@@ -6,11 +6,7 @@
 #include "SMSlib.h"
 #include "SMSlib_common.c"
 
-#if MAXSPRITES==64
 unsigned char SpriteTableY[MAXSPRITES];
-#else
-unsigned char SpriteTableY[MAXSPRITES+1];
-#endif
 unsigned char SpriteTableXN[MAXSPRITES*2];
 unsigned char SpriteNextFree;
 
