@@ -69,12 +69,13 @@ void (*SMS_theLineInterruptHandler)(void);
 #ifdef  VDPTYPE_DETECTION
 inline void SMS_detect_VDP_type (void) {
   // INTERNAL FUNCTION
-  unsigned char old_value;
-  while (VDPVCounterPort>0x80);       // wait next frame starts
-  while (VDPVCounterPort<0x80);       // wait next half frame
+  unsigned char old_value,new_value;
+  while (VDPVCounterPort!=0x80);      // wait for line 0x80
+  new_value=VDPVCounterPort;
   do {
-    old_value=VDPVCounterPort;        // wait until VCounter 'goes back'
-  } while (old_value<=VDPVCounterPort);
+    old_value=new_value;              // wait until VCounter 'goes back'
+    new_value=VDPVCounterPort;
+  } while (old_value<=new_value);
   if (old_value>=0xE7)
     VDPType=VDP_PAL;                  // old value should be 0xF2
   else
