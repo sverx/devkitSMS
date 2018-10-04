@@ -245,6 +245,8 @@ extern volatile unsigned char SMS_VDPFlags;
 #define VDPFLAG_SPRITEOVERFLOW  0x40
 #define VDPFLAG_SPRITECOLLISION 0x20
 
+extern unsigned char SMS_Port3FBIOSvalue;
+
 /* line interrupt */
 void SMS_setLineInterruptHandler (void (*theHandlerFunction)(void)) __z88dk_fastcall;
 void SMS_setLineCounter (unsigned char count) __z88dk_fastcall;
