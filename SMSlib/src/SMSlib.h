@@ -119,7 +119,11 @@ void SMS_loadSTMcompressedTileMapatAddr (unsigned int dst, void* src);
 
 /* functions for sprites handling */
 void SMS_initSprites (void);
-signed char SMS_addSprite (unsigned char x, unsigned char y, unsigned char tile);  /* returns -1 if no more sprites are available, -2 if invalid Y coord */
+#ifdef NO_SPRITE_CHECKS
+void SMS_addSprite (unsigned char x, unsigned char y, unsigned char tile) __naked __preserves_regs(iyh,iyl);
+#else
+signed char SMS_addSprite (unsigned char x, unsigned char y, unsigned char tile) __naked __preserves_regs(iyh,iyl);  /* returns -1 if no more sprites are available, -2 if invalid Y coord */
+#endif
 void SMS_addTwoAdjoiningSprites (unsigned char x, unsigned char y, unsigned char tile);   /* doesn't return anything */
 signed char SMS_reserveSprite (void);
 void SMS_updateSpritePosition (signed char sprite, unsigned char x, unsigned char y);

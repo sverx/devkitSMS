@@ -17,6 +17,43 @@ void SMS_initSprites (void) {
 #pragma save
 #pragma disable_warning 85
 
+#ifdef NO_SPRITE_CHECKS
+// This version doesn't check if there are available sprites,
+// nor it checks if sprite's Y is the sprite terminator,
+// so it's faster... but you should know what you're doing
+// Also, it doesn't return any sprite handle
+// 1st ASM version: 170 CPU cycles
+void SMS_addSprite (unsigned char x, unsigned char y, unsigned char tile) __naked __preserves_regs(iyh,iyl) {
+  __asm
+    ld  hl,#2
+    add hl,sp
+    ld  e,(hl)                       ; read X (in E)
+    inc hl
+    ld  a,(hl)                       ; read Y (in A)
+    inc hl
+    ld  d,(hl)                       ; read tile number (in D)
+
+    ld  hl,#_SpriteNextFree          ; load current SpriteNextFree value
+    ld  c,(hl)                       ; (in C)
+    inc (hl)                         ; increment SpriteNextFree
+    ld  b,#0x00
+    ld  hl,#_SpriteTableY
+    add hl,bc                        ; hl+=SpriteNextFree
+    dec a
+    ld (hl),a                        ; write Y (as Y-1)
+
+    ld hl,#_SpriteTableXN
+    sla c
+    add hl,bc                        ; hl+=(SpriteNextFree*2)
+    ld (hl),e                        ; write X
+    inc hl
+    ld (hl),d                        ; write tile number
+    ret
+ __endasm;
+}
+
+
+#else
 // 3rd ASM version: 212 CPU cycles
 signed char SMS_addSprite (unsigned char x, unsigned char y, unsigned char tile) __naked __preserves_regs(iyh,iyl) {
   __asm
@@ -39,7 +76,7 @@ signed char SMS_addSprite (unsigned char x, unsigned char y, unsigned char tile)
     ld  b,#0x00
     add hl,bc                        ; hl+=SpriteNextFree
     dec a
-    ld (hl),a                        ; write Y  (as Y-1)
+    ld (hl),a                        ; write Y (as Y-1)
 
     ld hl,#_SpriteTableXN
     ld a,c                           ; save sprite handle to A
@@ -63,6 +100,7 @@ _returnInvalidHandle2:
     ret
  __endasm;
 }
+#endif
 #pragma restore
 
 void SMS_copySpritestoSAT (void) {
