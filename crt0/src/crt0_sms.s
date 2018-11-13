@@ -81,7 +81,7 @@ clear_ram:
         ld de,#0xc001                   ;   copying (LDIR) it to next byte
         ld bc,#0x1eff                   ;   for 8 KB (minus 17 bytes)
         ldir                            ;   do that
-        ld (_SMS_Port3FBIOSvalue),a     ; restore contents of $c000 to SMS_Port3FBIOSvalue var
+        ld (_SMS_Port3EBIOSvalue),a     ; restore contents of $c000 to SMS_Port3EBIOSvalue var
 
         ;; Initialise global variables
         call gsinit

@@ -2,7 +2,7 @@ XL2
 H 10 areas 10 global symbols
 M crt0
 S _main Ref0000
-S _SMS_Port3FBIOSvalue Ref0000
+S _SMS_Port3EBIOSvalue Ref0000
 S .__.ABS. Def0000
 S _SMS_nmi_isr Ref0000
 S _SMS_init Ref0000

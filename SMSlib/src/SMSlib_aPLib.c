@@ -102,7 +102,7 @@ _getBitstream_fourBitNumber_done:
   jr nz, _emitSingleByte_offset
 
 _emitSingleByte_zero:
-  ; If the final result in c is zero, it's a literal zero. We zeroed b above.
+  ; If the final result in c is zero, it is a literal zero. We zeroed b above.
   ex de, hl
   ld c, #0xbe
   out (c), b
@@ -134,7 +134,7 @@ _getBitstream_fourBitNumber:
 
 _emitSingleByte_offset:
   ; Preserve the bitstream
-  ex af, af'
+  ex af, af'             ; '
     ; Get the dest into hl for maths
     ex de, hl
     push hl
@@ -153,7 +153,7 @@ _emitSingleByte_offset:
     ei
     out (#0xbe),a
     ex de, hl
-  ex af, af'
+  ex af, af'        ; '
   inc de
   jp _mainLoop_noPair
 
@@ -165,9 +165,9 @@ _getBitstream_bit3:
 _emitSmallBlock:
   ld c,(hl) ; use 7 bit offset, length = 2 or 3
   inc hl
-  ex af, af'
+  ex af, af'              ; '
   rr c
-  jp z, _leave   ; if a zero is found here, it's EOF
+  jp z, _leave   ; if a zero is found here, it is EOF
   ld a, #2
   ld b, #0
   adc a, b
@@ -178,7 +178,7 @@ _emitSmallBlock:
     ld l, e
     sbc hl, bc
     ld c, a
-    ex af, af'
+    ex af, af'            ; '
     call _ldir_vram_to_vram
   pop hl
   .db 0xDD
@@ -197,7 +197,7 @@ _emitBlock:
   ; Get the first part of the offset (usually the MSB)
   call _getVariableLengthNumber
   dec c
-  ex af, af'     ; make a usable for maths
+  ex af, af'     ; ' make a usable for maths
     ld a, c
     .db 0xDD
     sub a,h      ; sub a,ixh ; will be 1 if we should use the last offset, 0 otherwise (?)
@@ -218,17 +218,17 @@ _emitBlock:
       call _getVariableLengthNumber_fromShadowA
     ; previous call restores us to normal af
     ; Swap the offset (on the stack) with the source pointer, to preserve the latter and do maths with the former
-    ; This is cunning: it's almost equivalent to pop bc; push hl; ld h,b; ld l,c
+    ; This is cunning: it is almost equivalent to pop bc; push hl; ld h,b; ld l,c
     ex (sp), hl ;bc = len, hl=offs
     ; We need to amend the length
     ; Range       Amendment
     ; 0..127        +2
     ; 128..1279      0
     ; 1280..31999   +1
-    ; 32000+        +2    <-- we don't bother with this
+    ; 32000+        +2    <-- we do not bother with this
     push de
       ex de, hl ; de = length, hl = dest
-      ex af, af' ; To scratch a
+      ex af, af' ; ' To scratch a
         ; First check for <128
         ld hl, #127
         sbc hl, de
@@ -264,7 +264,7 @@ _f2:
       push hl
         or a
         sbc hl, de
-      ex af, af' ; To bitstream a
+      ex af, af' ; ' To bitstream a
     pop de       ; hl=dest-offs, bc=len, de = dest
     call _ldir_vram_to_vram
   pop hl
@@ -325,7 +325,7 @@ _getBitstream_variableLengthNumber_bitflag:
 
 _getVariableLengthNumber_fromShadowA:
   ; Variant of the below where we restore the bitstream a bofore we start
-  ex af, af'
+  ex af, af'         ; '
 
 _getVariableLengthNumber:
   ; Reads a number encoded as all the bits of the number after the first 1 bit,
@@ -373,7 +373,7 @@ _ldir_vram_to_vram:
   ; Copy bc bytes from VRAM address hl to VRAM address de
   ; Both hl and de are "write" addresses ($4xxx)
 
-  ex af, af'
+  ex af, af'     ; '
   ; Make hl a read address
   res 6,h        ; ld a,h  ; xor #0x40 ; ld h,a
   ; Check if the count is below 256
@@ -408,7 +408,7 @@ _b3:
   inc hl
   inc de
   djnz _b3
-  ex af, af'
+  ex af, af'     ; '
   ret
   
 _leave:

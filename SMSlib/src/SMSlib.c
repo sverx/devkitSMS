@@ -53,7 +53,7 @@ unsigned char VDPType;                /* used by NTSC/PAL and VDP type detection
 #endif
 #endif
 
-unsigned char SMS_Port3FBIOSvalue;    /* initialized by BIOS */
+unsigned char SMS_Port3EBIOSvalue;    /* initialized by BIOS */
 
 /* variables for pad handling */
 volatile unsigned int KeysStatus,PreviousKeysStatus;
