@@ -178,7 +178,7 @@ void SG_init (void) {
 }
 
 void SG_setBackdropColor (unsigned char entry) {
-  SG_write_to_VDPRegister (0x07, entry & 0x0f);
+  SG_write_to_VDPRegister (0x07, entry);
 }
 
 void SG_setSpriteMode (unsigned char mode) {
