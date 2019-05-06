@@ -19,23 +19,23 @@ void SMS_VDPturnOffFeature (unsigned int feature)__z88dk_fastcall;
 /* feature can be one of the following: */
 
 /* group 0 */
-#define VDPFEATURE_EXTRAHEIGHT      0x0002
+#define VDPFEATURE_EXTRAHEIGHT      0x0002     /* needed for 224-240 lines modes */
 #define VDPFEATURE_SHIFTSPRITES     0x0008
 #define VDPFEATURE_HIDEFIRSTCOL     0x0020
-#define VDPFEATURE_LEFTCOLBLANK     0x0020     /* a better name */
+#define VDPFEATURE_LEFTCOLBLANK     0x0020     /* probably a better name */
 #define VDPFEATURE_LOCKHSCROLL      0x0040
 #define VDPFEATURE_LOCKVSCROLL      0x0080
 
 /* group 1 */
-#define VDPFEATURE_ZOOMSPRITES      0x0101
-#define VDPFEATURE_USETALLSPRITES   0x0102
-#define VDPFEATURE_240LINES         0x0108
-#define VDPFEATURE_224LINES         0x0110
+#define VDPFEATURE_ZOOMSPRITES      0x0101     /* (use SMS_setSpriteMode instead) */
+#define VDPFEATURE_USETALLSPRITES   0x0102     /* (use SMS_setSpriteMode instead) */
+#define VDPFEATURE_240LINES         0x0108     /*  SMS II only! PAL only! */
+#define VDPFEATURE_224LINES         0x0110     /*  SMS II only! */
 #define VDPFEATURE_FRAMEIRQ         0x0120
 #define VDPFEATURE_SHOWDISPLAY      0x0140
 
 /* (it's possible to combine (OR) them if they belong to the same group) */
-/* example: VDPFEATURE_ZOOMSPRITES|VDPFEATURE_USETALLSPRITES */
+/* example: VDPFEATURE_LEFTCOLBLANK|VDPFEATURE_LOCKHSCROLL */
 
 /* handy macros :) */
 #define SMS_displayOn()   SMS_VDPturnOnFeature(VDPFEATURE_SHOWDISPLAY)   /* turns on display */
@@ -100,16 +100,16 @@ void SMS_load1bppTiles (void *src, unsigned int tilefrom, unsigned int size, uns
 
 /* functions to load compressed tiles into VRAM */
 void SMS_loadPSGaidencompressedTilesatAddr (void *src, unsigned int dst);
-#define SMS_loadPSGaidencompressedTiles(src,tilefrom) SMS_loadPSGaidencompressedTilesatAddr((src),TILEtoADDR(tilefrom));
+#define SMS_loadPSGaidencompressedTiles(src,tilefrom) SMS_loadPSGaidencompressedTilesatAddr((src),TILEtoADDR(tilefrom))
 
 /* UNSAFE functions to load compressed tiles into VRAM */
 void UNSAFE_SMS_loadZX7compressedTilesatAddr (void *src, unsigned int dst);
 #define UNSAFE_SMS_loadZX7compressedTiles(src,tilefrom) UNSAFE_SMS_loadZX7compressedTilesatAddr((src),TILEtoADDR(tilefrom))
 void UNSAFE_SMS_loadaPLibcompressedTilesatAddr (void *src, unsigned int dst);
-#define UNSAFE_SMS_loadaPLibcompressedTiles(src,tilefrom) UNSAFE_SMS_loadaPLibcompressedTilesatAddr((src),TILEtoADDR(tilefrom));
+#define UNSAFE_SMS_loadaPLibcompressedTiles(src,tilefrom) UNSAFE_SMS_loadaPLibcompressedTilesatAddr((src),TILEtoADDR(tilefrom))
 
 /* functions for the tilemap */
-#define SMS_loadTileMap(x,y,src,size)            SMS_VRAMmemcpy (XYtoADDR((x),(y)),(src),(size));
+#define SMS_loadTileMap(x,y,src,size)            SMS_VRAMmemcpy (XYtoADDR((x),(y)),(src),(size))
 void SMS_loadTileMapArea (unsigned char x, unsigned char y, void *src, unsigned char width, unsigned char height);
 
 void SMS_loadSTMcompressedTileMapatAddr (unsigned int dst, void* src);
