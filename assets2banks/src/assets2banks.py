@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 # Author: sverx
-# Version: 2.1.0
+# Version: 2.2.0
 
 from __future__ import absolute_import, division, generators, unicode_literals, print_function, nested_scopes
 import sys
@@ -76,12 +76,13 @@ BankList = []          # list of the banks
 
 print("*** sverx's assets2banks converter ***")
 
-if 2 <= len(sys.argv) <= 4:
+if 2 <= len(sys.argv) <= 5:
     assets_path = sys.argv[1]
     first_bank = 2                                                  # first bank will be number 2
     compile_rel = 0                                                 # RELs not requested
+    single_h = 0                                                    # generate separate .h files
 else:
-    print("Usage: assets2banks path [--bank1size=<size>][--compile]")
+    print("Usage: assets2banks path [--bank1size=<size>][--compile][--singleheader]")
     sys.exit(1)
 
 for n, arg in enumerate(sys.argv):
@@ -98,8 +99,11 @@ for n, arg in enumerate(sys.argv):
         elif arg == "--compile":
             compile_rel = 1
             print("Info: compiled output requested")
+        elif arg == "--singleheader":
+            single_h = 1
+            print("Info: single header file requested (assets2banks.h)")
         else:
-            print("Usage: assets2banks path [--bank1size=<size>][--compile]")
+            print("Usage: assets2banks path [--bank1size=<size>][--compile][--singleheader]")
             sys.exit(1)
 
 
@@ -191,8 +195,13 @@ for ag in AssetGroupList:                                  # now find a place fo
             print("Fatal: asset/assetgroup too big to fit ({0!s} bytes are needed)".format(ag.size))
             sys.exit(1)
 
+if single_h == 1 and len(BankList)>0:
+    out_file_h = open("assets2banks.h", 'w')
+
 for bank_n, b in enumerate(BankList):
-    out_file_h = open("bank{0!s}.h".format(bank_n + first_bank), 'w')
+    if single_h == 0:
+        out_file_h = open("bank{0!s}.h".format(bank_n + first_bank), 'w')
+
     if compile_rel == 0:
         out_file_c = open("bank{0!s}.c".format(bank_n + first_bank), 'w')
     else:
@@ -307,12 +316,14 @@ for bank_n, b in enumerate(BankList):
             if compile_rel == 0:
                 out_file_c.write("};\n\n")
             in_file.close()
-    out_file_h.close()
+    if single_h == 0:
+        out_file_h.close()
 
     if compile_rel == 0:
         out_file_c.close()
     else:
         out_file_rel.close()
+
 else:
     if len(BankList) == 0:
         print("Fatal: no banks generated")
@@ -320,5 +331,9 @@ else:
     else:
         print("Info: {0!s} bank(s) generated".format(len(BankList)), end="")
         for bank_n, b in enumerate(BankList):
-            print(" [bank{0!s}:{1!s}]".format(bank_n + first_bank, b.free), end=""),
+            print(" [bank{0!s} {1!s}]".format(bank_n + first_bank, b.free), end=""),
         print(" bytes free")
+
+if single_h == 1 and len(BankList)>0:
+    out_file_h.close()
+

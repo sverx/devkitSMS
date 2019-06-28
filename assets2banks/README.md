@@ -1,12 +1,13 @@
-##assets2banks
+## assets2banks
 
-###How to use assets2banks
+### How to use assets2banks
 
 ```
-assets2banks <asset folder> [--bank1size=<size in bytes>][--compile]
+assets2banks <asset folder> [--bank1size=<size>][--compile][--singleheader]
 ```
 
 Using the assets2banks utility you can create .c source files and their respective .h header files containing one constant data array for each single file found in the specified asset folder.
+(Adding --singleheader you'll generate a single assets2banks.h file instead of one single .h header file for each bank)
 Also, if you add the --compile option to your command line, object files (RELs) will be generated in place of the C source files, so you won't have to compile them yourself.
 
 Example usage:
@@ -114,6 +115,10 @@ asset4.bin
 :overwrite 32 128 0x010a 0x01FF 0x0123
 # 'asset4.bin' 128 elements starting from array[32] will be set to the values listed
 # (values list will be reitered until 128 array elements are replaced)
+
+somedata.bin
+:header 0xF5 0xC9 x00
+# adds a 3 bytes header to your binary data
 ```
 
 Of course all the assets in the asset folder which are not mentioned in the config file will be handled as ungrouped and without special attributes.
