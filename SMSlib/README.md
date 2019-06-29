@@ -75,6 +75,9 @@ void SMS_copySpritestoSAT (void);           /* copy sprites to Sprites Attribute
 void SMS_configureTextRenderer (signed int ascii_to_tile_offset);  /* set the value you should add to ASCII value to get the tile number */
 void SMS_autoSetUpTextRenderer (void);                             /* load a standard font character set into tiles 0-95, set BG palette to B/W and turn on the screen */
 
+/* decompress ZX7-compressed data to RAM */
+void SMS_decompressZX7 (void *src, void *dst);
+
 /* input handling */
 unsigned int SMS_getKeysStatus (void);    /* the current status of the keys */
 unsigned int SMS_getKeysPressed (void);   /* the keys that were up last frame and down now */

@@ -177,6 +177,9 @@ void SMS_zeroSpritePalette (void);
 void SMS_configureTextRenderer (signed int ascii_to_tile_offset) __z88dk_fastcall;
 void SMS_autoSetUpTextRenderer (void);
 
+/* decompress ZX7-compressed data to RAM */
+void SMS_decompressZX7 (void *src, void *dst);
+
 /* functions to read joypad(s) */
 unsigned int SMS_getKeysStatus (void);
 unsigned int SMS_getKeysPressed (void);
