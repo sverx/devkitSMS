@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 # Author: sverx
-# Version: 2.2.0
+# Version: 2.3.0
 
 from __future__ import absolute_import, division, generators, unicode_literals, print_function, nested_scopes
 import sys
@@ -10,11 +10,12 @@ import os.path
 import array
 
 
-class OverWrite:
-    def __init__(self, start, length, replace):
+class Modify:
+    def __init__(self, operator, start, length, values):
+        self.operator = operator
         self.start = start
         self.length = length
-        self.replace = replace
+        self.values = values
 
 
 class Asset:
@@ -23,14 +24,14 @@ class Asset:
         self.o_size = size
         self.size = size
         self.style = 0
-        self.overwrites = []
+        self.modifies = []
         self.header = []
 
     def set_style(self, style):
         self.style = style
 
-    def add_overwrite(self, overwrite):
-        self.overwrites.append(overwrite)
+    def add_modify(self, modify):
+        self.modifies.append(modify)
 
     def add_header(self, header):
         self.header = header
@@ -125,18 +126,38 @@ try:
             in_a_group = False
         elif ls[0] == ":":                               # if line starts with : it means we have an attribute
             if ls == ":format unsigned int":
+                if len(a.modifies) != 0 or len(a.header) != 0:
+                    print("Fatal: format attribute should be specified before any other asset attribute")
+                    sys.exit(1)
                 a.set_style(1)
             elif ls[:11] == ":overwrite ":
                 ovp = ls[11:].split()
                 try:
                     if len(ovp) == 2:                    # if there are two values only, we overwrite just one value
-                        ov = OverWrite(int(ovp[0], 0), 1, ovp[1:])
+                        md = Modify('set', int(ovp[0], 0), 1, ovp[1])
                     else:
-                        ov = OverWrite(int(ovp[0], 0), int(ovp[1], 0), ovp[2:])
+                        md = Modify('set', int(ovp[0], 0), int(ovp[1], 0), ovp[2:])
                 except ValueError:
                     print("Fatal: invalid overwrite attribute parameter(s)")
                     sys.exit(1)
-                a.add_overwrite(ov)
+                a.add_modify(md)
+            elif ls[:8] == ":modify ":
+                mdf = ls[8:].split()
+                if mdf[0].lower() == 'add' or mdf[0].lower() == 'and' or mdf[0].lower() == 'or' or mdf[0].lower() == 'xor':
+                    try:
+                        if len(mdf) == 2:                # if there is one value only after the operator, we modify all array elements
+                            md = Modify(mdf[0].lower(), 0, a.size, mdf[1])
+                        elif len(mdf) == 3:              # if there are two values only after the operator, we modify one array element only
+                            md = Modify(mdf[0].lower(), mdf[1], 1, mdf[2])
+                        else:                            # if there are three (or more) values after the operator, we modify *len* array elements from *start*
+                            md = Modify(mdf[0].lower(), int(mdf[1], 0), int(mdf[2], 0), mdf[3:])
+                    except ValueError:
+                        print("Fatal: invalid modify attribute parameter(s)")
+                        sys.exit(1)
+                    a.add_modify(md)
+                else:
+                    print("Fatal: invalid modify attribute action parameter. Only 'add', 'and', 'or' and 'xor' are valid actions")
+                    sys.exit(1)
             elif ls[:8] == ":header ":
                 hdp = ls[8:].split()
                 a.add_header(hdp)
@@ -263,10 +284,23 @@ for bank_n, b in enumerate(BankList):
                     print("Warning: asset '{0}' has odd size but declared as 'unsigned int'".format(a.name))
                     print("         so the last byte has been discarded")
 
-            # do the requested overwrites to the data
-            for o in a.overwrites:
-                for cnt in range(o.length):
-                    ar[o.start+cnt] = int(o.replace[cnt % len(o.replace)], 0)
+            # do the requested modifies to the data
+            for m in a.modifies:
+                if m.operator == 'add':
+                    for cnt in range(m.length):
+                        ar[m.start+cnt] += int(m.values[cnt % len(m.values)], 0)
+                elif m.operator == 'and':
+                    for cnt in range(m.length):
+                        ar[m.start+cnt] &= int(m.values[cnt % len(m.values)], 0)
+                elif m.operator == 'or':
+                    for cnt in range(m.length):
+                        ar[m.start+cnt] |= int(m.values[cnt % len(m.values)], 0)
+                elif m.operator == 'xor':
+                    for cnt in range(m.length):
+                        ar[m.start+cnt] ^= int(m.values[cnt % len(m.values)], 0)
+                elif m.operator == 'set':
+                    for cnt in range(m.length):
+                        ar[m.start+cnt] = int(m.values[cnt % len(m.values)], 0)   # overwrites the original data
 
             # now prepend the header
             for cnt in range(len(a.header)):

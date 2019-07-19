@@ -54,15 +54,21 @@ Beside that, assets2banks behavior regarding specific assets can optionally be c
 
 This **must** be named *assets2banks.cfg* and it can define/contain:
  * grouping of assets
+
 Listed assets will be allocated in the same bank (groups are defined using open and close curly braces "{" and "}")
+
  * asset format attribute
+
+(all asset attributes starts with ':' and there's at most one attribute for each new line. They always refer to the last previously listed asset)
+
 For instance:
 ```
 :format unsigned int
 ```
-will create a **const unsigned int** array instead of a **const unsigned char** array.
-(Asset attributes starts with ':' and there's at most one attribute for each new line. They are relative to the last previously listed asset)
+will create a **const unsigned int** array instead of a **const unsigned char** array. Note that the format attribute, when present, should always be the **first** attribute of an asset.
+
  * overwrite array elements
+
 By using:
 ```
 :overwrite <start> <length> <value> [<value>[...]]
@@ -73,9 +79,31 @@ There's also a shorter form. By using:
 ```
 :overwrite <index> <value>
 ```
-the element element at *index* will be replaced with the provided value.
+the element at *index* will be replaced with the provided value.
 
 Is it also possible to specify more than one overwrite for a single asset, of course they are relative to the last previously listed asset.
+
+ * modify array elements
+
+By using:
+```
+:modify <action> <start> <length> <value> [<value>[...]]
+```
+*length* array elements from *start* will be modified using the listed action and value(s), repeating them if needed.
+Accept decimal values, or 0x-prefixed hex values. Valid actions are 'add', 'and', 'or' and 'xor'.
+There are also two shorter forms. By using:
+```
+:modify <action> <index> <value>
+```
+the element at *index* will be modified using the provided action and value.
+
+Also, by using:
+```
+:modify <action> <value>
+```
+all the array elements will be modified using the provided action and value.
+
+Is it also possible to specify more than one modify attribute for a single asset.
 
  * add leading values (an header) to your asset
 By using:
@@ -109,6 +137,8 @@ asset2 (palette).bin
 asset2 (tiles).psgcompr
 asset3 (tilemap).bin 
 :format unsigned int
+:modify OR 0 16 0x1000
+# 'asset3 (tilemap).bin' first 16 elements (starting from 0) will be ORed with 0x1000 bit mask
 
 asset4.bin
 :format unsigned int
@@ -117,8 +147,9 @@ asset4.bin
 # (values list will be reitered until 128 array elements are replaced)
 
 somedata.bin
+:modify AND 0xFE
 :header 0xF5 0xC9 x00
-# adds a 3 bytes header to your binary data
+# clears last bit of each elements and prepends a 3 bytes header to your 'somedata.bin' asset
 ```
 
 Of course all the assets in the asset folder which are not mentioned in the config file will be handled as ungrouped and without special attributes.
