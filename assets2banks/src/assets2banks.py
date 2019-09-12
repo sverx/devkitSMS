@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 # Author: sverx
-# Version: 2.3.0
+# Version: 2.3.1
 
 from __future__ import absolute_import, division, generators, unicode_literals, print_function, nested_scopes
 import sys
@@ -207,13 +207,16 @@ for ag in AssetGroupList:                                  # now find a place fo
         if b.free >= ag.size:                              # we've found a place for this assetgroup
             b.add_assetgroup(ag)
             break
-    else:                                                # we've found no place for this assetgroup, allocate a new bank
+    else:                                                  # we've found no place for this assetgroup, allocate a new bank
         if ag.size <= 16384:
             b = Bank(16384)
             b.add_assetgroup(ag)
             BankList.append(b)
         else:
-            print("Fatal: asset/assetgroup too big to fit ({0!s} bytes are needed)".format(ag.size))
+            if len(ag.assets) == 1:
+                print("Fatal: asset {0!s} too big to fit ({1!s} bytes are needed)".format(ag.assets[0].name, ag.size))
+            else:
+                print("Fatal: assetgroup {{{0!s}}} too big to fit ({1!s} bytes are needed)".format(', '.join(str(i.name) for i in ag.assets), ag.size))
             sys.exit(1)
 
 if single_h == 1 and len(BankList)>0:
