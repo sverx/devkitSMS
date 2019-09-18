@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 # Author: sverx
-# Version: 2.3.1
+# Version: 2.3.2
 
 from __future__ import absolute_import, division, generators, unicode_literals, print_function, nested_scopes
 import sys
@@ -196,6 +196,8 @@ try:
                 ag = AssetGroup()
                 ag.add_asset(a)
                 AssetGroupList.append(ag)
+            if st.st_size == 0:
+                print("Warning: {0!s} is an empty file".format(str(f)))
 except OSError:
     print("Fatal: can't access '{0}' folder".format(assets_path))
     sys.exit(1)
