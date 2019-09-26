@@ -42,7 +42,7 @@ sdcc -o SMSlib_VRAMmemcpy.rel -c -mz80 %OPT% --peep-file peep-rules.txt --peep-a
 sdcc -o SMSlib_VRAMmemset.rel -c -mz80 %OPT% --peep-file peep-rules.txt --peep-asm SMSlib_VRAMmemset.c
 @if %errorlevel% NEQ 0 goto :EOF
 
-sdcc -o SMSlib_UNSAFE.rel -c -mz80 %OPT% --peep-file peep-rules.txt --peep-asm SMSlib_UNSAFE.c
+sdcc -o SMSlib_UNSAFE.rel -c -mz80 %OPT% --peep-file peep-rules.txt SMSlib_UNSAFE.c
 @if %errorlevel% NEQ 0 goto :EOF
 
 sdcc -o SMSlib_PSGaiden.rel -c -mz80 %OPT% --peep-file peep-rules.txt SMSlib_PSGaiden.c
