@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 # Author: sverx
-# Version: 2.3.2
+# Version: 2.3.3
 
 from __future__ import absolute_import, division, generators, unicode_literals, print_function, nested_scopes
 import sys
@@ -37,8 +37,10 @@ class Asset:
         self.header = header
         if self.style == 0:
             self.size += len(self.header)
+            return len(self.header)
         else:
             self.size += len(self.header) * 2
+            return len(self.header) *2
 
 
 class AssetGroup:
@@ -50,6 +52,8 @@ class AssetGroup:
         self.assets.append(asset)
         self.size += asset.size
 
+    def grow(self, size):
+        self.size += size
 
 class Bank:
     def __init__(self, size):
@@ -160,7 +164,7 @@ try:
                     sys.exit(1)
             elif ls[:8] == ":header ":
                 hdp = ls[8:].split()
-                a.add_header(hdp)
+                ag.grow(a.add_header(hdp))
             else:
                 print("Fatal: unknown attribute '{0}'".format(ls))
                 sys.exit(1)
