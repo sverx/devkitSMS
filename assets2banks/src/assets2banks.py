@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 # Author: sverx
-# Version: 2.3.3
+# Version: 2.4.0
 
 from __future__ import absolute_import, division, generators, unicode_literals, print_function, nested_scopes
 import sys
@@ -26,6 +26,7 @@ class Asset:
         self.style = 0
         self.modifies = []
         self.header = []
+        self.footer = []
 
     def set_style(self, style):
         self.style = style
@@ -42,6 +43,14 @@ class Asset:
             self.size += len(self.header) * 2
             return len(self.header) *2
 
+    def add_footer(self, footer):
+        self.footer = footer
+        if self.style == 0:
+            self.size += len(self.footer)
+            return len(self.footer)
+        else:
+            self.size += len(self.footer) * 2
+            return len(self.footer) *2
 
 class AssetGroup:
     def __init__(self):
@@ -54,6 +63,7 @@ class AssetGroup:
 
     def grow(self, size):
         self.size += size
+
 
 class Bank:
     def __init__(self, size):
@@ -130,7 +140,7 @@ try:
             in_a_group = False
         elif ls[0] == ":":                               # if line starts with : it means we have an attribute
             if ls == ":format unsigned int":
-                if len(a.modifies) != 0 or len(a.header) != 0:
+                if len(a.modifies) != 0 or len(a.header) != 0 or len(a.footer) != 0:
                     print("Fatal: format attribute should be specified before any other asset attribute")
                     sys.exit(1)
                 a.set_style(1)
@@ -165,13 +175,16 @@ try:
             elif ls[:8] == ":header ":
                 hdp = ls[8:].split()
                 ag.grow(a.add_header(hdp))
+            elif ls[:8] == ":append ":
+                ftp = ls[8:].split()
+                ag.grow(a.add_footer(ftp))
             else:
                 print("Fatal: unknown attribute '{0}'".format(ls))
                 sys.exit(1)
         else:                                                   # else it's an asset
             try:
                 st = os.stat(os.path.join(assets_path, str(ls)))
-            except OSError:
+            except (IOError, OSError):
                 print("Fatal: can't find asset '{0}'".format(ls))
                 sys.exit(1)
             a = Asset(ls, st.st_size)
@@ -180,14 +193,14 @@ try:
                 ag = AssetGroup()
                 AssetGroupList.append(ag)
             ag.add_asset(a)
-except OSError:
+except (IOError, OSError):
     pass
 
 try:
     st = os.stat(os.path.join(assets_path, "assets2banks.cfg"))  # fake asset, to skip config file, if present in folder
     a = Asset("assets2banks.cfg", st.st_size)
     AssetList.append(a)
-except OSError:
+except (IOError, OSError):
     pass
 
 try:
@@ -202,7 +215,7 @@ try:
                 AssetGroupList.append(ag)
             if st.st_size == 0:
                 print("Warning: {0!s} is an empty file".format(str(f)))
-except OSError:
+except (IOError, OSError):
     print("Fatal: can't access '{0}' folder".format(assets_path))
     sys.exit(1)
 
@@ -314,6 +327,10 @@ for bank_n, b in enumerate(BankList):
             # now prepend the header
             for cnt in range(len(a.header)):
                 ar.insert(cnt, int(a.header[cnt], 0))
+
+            # then append the footer
+            for cnt in range(len(a.footer)):
+                ar.append(int(a.footer[cnt], 0))
 
             if compile_rel == 1:
                 out_file_rel.write("T {0!s} {1!s}".format(format(asset_addr % 256, "02X"),

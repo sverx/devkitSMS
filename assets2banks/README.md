@@ -106,11 +106,20 @@ all the array elements will be modified using the provided action and value.
 Is it also possible to specify more than one modify attribute for a single asset.
 
  * add leading values (an header) to your asset
+
 By using:
 ```
 :header <value> [<value>[...]]
 ```
 the provided value(s) will be placed *before* the asset's data.
+
+ * add trailing values (append data) to your asset
+
+By using:
+```
+:append <value> [<value>[...]]
+```
+the provided value(s) will be placed *after* the asset's data.
 
  * line comments (using the # as first char on the line)
  * (empty lines are ignored)
@@ -148,8 +157,9 @@ asset4.bin
 
 somedata.bin
 :modify AND 0xFE
-:header 0xF5 0xC9 x00
-# clears last bit of each elements and prepends a 3 bytes header to your 'somedata.bin' asset
+:header 0xF5 0xC9
+:append 0x00
+# clears last bit of each element, prepends a 2 bytes header to your 'somedata.bin' asset, then append one final byte to it
 ```
 
 Of course all the assets in the asset folder which are not mentioned in the config file will be handled as ungrouped and without special attributes.
