@@ -78,7 +78,7 @@ void SMS_crt0_RST18(unsigned int tile) __z88dk_fastcall __preserves_regs(b,c,d,e
 /* PNT define (has address and VDP flags) */
 #define SMS_PNTAddress            0x7800
 /* macro for turning x,y into VRAM addr */
-#define XYtoADDR(x,y)             (SMS_PNTAddress|((unsigned int)(y)<<6)|((unsigned char)(x)<<1))
+#define XYtoADDR(x,y)             (SMS_PNTAddress|((((unsigned int)(y)<<5)+((unsigned char)(x)))<<1))
 #define SMS_setNextTileatXY(x,y)  SMS_setAddr(XYtoADDR((x),(y)))
 #define SMS_setNextTileatLoc(loc) SMS_setAddr(SMS_PNTAddress|((unsigned int)(loc)<<1))
 #define SMS_setNextTileatAddr(a)  SMS_setAddr(a)
@@ -314,6 +314,21 @@ void UNSAFE_SMS_VRAMmemcpy128 (unsigned int dst, void *src);
                                        (0x7fe0-sizeof(author)-sizeof(name)-sizeof(descr))%256, \
                                         (0x7fe0-sizeof(author)-sizeof(name)-sizeof(descr))>>8}
 /* pretty nice, isn't it? :) */
+
+/* SEGA header for 16KB ROM */
+#ifndef TARGET_GG
+/* "SMS Export" (16KB) */
+#define SMS_EMBED_SEGA_ROM_HEADER_16KB_REGION_CODE  0x4B
+#else
+/* "GG international" (16KB) */
+#define SMS_EMBED_SEGA_ROM_HEADER_16KB_REGION_CODE  0x7B
+#endif
+
+#define SMS_EMBED_SEGA_ROM_HEADER_16KB(productCode,revision)                                   \
+ const __at (0x3ff0) unsigned char __SMS__SEGA_signature[16]={'T','M','R',' ','S','E','G','A', \
+                                                                          0xFF,0xFF,0xFF,0xFF, \
+                  SMS_BYTE_TO_BCD((productCode)%100),SMS_BYTE_TO_BCD(((productCode)/100)%100), \
+      (((productCode)/10000)<<4)|((revision)&0x0f),SMS_EMBED_SEGA_ROM_HEADER_16KB_REGION_CODE}
 
 /* to set SDSC header date to 0000-00-00 so that ihx2sms updates that with compilation date */
 #define SMS_EMBED_SDSC_HEADER_AUTO_DATE(verMaj,verMin,author,name,descr)                       \

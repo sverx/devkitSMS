@@ -4,7 +4,7 @@
   with 'broken' I mean that the program it's actually assuming that each new declaration of data
   at address 0x8000 informs that we have to allocate a new ROM bank in the final SMS file
 
-  sverx\2015
+  sverx\2015-2019
 
 */
 
@@ -19,6 +19,8 @@
 #define SEGA_HEADER_ADDR    0x7ff0
 #define SDSC_HEADER_ADDR    0x7fe0
 #define CRT0_END            0x200
+
+#define SEGA_HEADER_ADDR_16K    0x3ff0
 
 #define BYTE_TO_BCD(n)      (((n)/10)*16+((n)%10))
 
@@ -106,7 +108,7 @@ int get_slot2_bank_order(const char* map_file) {
 }
 
 int main(int argc, char const* *argv) {
-	
+  
   unsigned int i,dest_addr;
   char tmp[3];
   unsigned int checksum=0;
@@ -189,10 +191,10 @@ int main(int argc, char const* *argv) {
         break;
         
       case 1: // END (just ignore)
-  	break;  
-  	
+    break;  
+    
     }
-  	
+    
   }
   fclose (fIN);
 
@@ -224,6 +226,17 @@ int main(int argc, char const* *argv) {
         checksum+=buf[i];
       buf[SEGA_HEADER_ADDR+10]=checksum&0x00FF;
       buf[SEGA_HEADER_ADDR+11]=checksum>>8;
+      printf("Info: SEGA header found, checksum updated\n");
+    } else {
+      printf("Warning: SEGA header NOT found, ROM won't be bootable on european/american Master System\n");
+    }
+  } else { 
+    /* it's probably a 16 KB ROM, check/update SEGA header checksum */
+    if (!strncmp("TMR SEGA",(char *)&buf[SEGA_HEADER_ADDR_16K],8)) {
+      for (i=0;i<SEGA_HEADER_ADDR_16K;i++)
+        checksum+=buf[i];
+      buf[SEGA_HEADER_ADDR_16K+10]=checksum&0x00FF;
+      buf[SEGA_HEADER_ADDR_16K+11]=checksum>>8;
       printf("Info: SEGA header found, checksum updated\n");
     } else {
       printf("Warning: SEGA header NOT found, ROM won't be bootable on european/american Master System\n");
