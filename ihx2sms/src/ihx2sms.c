@@ -24,13 +24,14 @@
 
 #define BYTE_TO_BCD(n)      (((n)/10)*16+((n)%10))
 
-unsigned char buf[1024*1024];
+unsigned char buf[1024*1024];    // generated ROM max: 1MB
 unsigned int size=0;
 unsigned int used=CRT0_END,used_low=CRT0_END;
 int use_additional_banks=0;
 unsigned int add_banks=0;
 unsigned int count, addr, type;
 char data[256];
+char padding_type;
 unsigned char map_loc[MAX_SLOT2_BANKS];
 unsigned int num_map_loc=0;
 FILE *fIN;
@@ -107,32 +108,55 @@ int get_slot2_bank_order(const char* map_file) {
     return 0;
 }
 
+void usage (int ret_value) {
+  printf("Usage: ihx2sms [-m file.map] [-pm|-pp] infile.ihx outfile.sms\n");
+  exit(ret_value);
+}
+
+int count_set_bits (unsigned int value) {
+  int cnt=0;
+  while (value) {
+    cnt+=(value & 0x01);
+    value>>=1;
+  }
+  return (cnt);
+}
+
 int main(int argc, char const* *argv) {
   
   unsigned int i,dest_addr;
   char tmp[3];
   unsigned int checksum=0;
   int using_map=0;
+  int cur_arg=1;
   
   printf("*** sverx's ihx2sms converter ***\n");
-
-  if (argc==5 && strcmp(argv[1], "-m")==0) {
-    using_map=1;
-  }
-
-  if (argc!=3 && !using_map) {
-    printf("Usage: ihx2sms [-m file.map] infile.ihx outfile.sms\n");
-    return(1);
-  }
   
-  fIN=fopen(argv[using_map ? 3 : 1],"rb");
+  if (argc<3)
+    usage(1);
+  
+  while (cur_arg<(argc-2)) {
+    if (strcmp(argv[cur_arg], "-m")==0)
+      using_map=(++cur_arg)+1;
+    else if (strcmp(argv[cur_arg], "-pm")==0)
+      padding_type=1;
+    else if (strcmp(argv[cur_arg], "-pp")==0)
+      padding_type=2;
+    else {
+      printf("Fatal: can't understand argument '%s'\n",argv[cur_arg]);
+      usage(1);
+    }
+    cur_arg++;
+  }
+
+  fIN=fopen(argv[argc-2],"rb");
   if (!fIN) {
     printf("Fatal: can't open input IHX file\n");
     return(1);
   }
 
   if (using_map) {
-    int ret=get_slot2_bank_order(argv[2]);
+    int ret=get_slot2_bank_order(argv[using_map]);
     if (ret) {
       return ret;
     }
@@ -243,10 +267,21 @@ int main(int argc, char const* *argv) {
     }
   }
 
-  fOUT=fopen(argv[using_map ? 4 : 2],"wb");
+  fOUT=fopen(argv[argc-1],"wb");
   if (!fOUT) {
     printf("Fatal: can't open output SMS file\n");
     return(1);
+  }
+  
+  if (padding_type!=0) {
+    if (padding_type==1) {
+      while (size%(64*1024)!=0)
+        size+=BANK_SIZE;
+    } else if (padding_type==2) {
+      while (count_set_bits(size)!=1)
+        size+=BANK_SIZE;
+    }
+    printf("Info: ROM size padded to %d KB\n",size/1024);
   }
 
   fwrite (&buf, 1, size, fOUT);
