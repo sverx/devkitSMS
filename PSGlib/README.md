@@ -19,11 +19,10 @@ void PSGSFXCancelLoop (void);                                         /* tell th
 void PSGSFXStop (void);                                               /* this will make your SFX stop */
 unsigned char PSGSFXGetStatus (void);                                 /* get the current status of the SFX */
 
-void PSGSilenceChannels (void);
-                 /* this will silence all PSG channels */
-void PSGRestoreVolumes (void);
-                  /* this will restore PSG channels volume */
+void PSGSilenceChannels (void);                 /* this will silence all PSG channels */
+void PSGRestoreVolumes (void);                  /* this will restore PSG channels volume */
 
 void PSGFrame (void);                           /* you should call this at a constant pace */
 void PSGSFXFrame (void);                        /* you should call this too at a constant pace, if you use SFXs */
 ```
+

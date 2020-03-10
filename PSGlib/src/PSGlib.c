@@ -155,17 +155,17 @@ void PSGRestoreVolumes (void) {
   restore the PSG channels volumes (if a tune or an SFX uses them!)
 */
   if (PSGMusicStatus) {
-    PSGPort=PSGLatch|PSGChannel0|PSGVolumeData|((PSGChan0Volume+PSGMusicVolumeAttenuation>15)?15:PSGChan0Volume+PSGMusicVolumeAttenuation);
-    PSGPort=PSGLatch|PSGChannel1|PSGVolumeData|((PSGChan1Volume+PSGMusicVolumeAttenuation>15)?15:PSGChan1Volume+PSGMusicVolumeAttenuation);
+    PSGPort=PSGLatch|PSGChannel0|PSGVolumeData|(((PSGChan0Volume&0x0F)+PSGMusicVolumeAttenuation>15)?15:(PSGChan0Volume&0x0F)+PSGMusicVolumeAttenuation);
+    PSGPort=PSGLatch|PSGChannel1|PSGVolumeData|(((PSGChan1Volume&0x0F)+PSGMusicVolumeAttenuation>15)?15:(PSGChan1Volume&0x0F)+PSGMusicVolumeAttenuation);
   }
   if (PSGChannel2SFX)
     PSGPort=PSGLatch|PSGChannel2|PSGVolumeData|PSGSFXChan2Volume;
   else if (PSGMusicStatus)
-    PSGPort=PSGLatch|PSGChannel2|PSGVolumeData|((PSGChan2Volume+PSGMusicVolumeAttenuation>15)?15:PSGChan2Volume+PSGMusicVolumeAttenuation);
+    PSGPort=PSGLatch|PSGChannel2|PSGVolumeData|(((PSGChan2Volume&0x0F)+PSGMusicVolumeAttenuation>15)?15:(PSGChan2Volume&0x0F)+PSGMusicVolumeAttenuation);
   if (PSGChannel3SFX)
     PSGPort=PSGLatch|PSGChannel3|PSGVolumeData|PSGSFXChan3Volume;
   else if (PSGMusicStatus)
-    PSGPort=PSGLatch|PSGChannel3|PSGVolumeData|((PSGChan3Volume+PSGMusicVolumeAttenuation>15)?15:PSGChan3Volume+PSGMusicVolumeAttenuation);
+    PSGPort=PSGLatch|PSGChannel3|PSGVolumeData|(((PSGChan3Volume&0x0F)+PSGMusicVolumeAttenuation>15)?15:(PSGChan3Volume&0x0F)+PSGMusicVolumeAttenuation);
 }
 
 void PSGSetMusicVolumeAttenuation (unsigned char attenuation) {
@@ -174,12 +174,12 @@ void PSGSetMusicVolumeAttenuation (unsigned char attenuation) {
 */
   PSGMusicVolumeAttenuation=attenuation;
   if (PSGMusicStatus) {
-    PSGPort=PSGLatch|PSGChannel0|PSGVolumeData|((PSGChan0Volume+PSGMusicVolumeAttenuation>15)?15:PSGChan0Volume+PSGMusicVolumeAttenuation);
-    PSGPort=PSGLatch|PSGChannel1|PSGVolumeData|((PSGChan1Volume+PSGMusicVolumeAttenuation>15)?15:PSGChan1Volume+PSGMusicVolumeAttenuation);
+    PSGPort=PSGLatch|PSGChannel0|PSGVolumeData|(((PSGChan0Volume&0x0F)+PSGMusicVolumeAttenuation>15)?15:(PSGChan0Volume&0x0F)+PSGMusicVolumeAttenuation);
+    PSGPort=PSGLatch|PSGChannel1|PSGVolumeData|(((PSGChan1Volume&0x0F)+PSGMusicVolumeAttenuation>15)?15:(PSGChan1Volume&0x0F)+PSGMusicVolumeAttenuation);
     if (!PSGChannel2SFX)
-      PSGPort=PSGLatch|PSGChannel2|PSGVolumeData|((PSGChan2Volume+PSGMusicVolumeAttenuation>15)?15:PSGChan2Volume+PSGMusicVolumeAttenuation);
+      PSGPort=PSGLatch|PSGChannel2|PSGVolumeData|(((PSGChan2Volume&0x0F)+PSGMusicVolumeAttenuation>15)?15:(PSGChan2Volume&0x0F)+PSGMusicVolumeAttenuation);
     if (!PSGChannel3SFX)
-      PSGPort=PSGLatch|PSGChannel3|PSGVolumeData|((PSGChan3Volume+PSGMusicVolumeAttenuation>15)?15:PSGChan3Volume+PSGMusicVolumeAttenuation);
+      PSGPort=PSGLatch|PSGChannel3|PSGVolumeData|(((PSGChan3Volume&0x0F)+PSGMusicVolumeAttenuation>15)?15:(PSGChan3Volume&0x0F)+PSGMusicVolumeAttenuation);
   }
 }
 
@@ -283,7 +283,7 @@ _continue:
   cp PSGLatch                    ; is it a latch?
   jr c,_noLatch                  ; if < $80 then it is NOT a latch
   ld (_PSGMusicLastLatch),a      ; it is a latch - save it in "LastLatch"
-  
+
   ; we have got the latch PSG byte both in A and in B
   ; and we have to check if the value should pass to PSG or not
   bit 4,a                        ; test if it is a volume
@@ -316,7 +316,7 @@ _ifchn2:
   or a
   jr z,_send2PSG_B
   jp _intLoop
-  
+
 _latch_Volume:
   bit 6,a                        ; test if the latch it is for channels 0-1 or for 2-3
   jr nz,_latch_Volume_23         ; volume is for channel 2 or 3
@@ -342,7 +342,7 @@ _chn2:
   or a
   jr z,_sendVolume2PSG_B
   jp _intLoop
-  
+
 _skipFrame:
   dec a
   ld (_PSGMusicSkipFrames),a
@@ -493,7 +493,7 @@ _SFXvolumechn3:
 _SFXoutbyte:
   out (PSGDataPort),a            ; output the byte
   jp _intSFXLoop
-  
+
 _skipSFXFrame:
   dec a
   ld (_PSGSFXSkipFrames),a
@@ -516,7 +516,7 @@ _SFXotherCommands:
   jr z,_sfxLoop
   cp PSGLoop
   jr z,_SFXsetLoopPoint
-  
+
   ; ***************************************************************************
   ; we should never get here!
   ; if we do, it means the PSG SFX file is probably corrupted, so we just RET
@@ -527,7 +527,7 @@ _SFXotherCommands:
 _SFXsetLoopPoint:
   ld (_PSGSFXLoopPoint),hl
   jp _intSFXLoop
-  
+
 _sfxLoop:
   ld a,(_PSGSFXLoopFlag)              ; is it a looping SFX?
   or a
