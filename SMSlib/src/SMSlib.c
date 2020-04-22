@@ -317,17 +317,18 @@ void SMS_isr (void) __interrupt __naked {
     push iy
     push ix
   __endasm;
-  SMS_VDPFlags=VDPStatusPort;              /* read status port and write it to SMS_VDPFlags */
-  if (SMS_VDPFlags & 0x80) {               /* this also aknowledge interrupt at VDP */
-    VDPBlank=true;                         /* frame interrupt */
+  SMS_VDPFlags=VDPStatusPort;               /* read status port and write it to SMS_VDPFlags */
+  if (SMS_VDPFlags & 0x80) {                /* this also aknowledge interrupt at VDP */
+    VDPBlank=true;                          /* frame interrupt */
     PreviousKeysStatus=KeysStatus;
     PreviousMDKeysStatus=MDKeysStatus;
-    IOPortCtrl=TH_HI;
-    KeysStatus=~(((IOPortH)<<8)|IOPortL);
+    KeysStatus=~(((IOPortH)<<8)|IOPortL);   /* TH status unimportant */
     IOPortCtrl=TH_LO;
     MDKeysStatus=IOPortL;
     if (!(MDKeysStatus & 0x0C)) {           /* verify it's a MD pad */
       MDKeysStatus=(~MDKeysStatus)&0x30;    /* read MD_A & MD_START */
+      IOPortCtrl=TH_HI;
+      IOPortCtrl=TH_LO;
       IOPortCtrl=TH_HI;
       IOPortCtrl=TH_LO;
       if (!(IOPortL & 0x0F)) {              /* verify we're reading a 6 buttons pad */
@@ -335,8 +336,10 @@ void SMS_isr (void) __interrupt __naked {
         MDKeysStatus|=(~IOPortL)&0x0F;      /* read MD_MODE, MD_X, MD_Y, MD_Z */
         IOPortCtrl=TH_LO;
       }
-    } else
+    } else {
       MDKeysStatus=0;                       /* (because one might have detached his MD pad) */
+    }
+    IOPortCtrl=TH_HI;                       /* leave TH high */
   } else
     SMS_theLineInterruptHandler();          /* line interrupt */
   __asm
