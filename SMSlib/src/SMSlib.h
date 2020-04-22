@@ -82,7 +82,7 @@ void SMS_crt0_RST18(unsigned int tile) __z88dk_fastcall __preserves_regs(b,c,d,e
 #define SMS_setNextTileatXY(x,y)  SMS_setAddr(XYtoADDR((x),(y)))
 #define SMS_setNextTileatLoc(loc) SMS_setAddr(SMS_PNTAddress|((unsigned int)(loc)<<1))
 #define SMS_setNextTileatAddr(a)  SMS_setAddr(a)
-#define SMS_setTileatXY(x,y,tile) {SMS_setAddr(XYtoADDR((x),(y)));SMS_setTile(tile);}
+#define SMS_setTileatXY(x,y,tile) do{SMS_setAddr(XYtoADDR((x),(y)));SMS_setTile(tile);}while(0)
 
 #define SMS_VDPVRAMWrite          0x4000
 /* macro for turning tile numbers into VRAM addr for writing */
