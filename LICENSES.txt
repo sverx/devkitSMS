@@ -4,7 +4,10 @@ devkitSMS/ihx2sms          is public domain. For more information, please refer 
 devkitSMS/assets2banks     is public domain. For more information, please refer to http://unlicense.org
 devkitSMS/folder2c         is public domain. For more information, please refer to http://unlicense.org
 devkitSMS/PSGlib           is public domain. For more information, please refer to http://unlicense.org
+devkitSMS/MBMlib           is public domain, as agreed with Kagesan. For more information, please refer to http://unlicense.org
+                      note:original MBM replay code by "Remco Schrijvers / MoonSoft", on WTFPL license.
 devkitSMS/SGlib            is public domain, as agreed with na_th_an. For more information, please refer to http://unlicense.org
 devkitSMS/SMSlib           is public domain. For more information, please refer to http://unlicense.org
                       note:includes ZX7 decompression routines (noted as required by ZX7 license)
                       note:includes aPLib decompression routines (in public domain, as agreed with Maxim and DWEdit)
+

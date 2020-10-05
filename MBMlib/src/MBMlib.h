@@ -1,6 +1,7 @@
 /* **************************************************
    MBMlib - C programming library for Moonblaster modules replay
    ( part of devkitSMS - github.com/sverx/devkitSMS )
+   code: Kagesan, sverx
    ************************************************** */
 
 #define MBM_STOPPED         0

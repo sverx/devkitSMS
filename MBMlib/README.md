@@ -6,7 +6,7 @@ A library to replay MoonBlaster modules on SEGA Master System / SEGA Mark III eq
 These are the currently defined functions/macros:
 
 ```
-void MBMPlay (void *module)              /* this will make your MoonBlaster module start and loop infinitely, if a loop has been defined */
+void MBMPlay (void *module)              /* this will make your MoonBlaster module start and, if a loop has been defined in the module, loop infinitely */
 void MBMCancelLoop (void)                /* tell the library to stop the looping tune at next loop point */
 void MBMPlayNoRepeat (void *module)      /* this will make your MoonBlaster module start and stop at the end even if the module defined a loop */
 
@@ -15,7 +15,7 @@ void MBMResume (void)                    /* this will make your stopped (paused)
 
 unsigned char MBMGetStatus (void)        /* get the current status of the tune. possible values are: */
 
-MBM_STOPPED                              /* no module currently playing */
+MBM_STOPPED                              /* (zero) no module currently playing */
 MBM_PLAYING                              /* a module is playing */
 
 void MBMFadeOut (unsigned char fade_fraction)   /* fade out the tune until the volume is zero and stop the tune */
@@ -30,7 +30,7 @@ The library also provide a function to detect the presence of the FM chip and a 
 ```
 unsigned char SMS_GetFMAudioCapabilities (void)    /* return if FM audio is available. possible values are: */
 
-SMS_AUDIO_NO_FM                                    /* if no FM chip is available */
+SMS_AUDIO_NO_FM                                    /* (zero) if no FM chip is available */
 SMS_AUDIO_FM_ONLY                                  /* if FM chip is available but PSG audio won't be available when this is enabled */
 SMS_AUDIO_FM_PSG                                   /* if FM chip is available and PSG audio can be enabled at the same time */
 

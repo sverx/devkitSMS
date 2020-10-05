@@ -1,6 +1,7 @@
 /* **************************************************
    MBMlib - C programming library for Moonblaster modules replay
    ( part of devkitSMS - github.com/sverx/devkitSMS )
+   code: Kagesan, sverx
    ************************************************** */
 
 #define MBMIVLIST_OFFSET           #0x00A3
