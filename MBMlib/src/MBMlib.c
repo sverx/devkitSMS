@@ -1,7 +1,7 @@
 /* **************************************************
    MBMlib - C programming library for Moonblaster modules replay
    ( part of devkitSMS - github.com/sverx/devkitSMS )
-   code: Kagesan, sverx
+   code: 'Remco Schrijvers / MoonSoft', Kagesan, sverx
    ************************************************** */
 
 #define MBMIVLIST_OFFSET           #0x00A3
@@ -65,7 +65,14 @@ unsigned char MBMLoopPoint;        // loop position
 
 unsigned char MBMLastCustInstr;    // last programmed custom instrument
 
-unsigned char MBMSFXStatus;        // SFX status (TO DO)
+// SFX variables
+unsigned char MBMSFXStatus;        // SFX status
+void* MBMSFXStart;                 // ROM address of SFX
+void* MBMSFXPointer;               // current address
+void* MBMSFXLoopPoint;             // the pointer to the loop begin
+unsigned char MBMSFXSkipFrames;    // wait counter for empty frames
+unsigned char MBMSFXLoopFlag;      // looping? 1= yes, 0 = no
+unsigned char MBMSFXDelayIVR;      // delay until instrument and volume are restored
 
 void MBMPlay (void *module) __z88dk_fastcall __naked {
 
@@ -1295,3 +1302,148 @@ void SMS_EnableAudio (unsigned char chips) __z88dk_fastcall __naked {
   __endasm;
 }
 #pragma restore
+
+// SFX
+
+void MBMSFXPlay (void *sound_effect) __z88dk_fastcall __naked {
+
+  MBMSFXStart=sound_effect;
+
+  __asm
+    xor a                           ; SFX is _NOT_ a looping one
+    ld (_MBMSFXLoopFlag),a
+    call MBMSFXSilence              ; stop any sfx that might be playing
+    inc a
+    ld (_MBMSFXStatus), a           ; set status to "playing"
+    ld (_MBMSFXSkipFrames), a       ; next frame follows immediately
+    ld hl,(_MBMSFXStart)            ; set pointer to start of sfx data
+    ld (_MBMSFXPointer), hl
+    ld (_MBMSFXLoopPoint), hl       ; loop pointer also points at the start for now
+    xor a
+    ld (_MBMSFXDelayIVR), a
+    ret
+  __endasm;
+}
+
+void MBMSFXPlayLoop (void *sound_effect) __z88dk_fastcall {
+  MBMSFXPlay (sound_effect);
+  MBMSFXLoopFlag=1;
+}
+
+void MBMSFXCancelLoop (void) {
+  MBMSFXLoopFlag=0;
+}
+
+void MBMSFXStop (void) __naked {
+  __asm
+    ld a, #22                       ; set number of frames until I/V restore
+    ld (_MBMSFXDelayIVR), a
+    jp MBMSFXSilence                ; zero frequency
+
+MBMSFXRestoreInstrVol:
+    xor a
+    ld (_MBMSFXStatus), a           ; reset status to "not playing"
+    ld (_MBMSFXDelayIVR), a         ; reset delay timer
+    ld a, (_MBMChannelBuffer+6)     ; get instrument number
+    dec a
+    ld b, #0
+    add a, a
+    ld c, a
+    ld hl,(_MBMIVListAddr)
+    add hl, bc
+    ld a, (hl)                      ; get instrument from list
+    cp #16
+    jr c, _is_not_custom
+    xor a
+_is_not_custom:
+    rlca                            ; move instrument into upper nibble
+    rlca
+    rlca
+    rlca
+    ld b, a
+    ld a, (_MBMChannelBuffer+13)    ; get volume
+    srl a
+    srl a
+    xor b                           ; combine volume with instrument
+    ld c, #0x30
+    jp FMOut                        ; restore instrument and volume, return
+
+MBMSFXSilence:
+    xor a
+    ld c, #0x10                     ; set frequency to zero, key off
+    call FMOut
+    nop        ;*
+    nop        ;*
+    nop        ;*
+    nop        ;*
+    nop        ;*
+    nop        ;*
+    sub #0     ;*
+    sub #0     ;*
+    ld c, #0x20
+    jp FMOut
+  __endasm;
+}
+
+unsigned char MBMSFXGetStatus (void) {
+  return MBMSFXStatus;
+}
+
+void MBMSFXFrame (void) __naked {
+  __asm
+    ld a, (_MBMSFXStatus)           ; check if sfx is playing
+    or a                            ; no?
+    ret z                           ; then just return
+
+    ld a, (_MBMSFXDelayIVR)         ; check if inside delay period
+    cp #1
+    jp c, _proceed                  ; if not, proceed with sfx
+    jp z, MBMSFXRestoreInstrVol     ; if end of delay, restore instrument/volume, end sfx
+    dec a                           ; else reduce timer
+    ld (_MBMSFXDelayIVR), a         ; store new value
+    ret
+
+_proceed:
+    ld a, (_MBMSFXSkipFrames)       ; check if there are empty frames to skip
+    dec a
+    ld (_MBMSFXSkipFrames), a
+    ret nz
+
+    ld hl, (_MBMSFXPointer)
+_sfx_loop:
+    ld a, (hl)                      ; read command / register
+    cp #16
+    jp c, _EndFrame
+    cp #255                         ; check if loop point
+    jp nz, _loop_point
+    inc hl
+    ld (_MBMSFXLoopPoint), hl       ; set loop point
+    jp _sfx_loop
+
+_loop_point:
+    ld c, a                         ; if a > 15, then it is a register number
+    inc hl                          ; move to data byte
+    ld a, (hl)                      ; read data byte
+    call FMOut
+    inc hl                          ; move to next command / register byte
+    jp _sfx_loop                    ; repeat until frame ends
+
+_EndFrame:
+    or a                            ; check if end of sfx
+    jp z, _EndSFX
+    ld (_MBMSFXSkipFrames), a       ; store wait frames
+    inc hl
+    ld (_MBMSFXPointer), hl
+    ret
+
+_EndSFX:
+    ld a, (_MBMSFXLoopFlag)         ; check if sfx is looping
+    or a                            ; no?
+    jp z, _MBMSFXStop               ; then stop sfx, restore instrument and volume
+    ld a, #1
+    ld (_MBMSFXSkipFrames), a       ; next frame follows immediately
+    ld hl, (_MBMSFXLoopPoint)       ; set pointer back to loop point
+    ld (_MBMSFXPointer), hl
+    ret
+  __endasm;
+}

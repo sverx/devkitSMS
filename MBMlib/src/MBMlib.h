@@ -1,7 +1,7 @@
 /* **************************************************
    MBMlib - C programming library for Moonblaster modules replay
    ( part of devkitSMS - github.com/sverx/devkitSMS )
-   code: Kagesan, sverx
+   code: 'Remco Schrijvers / MoonSoft', Kagesan, sverx
    ************************************************** */
 
 #define MBM_STOPPED         0
@@ -34,3 +34,18 @@ unsigned char SMS_GetFMAudioCapabilities (void) __naked;
 #define SMS_ENABLE_AUDIO_NONE      0x02
 
 void SMS_EnableAudio (unsigned char chips) __z88dk_fastcall __naked;
+
+/* SFX */
+
+#define MBMSFX_STOPPED         0
+#define MBMSFX_PLAYING         1
+
+void MBMSFXPlay (void *sound_effect) __z88dk_fastcall __naked;
+void MBMSFXPlayLoop (void *sound_effect) __z88dk_fastcall;
+void MBMSFXCancelLoop (void);
+
+void MBMSFXStop (void) __naked;
+
+unsigned char MBMSFXGetStatus (void);
+
+void MBMSFXFrame (void) __naked;
