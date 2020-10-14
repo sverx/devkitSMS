@@ -3,7 +3,7 @@ MBMlib
 
 A library to replay MoonBlaster modules on SEGA Master System / SEGA Mark III equipped with FM chip (either built in/add-on or mod board)
 
-These are the currently defined functions/macros:
+These are the currently defined functions for module replay:
 
 ```
 void MBMPlay (void *module)              /* this will make your MoonBlaster module start and, if a loop has been defined in the module, loop infinitely */
@@ -25,7 +25,25 @@ void MBMFadeOut (unsigned char fade_fraction)   /* fade out the tune until the v
 void MBMFrame (void)                     /* you should call this once per frame to replay the tune */
 ```
 
-The library also provide a function to detect the presence of the FM chip and a function to enable/disable audio chips:
+Then, there are functions for sound effect replay:
+
+```
+void MBMSFXPlay (void *sound_effect)     /* this will fire your sound effect */
+void MBMSFXPlayLoop (void *sound_effect) /* this will start your sound effect in auto-retrigger mode */
+void MBMSFXCancelLoop (void)             /* tells the library to cancel the auto-retrigging on the currently playing sound effect */
+
+void MBMSFXStop (void)                   /* this stops the playing sound effect immediately */
+
+unsigned char MBMSFXGetStatus (void)     /* get the current status of the sound effect. possible values are: */
+
+MBMSFX_STOPPED                           /* (zero) no sound effect currently playing */
+MBMSFX_PLAYING                           /* a sound effect is playing */
+
+void MBMSFXFrame (void)                  /* you should call this once per frame to replay the sound effect */
+
+```
+
+Finally, the library also provides a function to detect the presence of the FM chip and a function to enable/disable audio chips:
 
 ```
 unsigned char SMS_GetFMAudioCapabilities (void)    /* return if FM audio is available. possible values are: */
