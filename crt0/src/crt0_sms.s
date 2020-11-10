@@ -39,8 +39,8 @@
         ld sp, #0xdff0                  ; set stack pointer at end of RAM
         jr init
 ;--------------------------------------------------------------------------
-_SMS_crt0_RST08::
         .org    0x08                    ; Reset 08h - write HL to VDP Control Port
+_SMS_crt0_RST08::
         ld c, #0xBF                     ; set VDP Control Port
         di                              ; make it interrupt SAFE
         out (c),l
@@ -48,8 +48,8 @@ _SMS_crt0_RST08::
         ei
         ret
 ;--------------------------------------------------------------------------
-_SMS_crt0_RST18::
         .org    0x18                    ; Reset 18h - write HL to VDP Data Port
+_SMS_crt0_RST18::
         ld a,l                          ; (respecting VRAM time costraints)
         out (#0xBE),a                   ; 11
         ld a,h                          ; 4

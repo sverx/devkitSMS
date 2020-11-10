@@ -13,10 +13,10 @@ S _SMS_isr Ref0000
 A _CODE size 0 flags 0 addr 0
 A _HEADER size 0 flags 8 addr 0
 A _HEADER0 size 8 flags 8 addr 0
-S _SMS_crt0_RST08 Def0008
 A _HEADER1 size 9 flags 8 addr 8
-S _SMS_crt0_RST18 Def0011
+S _SMS_crt0_RST08 Def0008
 A _HEADER2 size 18 flags 8 addr 18
+S _SMS_crt0_RST18 Def0018
 A _HEADER3 size 2B flags 8 addr 38
 A _HEADER4 size 104 flags 8 addr 66
 S _OUTI32 Def0129
@@ -38,13 +38,13 @@ R 00 00 02 00
 T 00 00 F3 ED 56 31 F0 DF 18 22 00
 R 00 00 02 00 0D 09 04 00
 T 08 00
-R 00 00 02 00
+R 00 00 03 00
 T 08 00
 R 00 00 03 00
 T 08 00 0E BF F3 ED 69 ED 61 FB C9
 R 00 00 03 00
-T 11 00
-R 00 00 03 00
+T 18 00
+R 00 00 04 00
 T 18 00
 R 00 00 04 00
 T 18 00 7D D3 BE 7C D6 00 00 D3 BE C9

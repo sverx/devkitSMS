@@ -16,7 +16,7 @@
 ;  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 ;  GNU General Public License for more details.
 ;
-;  You should have received a copy of the GNU General Public License 
+;  You should have received a copy of the GNU General Public License
 ;  along with this library; see the file COPYING. If not, write to the
 ;  Free Software Foundation, 51 Franklin Street, Fifth Floor, Boston,
 ;   MA 02110-1301, USA.
@@ -29,84 +29,83 @@
 ;   might be covered by the GNU General Public License.
 ;--------------------------------------------------------------------------
 
-	.module crt0
-	.globl	_main
+  .module crt0
+  .globl  _main
 
-	.area	_HEADER (ABS)
-	;; Reset vector
-	.org 	0
-	di				; disable interrupt
-        im 1				; interrupt mode 1 (this won't change)
-	jp	init
+  .area _HEADER (ABS)
+  ;; Reset vector
+  .org  0
+  di        ; disable interrupt
+  im 1      ; interrupt mode 1 (this won't change)
+  jp  init
 
-        .org    0x38                    ; handle IRQ
-        jp _SG_isr
+  .org    0x38                    ; handle IRQ
+  jp _SG_isr
 
-        .org     0x66                   ; handle NMI
-        jp _SG_nmi_isr
+  .org     0x66                   ; handle NMI
+  jp _SG_nmi_isr
 
-	.org	 0x70
+  .org   0x70
 init:
-        ld sp,#0xc3f0			; set stack pointer at end of RAM
-        xor a				; clear RAM (to value 0x00)
-        ld hl,#0xc000			;   by setting value 0
-	ld (hl),a			;   to $c000 and
-        ld de,#0xc001			;   copying (LDIR) it to next byte
-        ld bc,#0x03f0			;   for 1 KB minus 16 bytes
-        ldir				;   do that
+  ld sp,#0xc3f0     ; set stack pointer at end of RAM
+  xor a             ; clear RAM (to value 0x00)
+  ld hl,#0xc000     ;   by setting value 0
+  ld (hl),a         ;   to $c000 and
+  ld de,#0xc001     ;   copying (LDIR) it to next byte
+  ld bc,#0x03f0     ;   for 1 KB minus 16 bytes
+  ldir              ;   do that
 
-        ;; Initialise global variables
-        call    gsinit
-        call    _SG_init
-        ei				; re-enable interrupts before going to main()
-	call	_main
-	jp	_exit
-	
+  ;; Initialise global variables
+  call    gsinit
+  call    _SG_init
+  ei        ; re-enable interrupts before going to main()
+  call  _main
+  jp  _exit
 
-        .rept	128			; this is a block of 128 OUTI
-	outi				; made for enabling UNSAFE but FAST
-	.endm				; short data transfers to VRAM
-_outi_block::				; _outi_block label points to END of block
-	ret
+  .rept 128     ; this is a block of 128 OUTI
+    outi        ; made for enabling UNSAFE but FAST
+  .endm         ; short data transfers to VRAM
+_outi_block::   ; _outi_block label points to END of block
+  ret
 
-	;; Ordering of segments for the linker.
-	.area	_HOME
-	.area	_CODE
-	.area	_INITIALIZER
-	.area   _GSINIT
-	.area   _GSFINAL
+  ;; Ordering of segments for the linker.
+  .area _HOME
+  .area _CODE
+  .area _INITIALIZER
+  .area   _GSINIT
+  .area   _GSFINAL
 
-	.area	_DATA
-	.area	_INITIALIZED
-	.area	_BSEG
-	.area   _BSS
-	.area   _HEAP
+  .area _DATA
+  .area _INITIALIZED
+  .area _BSEG
+  .area   _BSS
+  .area   _HEAP
 
-	.area   _CODE
+  .area   _CODE
 __clock::
-	ld	a,#2
-	rst     0x08
-	ret
+  ld  a,#2
+  rst     0x08
+  ret
 
 _exit::
-	;; Exit - special code to the emulator
-	ld	a,#0
-	rst     0x08
+  ;; Exit - special code to the emulator
+  ld a,#0
+  rst 0x08
 1$:
-	halt
-	jr	1$
+  halt
+  jr 1$
 
-	.area   _GSINIT
+  .area   _GSINIT
 gsinit::
-	ld	bc, #l__INITIALIZER
-	ld	a, b
-	or	a, c
-	jr	Z, gsinit_next
-	ld	de, #s__INITIALIZED
-	ld	hl, #s__INITIALIZER
-	ldir
+  ld  bc, #l__INITIALIZER
+  ld  a, b
+  or  a, c
+  jr  Z, gsinit_next
+  ld  de, #s__INITIALIZED
+  ld  hl, #s__INITIALIZER
+  ldir
 gsinit_next:
 
-	.area   _GSFINAL
-	ret
+  .area   _GSFINAL
+  ret
 
