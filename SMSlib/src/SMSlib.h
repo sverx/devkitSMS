@@ -335,7 +335,7 @@ void UNSAFE_SMS_VRAMmemcpy128 (unsigned int dst, void *src);
                         SMS_EMBED_SDSC_HEADER((verMaj),(verMin),0,0,0,(author),(name),(descr))
 
 /* the Interrupt Service Routines (do not modify) */
-void SMS_isr (void) __interrupt;
-void SMS_nmi_isr (void) __critical __interrupt;
+void SMS_isr (void) __naked;
+void SMS_nmi_isr (void) __naked;
 
 /* EOF */
