@@ -308,7 +308,7 @@ unsigned char SMS_getHCount (void) {
 
 /* Interrupt Service Routines */
 #ifdef MD_PAD_SUPPORT
-void SMS_isr (void) __interrupt __naked {
+void SMS_isr (void) __naked {
   __asm
     push af
     push bc
@@ -349,20 +349,20 @@ void SMS_isr (void) __interrupt __naked {
     pop de
     pop bc
     pop af
-    ei                                      ; Z80 disable the interrupts on ISR, so we should re-enable them explicitly
-    reti                                    ; this is here because function is __naked
+    ei                                      /* Z80 disables interrupts on ISR so we should re-enable them explicitly. */
+    reti                                    /* this is here because function is __naked */
   __endasm;
 }
 #else
-void SMS_isr (void) __interrupt __naked {
+void SMS_isr (void) __naked {
   __asm
     push af
     push hl
-    in a,(_VDPStatusPort)                   ; also aknowledge interrupt at VDP
-    ld (_SMS_VDPFlags),a                    ; write flags to SMS_VDPFlags variable
+    in a,(_VDPStatusPort)                   /* also aknowledge interrupt at VDP */
+    ld (_SMS_VDPFlags),a                    /* write flags to SMS_VDPFlags variable */
     rlca
     jr nc,1$
-    ld hl,#_VDPBlank                        ; frame interrupt
+    ld hl,#_VDPBlank                        /* frame interrupt */
     ld (hl),#0x01
     ld hl,(_KeysStatus)
     ld (_PreviousKeysStatus),hl
@@ -379,7 +379,7 @@ void SMS_isr (void) __interrupt __naked {
     inc hl
     ld (hl),a
     jr 2$
-1$:                                         ; line interrupt
+1$:                                         /* line interrupt */
     push bc
     push de
     push iy
@@ -390,14 +390,14 @@ void SMS_isr (void) __interrupt __naked {
     pop bc
 2$:
     pop hl
-    pop af                                  ; Z80 disable the interrupts on ISR,
-    ei                                      ; so we should re-enable them explicitly.
-    reti                                    ; this is here because function is __naked
+    pop af
+    ei                                      /* Z80 disables interrupts on ISR so we should re-enable them explicitly. */
+    reti                                    /* this is here because function is __naked */
   __endasm;
 }
 #endif
 
-void SMS_nmi_isr (void) __critical __interrupt __naked {          /* this is for NMI */
+void SMS_nmi_isr (void) __naked {          /* this is for NMI */
   __asm
 #ifndef TARGET_GG
     push hl
@@ -405,7 +405,7 @@ void SMS_nmi_isr (void) __critical __interrupt __naked {          /* this is for
     ld (hl),#0x01
     pop hl
 #endif
-    retn                                    ; this is here because function is __naked
+    retn                                   /* this is here because function is __naked */
   __endasm;
 }
 
