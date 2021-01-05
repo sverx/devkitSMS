@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 # Author: sverx
-# Version: 2.4.0
+# Version: 2.5.0
 
 from __future__ import absolute_import, division, generators, unicode_literals, print_function, nested_scopes
 import sys
@@ -52,6 +52,7 @@ class Asset:
             self.size += len(self.footer) * 2
             return len(self.footer) *2
 
+
 class AssetGroup:
     def __init__(self):
         self.assets = []
@@ -85,6 +86,10 @@ def find(fun, seq):
         if fun(item):
             return item
 
+def print_usage():
+    print("Usage: assets2banks path [--firstbank=<number>[,<size>]][--compile][--singleheader]")
+    sys.exit(1)
+
 AssetGroupList = []    # list of the groups (we will sort this)
 AssetList = []         # list of the assets (for inspection)
 BankList = []          # list of the banks
@@ -97,20 +102,43 @@ if 2 <= len(sys.argv) <= 5:
     compile_rel = 0                                                 # RELs not requested
     single_h = 0                                                    # generate separate .h files
 else:
-    print("Usage: assets2banks path [--bank1size=<size>][--compile][--singleheader]")
-    sys.exit(1)
+    print_usage()
 
 for n, arg in enumerate(sys.argv):
     if n >= 2:
-        if arg[:12] == "--bank1size=":
+        if arg[:12] == "--firstbank=":
+            fb = arg[12:].split(",")
+            if len(fb) > 2:
+                print("Fatal: invalid firstbank parameters")
+                print_usage()
+            try:
+                first_bank = int("+{0!s}".format(fb[0]))
+                if len(fb) == 1:
+                    print("Info: first bank number set to {0!s}".format(first_bank))
+                else:
+                    try:
+                        b = Bank(int("+{0!s}".format(fb[1])))
+                        BankList.append(b)
+                        print("Info: first bank number set to {0!s}, size set at {1!s} bytes".format(first_bank, b.free))
+                    except ValueError:
+                        print("Fatal: invalid firstbank size parameter")
+                        print_usage()
+            except ValueError:
+                print("Fatal: invalid firstbank number parameter")
+                print_usage()
+# deprecated --bank1size= option
+# ---------- from here ---------- 
+        elif arg[:12] == "--bank1size=":
+            print("Warning: --bank1size option is deprecated. Please use --firstbank=1,<size> instead")
             try:
                 b = Bank(int("+{0!s}".format(arg[12:])))
                 BankList.append(b)
-                first_bank = 1                                      # first bank should be number 1
-                print("Info: bank1 size set at {0!s} bytes".format(b.free))
+                first_bank = 1                                      # first bank set to 1
+                print("Info: first bank number set to 1, size set at {0!s} bytes".format(b.free))
             except ValueError:
-                print("Fatal: invalid bank1 size parameter")
-                sys.exit(1)
+                print("Fatal: invalid bank1size parameter")
+                print_usage()
+# ---------- to here ---------- 
         elif arg == "--compile":
             compile_rel = 1
             print("Info: compiled output requested")
@@ -118,8 +146,8 @@ for n, arg in enumerate(sys.argv):
             single_h = 1
             print("Info: single header file requested (assets2banks.h)")
         else:
-            print("Usage: assets2banks path [--bank1size=<size>][--compile][--singleheader]")
-            sys.exit(1)
+            print("Fatal: invalid '{0!s}' parameter".format(arg))
+            print_usage()
 
 
 # read cfg file (if present) and create assets and assets group accordingly
