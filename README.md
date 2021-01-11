@@ -118,7 +118,7 @@ void some_function (void) __banked {
 * use the provided `crt0b_sms.rel` as the *first* module in your linker call
 * instruct the linker to place all the banked code at address 0x4000 + the _virtual_ address of the bank, which is banknumber×2¹⁶ (so code segment BANK1 goes at 0x14000, code segment BANK2 goes at 0x24000 and so on...) and the compiled banked code modules in ascending order as in:
 ```
-  sdcc -o your_program.ihx -mz80 --no-std-crt0 --data-loc 0xC000 -Wl-b_BANK1=0x14000 -Wl-b_BANK1=0x24000 crt0b_sms.rel SMSlib.lib main.rel banked_code_1.rel banked_code_2.rel
+  sdcc -o your_program.ihx -mz80 --no-std-crt0 --data-loc 0xC000 -Wl-b_BANK1=0x14000 -Wl-b_BANK2=0x24000 crt0b_sms.rel SMSlib.lib main.rel banked_code_1.rel banked_code_2.rel
 ```
 * use the newer `makesms` tool to convert the ihx output to the sms file _instead_ of the `ihx2sms` tool, as this works in a different way. Usage is very similar:
 ```
