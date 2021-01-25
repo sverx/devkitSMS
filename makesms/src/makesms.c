@@ -18,7 +18,8 @@
 #define SEGA_HEADER_ADDR_16K    0x3ff0
 #define SDSC_HEADER_ADDR_16K    0x3fe0
 
-unsigned char buf[1024*1024];    // generated ROM max: 1MB
+unsigned char buf[4*1024*1024];    // generated ROM max: 4MB
+unsigned short used_bank[256];
 unsigned int size=0;
 unsigned char segment=0;
 unsigned char padding_type=0;
@@ -46,7 +47,7 @@ int count_set_bits (unsigned int value) {
 
 int main(int argc, char const* *argv) {
 
-  unsigned int i,dest_addr;
+  unsigned int i,dest_addr,dest_bank;
   char tmp[3];
   unsigned int checksum=0;
   int cur_arg=1;
@@ -82,15 +83,23 @@ int main(int argc, char const* *argv) {
     switch (type) {
       case 0: // DATA
 
+          if (addr>=BANK_ADDR) {
+            dest_addr=(segment*16*1024)+(addr & 0x3fff);
+            dest_bank=segment;
+          } else {
+            dest_addr=addr;
+            dest_bank=0;
+          }
+
         for (i=0;i<count;i++) {
-          dest_addr=(segment*16*1024)+(addr & 0x3fff)+i;
+          
           strncpy (tmp,&data[i*2],2);
-          buf[dest_addr]=strtol(tmp,NULL,16);
+          buf[dest_addr+i]=strtol(tmp,NULL,16);
 
           // printf("*%02x-%04x\n", buf[dest_addr], dest_addr);
 
-          if (dest_addr>=size)
-            size=dest_addr+1;
+          if ((dest_addr+i)>=size)
+            size=(dest_addr+i)+1;
         }
 
         if (addr>=CRT0_END) {
@@ -99,9 +108,12 @@ int main(int argc, char const* *argv) {
             used_low+=count;
         }
 
+        used_bank[dest_bank]+=count;
+
         break;
 
       case 4: // SET SEGMENT
+
         strncpy (tmp,&data[2],2);
         segment=strtol(tmp,NULL,16);
         break;
@@ -119,10 +131,16 @@ int main(int argc, char const* *argv) {
   if (size%BANK_SIZE)
     size=BANK_SIZE*((size/BANK_SIZE)+1);      // make BIN size exact multiple of BANK_SIZE
 
-  if (size>16*1024)
-    printf("Info: %d bytes used/%d total [%0.2f%%] - %d bytes used in bank 0 [%0.2f%%] - size of output ROM is %d KB\n",used,size,(float)used/(float)size*100, used_low,(float)used_low/((float)32*1024)*100, size/1024);
-  else
+  if (size>BANK_SIZE) {
+    printf("Info: %d bytes used/%d total [%0.2f%%] - %d bytes used in bank 0 [%0.2f%%] - size of output ROM is %d KB\n",used,size,(float)used/(float)size*100, used_low,(float)used_low/((float)16*1024)*100, size/1024);
+    printf("Info: ");
+    for (i=0;i<size/BANK_SIZE;i++)
+          printf("[bank%d %d] ",i,BANK_SIZE-((i==0)?used_low:used_bank[i]));
+    printf("bytes free\n");
+  } else
     printf("Info: %d bytes used/%d total [%0.2f%%] - size of output ROM is %d KB\n",used,size,(float)used/(float)size*100,size/1024);
+
+
 
   /* check/update SDSC header date */
   if (!strncmp("SDSC",(char *)&buf[SDSC_HEADER_ADDR_16K],4)) {
