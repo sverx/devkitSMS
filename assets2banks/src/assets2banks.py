@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 # Author: sverx
-# Version: 2.5.0
+# Version: 2.6.0
 
 from __future__ import absolute_import, division, generators, unicode_literals, print_function, nested_scopes
 import sys
@@ -277,7 +277,7 @@ for bank_n, b in enumerate(BankList):
         out_file_c = open("bank{0!s}.c".format(bank_n + first_bank), 'w')
     else:
         out_file_rel = open("bank{0!s}.rel".format(bank_n + first_bank), 'w')
-        out_file_rel.write("XL2\n")
+        out_file_rel.write("XL3\n")
 
         # count the global symbols
         global_symbols = 1                              # there's already one global symbol in the header
@@ -285,21 +285,28 @@ for bank_n, b in enumerate(BankList):
             for a in ag.assets:
                 global_symbols += 1
 
-        out_file_rel.write("H 1 areas {0!s} global symbols\n".format(format(global_symbols, "X")))
+        out_file_rel.write("H A areas {0!s} global symbols\n".format(format(global_symbols, "X")))
         out_file_rel.write("M bank{0!s}\n".format(bank_n + first_bank))
-        out_file_rel.write("S .__.ABS. Def0000\n")
-        if bank_n + first_bank == 1:
-            out_file_rel.write("A _CODE size {0!s} flags 0 addr 0\n".format(format(b.size - b.free, "X")))
-        else:
-            out_file_rel.write("A _BANK{0!s} size {1!s} flags 0 addr 0\n".format(bank_n + first_bank,
-                                                                                 format(b.size - b.free, "X")))
+        out_file_rel.write("S .__.ABS. Def000000\n")
+        out_file_rel.write("A _CODE size 0 flags 0 addr 0\n")
+        out_file_rel.write("A _DATA size 0 flags 0 addr 0\n")
+        out_file_rel.write("A _INITIALIZED size 0 flags 0 addr 0\n")
+        out_file_rel.write("A _DABS size 0 flags 8 addr 0\n")
+        out_file_rel.write("A _HOME size 0 flags 0 addr 0\n")
+        out_file_rel.write("A _GSINIT size 0 flags 0 addr 0\n")
+        out_file_rel.write("A _GSFINAL size 0 flags 0 addr 0\n")
+        out_file_rel.write("A _BANK{0!s} size {1!s} flags 0 addr 0\n".format(bank_n + first_bank,
+                                                                      format(b.size - b.free, "X")))
 
         # list all the  global symbols
         asset_addr = 0
         for ag in b.assetgroups:
             for a in ag.assets:
-                out_file_rel.write("S _{0!s} Def{1!s}\n".format(fix_name(a.name), format(asset_addr, "04X")))
+                out_file_rel.write("S _{0!s} Def{1!s}\n".format(fix_name(a.name), format(asset_addr, "06X")))
                 asset_addr += a.size
+
+        out_file_rel.write("A _INITIALIZER size 0 flags 0 addr 0\n")
+        out_file_rel.write("A _CABS size 0 flags 8 addr 0\n")
 
     asset_addr = 0
     for ag in b.assetgroups:
@@ -318,9 +325,9 @@ for bank_n, b in enumerate(BankList):
             out_file_h.write("#define\t\t\t\t{0}_bank {1!s}\n".format(fix_name(a.name), bank_n + first_bank))
 
             if compile_rel == 1:
-                out_file_rel.write("T {0!s} {1!s}\n".format(format(asset_addr % 256, "02X"),
-                                                            format(asset_addr // 256, "02X")))
-                out_file_rel.write("R 00 00 00 00\n")     # this is because we mapped assets in area number 0
+                out_file_rel.write("T {0!s} {1!s} 00\n".format(format(asset_addr % 256, "02X"),
+                                                               format(asset_addr // 256, "02X")))
+                out_file_rel.write("R 00 00 07 00\n")     # this is because we mapped assets in area number 7
 
             # read the file contents (using original size 'o_size' as len)
             if a.style == 0:
@@ -361,8 +368,8 @@ for bank_n, b in enumerate(BankList):
                 ar.append(int(a.footer[cnt], 0))
 
             if compile_rel == 1:
-                out_file_rel.write("T {0!s} {1!s}".format(format(asset_addr % 256, "02X"),
-                                                          format(asset_addr // 256, "02X")))
+                out_file_rel.write("T {0!s} {1!s} 00".format(format(asset_addr % 256, "02X"),
+                                                             format(asset_addr // 256, "02X")))
 
             cnt = 0
             for i in range(len(ar)):
@@ -392,15 +399,15 @@ for bank_n, b in enumerate(BankList):
                             cnt = 0
                 else:
                     cnt += 1
-                    if (a.style == 0 and cnt == 14) or (a.style != 0 and cnt == 7):   # wrap every 14 bytes
+                    if (a.style == 0 and cnt == 13) or (a.style != 0 and cnt == 6):   # wrap every 13 bytes (or 6 words)
                         cnt = 0
 
                     if cnt == 0 or i == (len(ar)-1):
                         out_file_rel.write("\n")               # EOL
-                        out_file_rel.write("R 00 00 00 00\n")  # this is because we mapped assets in area number 0
+                        out_file_rel.write("R 00 00 07 00\n")  # this is because we mapped assets in area number 7
                         if i < (len(ar)-1):
-                            out_file_rel.write("T {0!s} {1!s}".format(format(asset_addr % 256, "02X"),
-                                                                      format(asset_addr // 256, "02X")))
+                            out_file_rel.write("T {0!s} {1!s} 00".format(format(asset_addr % 256, "02X"),
+                                                                         format(asset_addr // 256, "02X")))
             if compile_rel == 0:
                 out_file_c.write("};\n\n")
             in_file.close()
