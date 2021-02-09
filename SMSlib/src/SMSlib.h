@@ -232,6 +232,13 @@ unsigned int SMS_getMDKeysReleased (void);
 /* port B still missing */
 #endif
 
+/* functions to read paddles */
+void SMS_paddleInit(void);
+char SMS_detectPaddleA(void);
+char SMS_detectPaddleB(void);
+int SMS_paddleReadA(void);
+int SMS_paddleReadB(void);
+
 #ifndef TARGET_GG
 /* pause handling (SMS only) */
 _Bool SMS_queryPauseRequested (void);
