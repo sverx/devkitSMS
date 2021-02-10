@@ -124,7 +124,8 @@ void SMS_addSprite (unsigned char x, unsigned char y, unsigned char tile) __nake
 #else
 signed char SMS_addSprite (unsigned char x, unsigned char y, unsigned char tile) __naked __preserves_regs(iyh,iyl);  /* returns -1 if no more sprites are available, -2 if invalid Y coord */
 #endif
-void SMS_addTwoAdjoiningSprites (unsigned char x, unsigned char y, unsigned char tile);   /* doesn't return anything */
+void SMS_addTwoAdjoiningSprites (unsigned char x, unsigned char y, unsigned char tile) __naked __preserves_regs(iyh,iyl);     /* doesn't return anything */
+void SMS_addThreeAdjoiningSprites (unsigned char x, unsigned char y, unsigned char tile) __naked __preserves_regs(iyh,iyl);   /* doesn't return anything */
 signed char SMS_reserveSprite (void);
 void SMS_updateSpritePosition (signed char sprite, unsigned char x, unsigned char y);
 void SMS_updateSpriteImage (signed char sprite, unsigned char image);
@@ -233,6 +234,14 @@ unsigned int SMS_getMDKeysReleased (void);
 #endif
 
 #ifndef TARGET_GG
+/* paddle controller handling (SMS only) */
+#define PORT_A      0
+#define PORT_B      1
+_Bool SMS_detectPaddle (unsigned char port) __z88dk_fastcall __naked;
+unsigned char SMS_readPaddle (unsigned char port) __z88dk_fastcall __naked;
+#endif
+
+#ifndef TARGET_GG
 /* pause handling (SMS only) */
 _Bool SMS_queryPauseRequested (void);
 void SMS_resetPauseRequest (void);
@@ -330,9 +339,27 @@ void UNSAFE_SMS_VRAMmemcpy128 (unsigned int dst, void *src);
                   SMS_BYTE_TO_BCD((productCode)%100),SMS_BYTE_TO_BCD(((productCode)/100)%100), \
       (((productCode)/10000)<<4)|((revision)&0x0f),SMS_EMBED_SEGA_ROM_HEADER_16KB_REGION_CODE}
 
+#define SMS_EMBED_SDSC_HEADER_16KB(verMaj,verMin,dateYear,dateMonth,dateDay,author,name,descr) \
+                          const __at (0x3fe0-sizeof(author)) char __SMS__SDSC_author[]=author; \
+                 const __at (0x3fe0-sizeof(author)-sizeof(name)) char __SMS__SDSC_name[]=name; \
+ const __at (0x3fe0-sizeof(author)-sizeof(name)-sizeof(descr)) char __SMS__SDSC_descr[]=descr; \
+                          const __at (0x3fe0) char __SMS__SDSC_signature[16]={'S','D','S','C', \
+                                              SMS_BYTE_TO_BCD(verMaj),SMS_BYTE_TO_BCD(verMin), \
+                                          SMS_BYTE_TO_BCD(dateDay),SMS_BYTE_TO_BCD(dateMonth), \
+                              SMS_BYTE_TO_BCD((dateYear)%100),SMS_BYTE_TO_BCD((dateYear)/100), \
+                                                                  (0x3fe0-sizeof(author))%256, \
+                                                                   (0x3fe0-sizeof(author))>>8, \
+                                                     (0x3fe0-sizeof(author)-sizeof(name))%256, \
+                                                      (0x3fe0-sizeof(author)-sizeof(name))>>8, \
+                                       (0x3fe0-sizeof(author)-sizeof(name)-sizeof(descr))%256, \
+                                        (0x3fe0-sizeof(author)-sizeof(name)-sizeof(descr))>>8}
+
 /* to set SDSC header date to 0000-00-00 so that ihx2sms updates that with compilation date */
 #define SMS_EMBED_SDSC_HEADER_AUTO_DATE(verMaj,verMin,author,name,descr)                       \
                         SMS_EMBED_SDSC_HEADER((verMaj),(verMin),0,0,0,(author),(name),(descr))
+
+#define SMS_EMBED_SDSC_HEADER_AUTO_DATE_16KB(verMaj,verMin,author,name,descr)                  \
+                  SMS_EMBED_SDSC_HEADER_16KB((verMaj),(verMin),0,0,0,(author),(name),(descr))
 
 /* the Interrupt Service Routines (do not modify) */
 void SMS_isr (void) __naked;
