@@ -90,12 +90,9 @@ unsigned int SMS_getMDKeysPressed (void); /* the extended keys that were up last
 unsigned int SMS_getMDKeysHeld (void);    /* the extended keys that were down last frame and still down now on a MD controller */
 unsigned int SMS_getMDKeysReleased (void); /* the extended keys that were down last frame and up now on a MD controller */
 
-/* Paddle controller handling */
-void SMS_paddleInit(void);
-char SMS_detectPaddleA(void);
-char SMS_detectPaddleB(void);
-int SMS_paddleReadA(void);
-int SMS_paddleReadB(void);
+/* paddle controller handling */
+_Bool SMS_detectPaddle (unsigned char port);
+unsigned char SMS_readPaddle (unsigned char port);
 
 /* pause handling (SMS only) */
 _Bool SMS_queryPauseRequested (void);     /* the pause key has been pressed since previous check */
