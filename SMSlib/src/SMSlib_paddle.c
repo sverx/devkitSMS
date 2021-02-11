@@ -5,13 +5,11 @@
 
 #include "SMSlib.h"
 
-// All based on:
+// (original asm code from SMS Test Suite)
+// (improved by Raphaël Assenat [raphnet])
+// references:
 // https://www.smspower.org/Development/Paddle
-//
-// Also:
 // https://www.smspower.org/Development/PeripheralPorts
-//
-// (modified asm code from SMS Test Suite)
 
 #define DETECT_MIN  0x60
 #define DETECT_MAX  0xA0
@@ -63,12 +61,12 @@ unsigned char SMS_readPaddle (unsigned char port) __z88dk_fastcall __naked {
     or a
     jr nz, read_second_pad
 
-	; First, synchronize by waiting until port A key 2 is high.
-	;
-	; Without this, the values occasionally glitches on real hardware,
-	; because the bits may be in the middle of changing and are therefore
-	; not reliable. (Remember the real world is analog)
-	;
+  ; First, synchronize by waiting until port A key 2 is high.
+  ;
+  ; Without this, the values occasionally glitches on real hardware,
+  ; because the bits may be in the middle of changing and are therefore
+  ; not reliable. (Remember the real world is analog)
+  ;
 wait_5_set_sync:
     in a,(#0xDC)
     bit 5,a
@@ -97,10 +95,16 @@ wait_5_set:
 read_second_pad:
     ld c,#0xDC
 
+  ; First, synchronize by waiting until port B key 2 is high.
+  ;
+  ; Without this, the values occasionally glitches on real hardware,
+  ; because the bits may be in the middle of changing and are therefore
+  ; not reliable. (Remember the real world is analog)
+
 wait_3_set_sync:
     in a,(#0xDD)
     bit 3,a
-    jr z, wait_3_set_sync   ; wait until bit 5 is 1
+    jr z, wait_3_set_sync   ; wait until bit 3 is 1
 
 wait_3_reset:
     in a,(#0xDD)            ; ensure we are reading both ports same moment
