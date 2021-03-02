@@ -6,7 +6,7 @@
 #include "SMSlib.h"
 #include "SMSlib_common.c"
 
-void SMS_load1bppTiles (void *src, unsigned int tilefrom, unsigned int size, unsigned char color0, unsigned char color1) {
+void SMS_load1bppTiles (const void *src, unsigned int tilefrom, unsigned int size, unsigned char color0, unsigned char color1) {
   unsigned char *s=(unsigned char *)src;
   unsigned char mask;
   SMS_setAddr(0x4000|(tilefrom*32));

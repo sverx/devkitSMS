@@ -10,7 +10,7 @@
 
 #pragma save
 #pragma disable_warning 85
-void SMS_VRAMmemcpy (unsigned int dst, void *src, unsigned int size) {
+void SMS_VRAMmemcpy (unsigned int dst, const void *src, unsigned int size) {
   //  optimized (faster looping) ASM code (SDCC generated then hand optimized)  
 __asm
   push  ix
@@ -42,7 +42,7 @@ copyloop:
 __endasm;
 }
 
-void SMS_VRAMmemcpy_brief (unsigned int dst, void *src, unsigned char size) {
+void SMS_VRAMmemcpy_brief (unsigned int dst, const void *src, unsigned char size) {
   //  optimized (faster looping) ASM code (SDCC generated then hand optimized)
 __asm
   push  ix

@@ -15,7 +15,7 @@ unsigned char STM_needRestore;
 unsigned char STM_ttw;
 unsigned char STM_width;
 
-void SMS_loadSTMcompressedTileMapatAddr (unsigned int dst, void* src) {
+void SMS_loadSTMcompressedTileMapatAddr (unsigned int dst, const void *src) {
   STM_dest=dst;
   STM_src=(unsigned char *)(src);
   STM_width=*STM_src++;

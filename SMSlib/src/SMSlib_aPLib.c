@@ -18,7 +18,7 @@
 
 #pragma save
 #pragma disable_warning 85
-void UNSAFE_SMS_loadaPLibcompressedTilesatAddr (void *src, unsigned int dst) {
+void UNSAFE_SMS_loadaPLibcompressedTilesatAddr (const void *src, unsigned int dst) {
 __asm
   pop bc
   pop hl      ; pop src

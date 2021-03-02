@@ -93,7 +93,7 @@ _no_sprite_term:
     ld c,a
     ld b,#0
     ld hl,#_OUTI128
-    add hl,bc    
+    add hl,bc
     ex de,hl
     ld hl,#_SpriteTableXN
 _start_cpy:
@@ -107,25 +107,25 @@ _no_sprites:
 }
 */
 
-void OUTI32(void *src) __z88dk_fastcall;
-void OUTI64(void *src) __z88dk_fastcall;
-void OUTI128(void *src) __z88dk_fastcall;
+void OUTI32(const void *src) __z88dk_fastcall;
+void OUTI64(const void *src) __z88dk_fastcall;
+void OUTI128(const void *src) __z88dk_fastcall;
 
 #define SETVDPDATAPORT  __asm ld c,#_VDPDataPort __endasm
 
-void UNSAFE_SMS_VRAMmemcpy32 (unsigned int dst, void *src) {
+void UNSAFE_SMS_VRAMmemcpy32 (unsigned int dst, const void *src) {
   SMS_setAddr(0x4000|dst);
   SETVDPDATAPORT;
   OUTI32(src);
 }
 
-void UNSAFE_SMS_VRAMmemcpy64 (unsigned int dst, void *src) {
+void UNSAFE_SMS_VRAMmemcpy64 (unsigned int dst, const void *src) {
   SMS_setAddr(0x4000|dst);
   SETVDPDATAPORT;
   OUTI64(src);
 }
 
-void UNSAFE_SMS_VRAMmemcpy128 (unsigned int dst, void *src) {
+void UNSAFE_SMS_VRAMmemcpy128 (unsigned int dst, const void *src) {
   SMS_setAddr(0x4000|dst);
   SETVDPDATAPORT;
   OUTI128(src);

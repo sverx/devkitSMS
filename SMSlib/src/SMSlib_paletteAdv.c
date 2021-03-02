@@ -9,7 +9,7 @@
 #pragma save
 #pragma disable_warning 85
 #ifndef TARGET_GG
-void SMS_loadBGPaletteHalfBrightness (void *palette) __z88dk_fastcall {
+void SMS_loadBGPaletteHalfBrightness (const void *palette) __z88dk_fastcall {
   // *palette will be in HL
   ASM_LD_DE_IMM(#SMS_CRAMAddress);
   ASM_DE_TO_VDP_CONTROL;
@@ -36,7 +36,7 @@ void SMS_zeroBGPalette (void) {
   __endasm;
 }
 
-void SMS_loadSpritePaletteHalfBrightness (void *palette) __z88dk_fastcall {
+void SMS_loadSpritePaletteHalfBrightness (const void *palette) __z88dk_fastcall {
   // *palette will be in HL
   ASM_LD_DE_IMM(#SMS_CRAMAddress+0x10);
   ASM_DE_TO_VDP_CONTROL;

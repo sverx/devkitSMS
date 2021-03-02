@@ -6,7 +6,7 @@
 #include "SMSlib.h"
 #include "SMSlib_common.c"
 
-void SMS_loadTileMapArea (unsigned char x, unsigned char y,  void *src, unsigned char width, unsigned char height) {
+void SMS_loadTileMapArea (unsigned char x, unsigned char y, const void *src, unsigned char width, unsigned char height) {
   unsigned char cur_y;
   for (cur_y=y;cur_y<y+height;cur_y++) {
     // SMS_set_address_VRAM(SMS_PNTAddress+(cur_y*32+x)*2);

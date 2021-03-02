@@ -95,24 +95,24 @@ void SMS_crt0_RST18(unsigned int tile) __z88dk_fastcall __preserves_regs(b,c,d,e
 #define TILE_PRIORITY             0x1000
 
 /* functions to load tiles into VRAM */
-void SMS_loadTiles (void *src, unsigned int tilefrom, unsigned int size);
-void SMS_load1bppTiles (void *src, unsigned int tilefrom, unsigned int size, unsigned char color0, unsigned char color1);
+void SMS_loadTiles (const void *src, unsigned int tilefrom, unsigned int size);
+void SMS_load1bppTiles (const void *src, unsigned int tilefrom, unsigned int size, unsigned char color0, unsigned char color1);
 
 /* functions to load compressed tiles into VRAM */
-void SMS_loadPSGaidencompressedTilesatAddr (void *src, unsigned int dst);
+void SMS_loadPSGaidencompressedTilesatAddr (const void *src, unsigned int dst);
 #define SMS_loadPSGaidencompressedTiles(src,tilefrom) SMS_loadPSGaidencompressedTilesatAddr((src),TILEtoADDR(tilefrom))
 
 /* UNSAFE functions to load compressed tiles into VRAM */
-void UNSAFE_SMS_loadZX7compressedTilesatAddr (void *src, unsigned int dst);
+void UNSAFE_SMS_loadZX7compressedTilesatAddr (const void *src, unsigned int dst);
 #define UNSAFE_SMS_loadZX7compressedTiles(src,tilefrom) UNSAFE_SMS_loadZX7compressedTilesatAddr((src),TILEtoADDR(tilefrom))
-void UNSAFE_SMS_loadaPLibcompressedTilesatAddr (void *src, unsigned int dst);
+void UNSAFE_SMS_loadaPLibcompressedTilesatAddr (const void *src, unsigned int dst);
 #define UNSAFE_SMS_loadaPLibcompressedTiles(src,tilefrom) UNSAFE_SMS_loadaPLibcompressedTilesatAddr((src),TILEtoADDR(tilefrom))
 
 /* functions for the tilemap */
 #define SMS_loadTileMap(x,y,src,size)            SMS_VRAMmemcpy (XYtoADDR((x),(y)),(src),(size))
-void SMS_loadTileMapArea (unsigned char x, unsigned char y, void *src, unsigned char width, unsigned char height);
+void SMS_loadTileMapArea (unsigned char x, unsigned char y, const void *src, unsigned char width, unsigned char height);
 
-void SMS_loadSTMcompressedTileMapatAddr (unsigned int dst, void* src);
+void SMS_loadSTMcompressedTileMapatAddr (unsigned int dst, const void *src);
 #define SMS_loadSTMcompressedTileMap(x,y,src)       SMS_loadSTMcompressedTileMapatAddr(XYtoADDR((x),(y)),(src))
 #define SMS_loadSTMcompressedTileMapArea(x,y,src,w) SMS_loadSTMcompressedTileMapatAddr(XYtoADDR((x),(y)),(src))
 // SMS_loadSTMcompressedTileMapArea *DEPRECATED* - will be dropped at some point in 2018
@@ -146,8 +146,8 @@ void SMS_copySpritestoSAT (void);
 /* GG functions to set a color / load a palette */
 void GG_setBGPaletteColor (unsigned char entry, unsigned int color);
 void GG_setSpritePaletteColor (unsigned char entry, unsigned int color);
-void GG_loadBGPalette (void *palette) __z88dk_fastcall;
-void GG_loadSpritePalette (void *palette) __z88dk_fastcall;
+void GG_loadBGPalette (const void *palette) __z88dk_fastcall;
+void GG_loadSpritePalette (const void *palette) __z88dk_fastcall;
 #define GG_setNextBGColoratIndex(i)       SMS_setAddr(SMS_CRAMAddress|((i)<<1))
 #define GG_setNextSpriteColoratIndex(i)   SMS_setAddr(SMS_CRAMAddress|0x20|((i)<<1))
 #define GG_setColor(color)       SMS_crt0_RST18(color)
@@ -159,8 +159,8 @@ void GG_loadSpritePalette (void *palette) __z88dk_fastcall;
 /* SMS functions to set a color / load a palette */
 void SMS_setBGPaletteColor (unsigned char entry, unsigned char color);
 void SMS_setSpritePaletteColor (unsigned char entry, unsigned char color);
-void SMS_loadBGPalette (void *palette) __z88dk_fastcall;
-void SMS_loadSpritePalette (void *palette) __z88dk_fastcall;
+void SMS_loadBGPalette (const void *palette) __z88dk_fastcall;
+void SMS_loadSpritePalette (const void *palette) __z88dk_fastcall;
 #define SMS_setNextBGColoratIndex(i)       SMS_setAddr(SMS_CRAMAddress|(i))
 #define SMS_setNextSpriteColoratIndex(i)   SMS_setAddr(SMS_CRAMAddress|0x10|(i))
 void SMS_setColor (unsigned char color) __z88dk_fastcall __preserves_regs(b,c,d,e,h,l,iyh,iyl);
@@ -168,8 +168,8 @@ void SMS_setColor (unsigned char color) __z88dk_fastcall __preserves_regs(b,c,d,
 #define RGB(r,g,b)        ((r)|((g)<<2)|((b)<<4))
 #define RGB8(r,g,b)       (((r)>>6)|(((g)>>6)<<2)|(((b)>>6)<<4))
 #define RGBHTML(RGB24bit) (((RGB24bit)>>22)|((((RGB24bit)&0xFFFF)>>14)<<2)|((((RGB24bit)&0xFF)>>6)<<4))
-void SMS_loadBGPaletteHalfBrightness (void *palette) __z88dk_fastcall;
-void SMS_loadSpritePaletteHalfBrightness (void *palette) __z88dk_fastcall;
+void SMS_loadBGPaletteHalfBrightness (const void *palette) __z88dk_fastcall;
+void SMS_loadSpritePaletteHalfBrightness (const void *palette) __z88dk_fastcall;
 void SMS_zeroBGPalette (void);
 void SMS_zeroSpritePalette (void);
 #endif
@@ -179,7 +179,7 @@ void SMS_configureTextRenderer (signed int ascii_to_tile_offset) __z88dk_fastcal
 void SMS_autoSetUpTextRenderer (void);
 
 /* decompress ZX7-compressed data to RAM */
-void SMS_decompressZX7 (void *src, void *dst);
+void SMS_decompressZX7 (const void *src, void *dst);
 
 /* functions to read joypad(s) */
 unsigned int SMS_getKeysStatus (void);
@@ -275,16 +275,16 @@ unsigned char SMS_getVCount (void);
 unsigned char SMS_getHCount (void);
 
 /* low level functions */
-void SMS_VRAMmemcpy (unsigned int dst, void *src, unsigned int size);
-void SMS_VRAMmemcpy_brief (unsigned int dst, void *src, unsigned char size);
+void SMS_VRAMmemcpy (unsigned int dst, const void *src, unsigned int size);
+void SMS_VRAMmemcpy_brief (unsigned int dst, const void *src, unsigned char size);
 void SMS_VRAMmemset (unsigned int dst, unsigned char value, unsigned int size);
 void SMS_VRAMmemsetW (unsigned int dst, unsigned int value, unsigned int size);
 
 /* VRAM unsafe functions. Fast, but dangerous! */
 void UNSAFE_SMS_copySpritestoSAT (void);
-void UNSAFE_SMS_VRAMmemcpy32 (unsigned int dst, void *src);
-void UNSAFE_SMS_VRAMmemcpy64 (unsigned int dst, void *src);
-void UNSAFE_SMS_VRAMmemcpy128 (unsigned int dst, void *src);
+void UNSAFE_SMS_VRAMmemcpy32 (unsigned int dst, const void *src);
+void UNSAFE_SMS_VRAMmemcpy64 (unsigned int dst, const void *src);
+void UNSAFE_SMS_VRAMmemcpy128 (unsigned int dst, const void *src);
 
 /* handy macros for UNSAFE_SMS_VRAMmemcpy* */
 #define UNSAFE_SMS_load1Tile(src,theTile)     UNSAFE_SMS_VRAMmemcpy32((theTile)*32,(src))
