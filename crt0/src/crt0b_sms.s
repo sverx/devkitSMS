@@ -81,7 +81,7 @@ clear_ram:
         ld b,#0x00                      ; clear RAM (to value 0x00) by setting
         ld (hl),b                       ;   value 0 to $c000 and
         ld de,#0xc001                   ;   copying (LDIR) it to next byte
-        ld bc,#0x1eff                   ;   for 8 KB (minus 17 bytes)
+        ld bc,#0x2000-17                ;   for 8 KB (minus 17 bytes)
         ldir                            ;   do that
         ld (_SMS_Port3EBIOSvalue),a     ; restore contents of $c000 to SMS_Port3EBIOSvalue var
 

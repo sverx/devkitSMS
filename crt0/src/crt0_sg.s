@@ -52,7 +52,7 @@ init:
   ld hl,#0xc000     ;   by setting value 0
   ld (hl),a         ;   to $c000 and
   ld de,#0xc001     ;   copying (LDIR) it to next byte
-  ld bc,#0x03f0     ;   for 1 KB minus 16 bytes
+  ld bc,#0x0400-17  ;   for 1 KB minus 17 bytes
   ldir              ;   do that
 
   ;; Initialise global variables
