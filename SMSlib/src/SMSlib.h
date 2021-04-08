@@ -128,7 +128,7 @@ void SMS_addTwoAdjoiningSprites (unsigned char x, unsigned char y, unsigned char
 void SMS_addThreeAdjoiningSprites (unsigned char x, unsigned char y, unsigned char tile) __naked __preserves_regs(iyh,iyl);   /* doesn't return anything */
 signed char SMS_reserveSprite (void);
 void SMS_updateSpritePosition (signed char sprite, unsigned char x, unsigned char y);
-void SMS_updateSpriteImage (signed char sprite, unsigned char image);
+void SMS_updateSpriteImage (signed char sprite, unsigned char tile);
 void SMS_hideSprite (signed char sprite);
 void SMS_setClippingWindow (unsigned char x0, unsigned char y0, unsigned char x1, unsigned char y1);
 signed char SMS_addSpriteClipping (int x, int y, unsigned char tile);   /* returns -1 if no more sprites are available or sprite clipped */

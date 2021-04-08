@@ -27,8 +27,8 @@ void SMS_updateSpritePosition (signed char sprite, unsigned char x, unsigned cha
   }
 }
 
-void SMS_updateSpriteImage (signed char sprite, unsigned char image) {
-  SpriteTableXN[(unsigned char)sprite*2+1]=image;
+void SMS_updateSpriteImage (signed char sprite, unsigned char tile) {
+  SpriteTableXN[(unsigned char)sprite*2+1]=tile;
 }
 
 void SMS_hideSprite (signed char sprite) {
