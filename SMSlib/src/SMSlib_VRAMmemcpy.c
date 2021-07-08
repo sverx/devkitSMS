@@ -6,12 +6,12 @@
 #include "SMSlib.h"
 #include "SMSlib_common.c"
 
-/* low level functions */
+/* SMS_loadTiles() and SMS_loadTileMap() are just calls to SMS_VRAMmemcpy() */
 
 #pragma save
 #pragma disable_warning 85
 void SMS_VRAMmemcpy (unsigned int dst, const void *src, unsigned int size) {
-  //  optimized (faster looping) ASM code (SDCC generated then hand optimized)  
+  //  optimized (faster looping) ASM code (SDCC generated then hand optimized)
 __asm
   push  ix
   ld  ix,#0

@@ -95,7 +95,7 @@ void SMS_crt0_RST18(unsigned int tile) __z88dk_fastcall __preserves_regs(b,c,d,e
 #define TILE_PRIORITY             0x1000
 
 /* functions to load tiles into VRAM */
-void SMS_loadTiles (const void *src, unsigned int tilefrom, unsigned int size);
+#define SMS_loadTiles(src,tilefrom,size)            SMS_VRAMmemcpy (TILEtoADDR(tilefrom)),(src),(size))
 void SMS_load1bppTiles (const void *src, unsigned int tilefrom, unsigned int size, unsigned char color0, unsigned char color1);
 
 /* functions to load compressed tiles into VRAM */
@@ -109,7 +109,7 @@ void UNSAFE_SMS_loadaPLibcompressedTilesatAddr (const void *src, unsigned int ds
 #define UNSAFE_SMS_loadaPLibcompressedTiles(src,tilefrom) UNSAFE_SMS_loadaPLibcompressedTilesatAddr((src),TILEtoADDR(tilefrom))
 
 /* functions for the tilemap */
-#define SMS_loadTileMap(x,y,src,size)            SMS_VRAMmemcpy (XYtoADDR((x),(y)),(src),(size))
+#define SMS_loadTileMap(x,y,src,size)               SMS_VRAMmemcpy (XYtoADDR((x),(y)),(src),(size))
 void SMS_loadTileMapArea (unsigned char x, unsigned char y, const void *src, unsigned char width, unsigned char height);
 
 void SMS_loadSTMcompressedTileMapatAddr (unsigned int dst, const void *src);
