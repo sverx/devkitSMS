@@ -10,37 +10,36 @@
 
 #pragma save
 #pragma disable_warning 85
-void SMS_VRAMmemcpy (unsigned int dst, const void *src, unsigned int size) {
-  //  optimized (faster looping) ASM code (SDCC generated then hand optimized)
+void SMS_VRAMmemcpy (unsigned int dst, const void *src, unsigned int size) __naked __z88dk_callee __preserves_regs(iyh,iyl) {
+  //  handwritten asm code
 __asm
-  push  ix
-  ld  ix,#0
-  add ix,sp
 
-  ld  l, 4 (ix)
-  ld  a, 5 (ix)
-  set 6, a
-  ld  h, a
+  pop de             ; pop ret address
+  pop hl             ; dst
+  set 6, h
   rst #0x08
 
-  ld  l,6 (ix)
-  ld  h,7 (ix)
-  ld  a,8 (ix)       ; LO(size)
-  or  a
-  ld  b,a
-  ld  a,9 (ix)       ; HI(size)
-  jr  Z,noinc        ; if LO(size) is zero, do not inc HI(size)
-  inc a              ; inc HI(size) because LO(size) is not zero
-noinc:
+  pop hl             ; src
+  pop bc             ; size
+  push de            ; push ret address
+
+  dec bc
+  inc b
+  inc c              ; increment B if C is not zero
+
+  ld a,b             ; HI(size)
+  ld b,c             ; LO(size)
+
   ld c,#_VDPDataPort
 copyloop:
   outi
   jp  nz,copyloop    ; 10 = 26 (VRAM safe)
   dec a
   jp  nz,copyloop
-  pop ix
+  ret
 __endasm;
 }
+
 
 void SMS_VRAMmemcpy_brief (unsigned int dst, const void *src, unsigned char size) {
   //  optimized (faster looping) ASM code (SDCC generated then hand optimized)
