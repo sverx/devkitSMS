@@ -62,6 +62,7 @@ void SMS_loadSTMcompressedTileMapArea (unsigned char x, unsigned char y, unsigne
 void SMS_initSprites (void);                /* we're going to start declaring sprites, in front-to-back order */
 signed char SMS_addSprite (unsigned char x, unsigned char y, unsigned char tile);  /* declare a sprite - returns handle or -1 if no more sprites are available */
 void SMS_addTwoAdjoiningSprites (unsigned char x, unsigned char y, unsigned char tile);   /* doesn't return anything */
+void SMS_addThreeAdjoiningSprites (unsigned char x, unsigned char y, unsigned char tile); /* doesn't return anything */
 signed char SMS_reserveSprite (void);
 void SMS_updateSpritePosition (signed char sprite, unsigned char x, unsigned char y);
 void SMS_updateSpriteImage (signed char sprite, unsigned char tile);
@@ -98,6 +99,9 @@ unsigned char SMS_readPaddle (unsigned char port);
 _Bool SMS_queryPauseRequested (void);     /* the pause key has been pressed since previous check */
 void SMS_resetPauseRequest (void);        /* reset/acknowledge pause requests */
 
+_Bool SMS_detectPaddle (unsigned char port);                  /* detect paddle controller presence */
+unsigned char SMS_readPaddle (unsigned char port);            /* read paddle controller position */
+
 /* line IRQ handling */
 void SMS_setLineInterruptHandler (void (*theHandlerFunction)(void));  /* link your own handler to the line interrupt */
 void SMS_setLineCounter (unsigned char count);                        /* choose on which line trigger the IRQ */
@@ -115,7 +119,8 @@ SMS_disableSRAM();                        /* macro - disable SRAM */
 /* low level functions */
 void SMS_VRAMmemcpy (unsigned int dst, void *src, unsigned int size);              /* memcpy to VRAM */
 void SMS_VRAMmemcpy_brief (unsigned int dst, void *src, unsigned char size);       /* memcpy to VRAM (256 bytes max) */
-void SMS_VRAMmemset (unsigned int dst, unsigned char value, unsigned int size);    /* memset to VRAM */
+void SMS_VRAMmemset (unsigned int dst, unsigned char value, unsigned int size);    /* memset (bytes) to VRAM */
+void SMS_VRAMmemsetW (unsigned int dst, unsigned int value, unsigned int size);    /* memset (words) to VRAM */
 
 /* VRAM unsafe functions. Fast, but dangerous, can be safely used only during VBlank or when screen is off */
 void UNSAFE_SMS_copySpritestoSAT (void);                         /* copy sprites to Sprites Attribute Table */
@@ -132,4 +137,9 @@ UNSAFE_SMS_load4Tiles(src,tilefrom)         /* copy FOUR tiles to VRAM */
 SMS_EMBED_SEGA_ROM_HEADER(productCode,revision);                                   /* macro - embed SEGA header into ROM */
 SMS_EMBED_SDSC_HEADER(verMaj,verMin,dateYear,dateMonth,dateDay,author,name,descr); /* macro - embed SDSC homebrew header into ROM */
 SMS_EMBED_SDSC_HEADER_AUTO_DATE(verMaj,verMin,author,name,descr);                  /* macro - embed auto timestamped SDSC homebrew header into ROM */
+
+/* SEGA/SDSC headers (when using banked code) */
+SMS_EMBED_SEGA_ROM_HEADER_16KB(productCode,revision);                                     /* macro - embed SEGA header into ROM - for banked code */
+SMS_EMBED_SDSC_HEADER_16KB(verMaj,verMin,dateYear,dateMonth,dateDay,author,name,descr);   /* macro - embed SDSC homebrew header into ROM - for banked code */
+SMS_EMBED_SDSC_HEADER_AUTO_DATE_16KB(verMaj,verMin,author,name,descr);                    /* macro - embed auto timestamped SDSC homebrew header into ROM - for banked code */
 ```
