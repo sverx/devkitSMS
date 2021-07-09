@@ -4,6 +4,7 @@
    ************************************************** */
 
 #include "SMSlib.h"
+#include "SMSlib_common.c"
 
 #pragma save
 #pragma disable_warning 85

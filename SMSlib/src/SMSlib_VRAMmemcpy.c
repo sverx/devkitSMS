@@ -4,6 +4,7 @@
    ************************************************** */
 
 #include "SMSlib.h"
+#include "SMSlib_common.c"
 
 /* SMS_loadTiles() and SMS_loadTileMap() are just calls to SMS_VRAMmemcpy() */
 
