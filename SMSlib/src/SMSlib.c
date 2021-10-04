@@ -8,14 +8,13 @@
 #include <stdbool.h>
 
 /* declare various I/O ports in SDCC z80 syntax */
-/* define IOPort (joypad) */
+/* define IOPorts (for joypads) */
 __sfr __at 0xDC IOPortL;
+__sfr __at 0xDD IOPortH;
+
 #ifdef TARGET_GG
 /* define GG IOPort (GG START key) */
 __sfr __at 0x00 GGIOPort;
-#else
-/* define IOPort (joypad) */
-__sfr __at 0xDD IOPortH;
 #endif
 
 #ifdef MD_PAD_SUPPORT
@@ -89,6 +88,8 @@ inline void SMS_detect_VDP_type (void) {
 void SMS_init (void) {
   // Initializes the lib
   unsigned char i;
+  /* make sure the VDP is ready */
+  while (VDPVCounterPort!=0xB0);
   /* set sprite palette color 0 to black */
 #ifndef TARGET_GG
   SMS_setSpritePaletteColor(0, RGB(0,0,0));
@@ -366,18 +367,25 @@ void SMS_isr (void) __naked {
     ld (hl),#0x01
     ld hl,(_KeysStatus)
     ld (_PreviousKeysStatus),hl
-    in a,(_IOPortL)
+    in a,(_IOPortL)                         /* read first pad */
     cpl
     ld hl,#_KeysStatus
-    ld (hl),a
+    ld (hl),a                               /* save it in KeysStatus low byte */
+    inc hl
 #ifdef TARGET_GG
-    in a,(_GGIOPort)
+    in a,(_GGIOPort)                        /* read START button status */
+    or #0x7F                                /* keep the msb only */
+#ifdef GG_SECOND_PAD_SUPPORT
+    ld (hl),a                               /* save it for later */
+    in a,(_IOPortH)                         /* read second pad */
+    or #0xF0                                /* keep the 4 lsb only */
+    and (hl)                                /* combine the data */
+#endif
 #else
-    in a,(_IOPortH)
+    in a,(_IOPortH)                         /* read second pad */
 #endif
     cpl
-    inc hl
-    ld (hl),a
+    ld (hl),a                               /* save it in KeysStatus high byte */
     jr 2$
 1$:                                         /* line interrupt */
     push bc

@@ -4,10 +4,13 @@
    ************************************************** */
 
 // #define TARGET_GG
-/* uncomment previous line to compile for the GameGear */
+/* to recompile the library for the GameGear */
+
+// #define GG_SECOND_PAD_SUPPORT
+/* to recompile with support for the external second pad on GameGear */
 
 // #define MD_PAD_SUPPORT
-/* uncomment previous line to add support for the Genesis/MegaDrive pad (SMS only) */
+/* to recompile with support for the Genesis/MegaDrive pad (SMS only) */
 
 /* library initialization. you don't need to call this if you use devkitSMS crt0.rel */
 void SMS_init (void);
