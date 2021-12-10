@@ -92,7 +92,7 @@ int main(int argc, char const* *argv) {
           }
 
         for (i=0;i<count;i++) {
-          
+
           strncpy (tmp,&data[i*2],2);
           buf[dest_addr+i]=strtol(tmp,NULL,16);
 
@@ -109,6 +109,11 @@ int main(int argc, char const* *argv) {
         }
 
         used_bank[dest_bank]+=count;
+
+        if (used_bank[dest_bank]>BANK_SIZE) {
+          printf("Fatal: Bank %d overflow.\n", dest_bank);
+          return(1);
+        }
 
         break;
 
