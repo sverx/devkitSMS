@@ -27,9 +27,6 @@ sdcc -o SMSlib_spriteClip_GG.rel -c -mz80 %OPT% -DTARGET_GG --peep-file peep-rul
 sdcc -o SMSlib_loadTileMapArea.rel -c -mz80 %OPT% --peep-file peep-rules.txt --peep-asm SMSlib_loadTileMapArea.c
 @if %errorlevel% NEQ 0 goto :EOF
 
-sdcc -o SMSlib_loadTiles.rel -c -mz80 %OPT% --peep-file peep-rules.txt --peep-asm SMSlib_loadTiles.c
-@if %errorlevel% NEQ 0 goto :EOF
-
 sdcc -o SMSlib_load1bppTiles.rel -c -mz80 %OPT% --peep-file peep-rules.txt --peep-asm SMSlib_load1bppTiles.c
 @if %errorlevel% NEQ 0 goto :EOF
 
