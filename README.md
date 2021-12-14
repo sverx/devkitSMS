@@ -5,7 +5,7 @@ a collection of tools and code (with a *very* presumptuous name) for SEGA Master
 
 ### How to code your own programs using devkitSMS:
 
-* download SDCC - version 4.0.4 (build #11929) or newer **required** - get it [here](http://sdcc.sourceforge.net/) - snapshots [here](http://sdcc.sourceforge.net/snap.php) 
+* download SDCC - version 4.0.4 (build #11929) or newer **required**, up to version 4.1.11 at most - get 4.1.0 [here](https://sourceforge.net/projects/sdcc/files/)
 * install it ("include files" and "Z80 library" are the only components required, you shouldn't need anything else)
 * read its [manual](http://sdcc.sourceforge.net/doc/sdccman.pdf)
 * make sure that your installation works - details are at page 20 of the PDF manual
