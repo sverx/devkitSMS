@@ -30,7 +30,8 @@ void *PSGMusicStart;                       // the pointer to the beginning of mu
 void *PSGMusicPointer;                     // the pointer to the current
 void *PSGMusicLoopPoint;                   // the pointer to the loop begin
 unsigned char PSGMusicSkipFrames;          // the frames we need to skip
-unsigned char PSGLoopFlag;                 // the tune should loop or not (flag)
+unsigned char PSGLoopFlag;                 // the tune should loop infinitely or not (flag)
+unsigned char PSGLoopCounter;              // how many times the tune should loop
 unsigned char PSGMusicLastLatch;           // the last PSG music latch
 unsigned char PSGMusicVolumeAttenuation;   // the volume attenuation applied to the tune (0-15)
 
@@ -110,7 +111,7 @@ void PSGPlay (void *song) {
   PSGLoopFlag=1;
   PSGMusicStart=song;           // store the begin point of music
   PSGMusicPointer=song;         // set music pointer to begin of music
-  PSGMusicLoopPoint=song;       // looppointer points to begin too
+  PSGMusicLoopPoint=song;       // loop pointer points to begin of music too
 
   PSGMusicSkipFrames=0;         // reset the skip frames
   PSGMusicSubstringLen=0;       // reset the substring len (for compression)
@@ -118,11 +119,22 @@ void PSGPlay (void *song) {
   PSGMusicStatus=PSG_PLAYING;
 }
 
+void PSGPlayLoops (void *song, unsigned char loops) {
+/* *********************************************************************
+  receives the address of the PSG to start playing (continuously) and
+  the number of loops (going back to loop point) requested
+*/
+  PSGPlay(song);
+  PSGLoopFlag=0;
+  PSGLoopCounter=loops;
+}
+
 void PSGCancelLoop (void) {
 /* *********************************************************************
   sets the currently looping music to no more loops after the current
 */
   PSGLoopFlag=0;
+  PSGLoopCounter=0;
 }
 
 void PSGPlayNoRepeat (void *song) {
@@ -131,6 +143,7 @@ void PSGPlayNoRepeat (void *song) {
 */
   PSGPlay(song);
   PSGLoopFlag=0;
+  PSGLoopCounter=0;
 }
 
 unsigned char PSGGetStatus (void) {
@@ -419,11 +432,16 @@ _setLoopPoint:
   jp _intLoop
 
 _musicLoop:
-  ld a,(_PSGLoopFlag)              ; looping requested?
-  or a
-  jp z,_PSGStop                    ; No:stop it! (tail call optimization)
   ld hl,(_PSGMusicLoopPoint)
-  jp _intLoop
+  ld a,(_PSGLoopFlag)              ; infinite loop requested?
+  or a
+  jp nz,_intLoop                   ; Yes: do loop
+  ld a,(_PSGLoopCounter)           ; one more loop requested?
+  or a
+  jp z,_PSGStop                    ; No: stop the music! (tail call optimization)
+  dec a
+  ld (_PSGLoopCounter),a           ; decrement loop counter
+  jp _intLoop                      ; do loop
 
 _substring:
   sub PSGSubString-4                  ; len is value - $08 + 4

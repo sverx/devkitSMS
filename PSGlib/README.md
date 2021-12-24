@@ -4,12 +4,13 @@ PSGlib
 these are the currently defined functions/macros:
 
 ```
-void PSGPlay (unsigned char *song);             /* this will make your PSG tune start */
-void PSGCancelLoop (void);                      /* tell the library to stop the tune at next loop */
-void PSGPlayNoRepeat (unsigned char *song);     /* this will make your PSG tune start and stop at loop */
-void PSGStop (void);                            /* this will make your PSG tune stop */
-void PSGResume (void);                          /* this will make your stopped PSG tune resume playing */
-unsigned char PSGGetStatus (void);              /* get the current status of the tune */
+void PSGPlay (void *song);                           /* this will make your PSG tune start and loop forever */
+void PSGPlayLoops (void *song, unsigned char loops); /* this will make your PSG tune start and loop the requested amount of times*/
+void PSGCancelLoop (void);                           /* tell the library to stop the tune at next loop */
+void PSGPlayNoRepeat (void *song);                   /* this will make your PSG tune start and stop at loop */
+void PSGStop (void);                                 /* this will make your PSG tune stop (pause) */
+void PSGResume (void);                               /* this will make your stopped (paused) PSG tune resume playing */
+unsigned char PSGGetStatus (void);                   /* get the current status of the tune */
 
 void PSGSetMusicVolumeAttenuation (unsigned char attenuation);   /* this will set the tune attenuation (0-15) */
 
