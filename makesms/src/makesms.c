@@ -132,11 +132,20 @@ int main(int argc, char const* *argv) {
     size=BANK_SIZE*((size/BANK_SIZE)+1);      // make BIN size exact multiple of BANK_SIZE
 
   if (size>BANK_SIZE) {
+    int overflow = 0;
     printf("Info: %d bytes used/%d total [%0.2f%%] - %d bytes used in bank 0 [%0.2f%%] - size of output ROM is %d KB\n",used,size,(float)used/(float)size*100, used_low,(float)used_low/((float)16*1024)*100, size/1024);
     printf("Info: ");
-    for (i=0;i<size/BANK_SIZE;i++)
-          printf("[bank%d %d] ",i,BANK_SIZE-((i==0)?used_low:used_bank[i]));
+    for (i=0;i<size/BANK_SIZE;i++) {
+          int spaceleft = BANK_SIZE-((i==0)?used_low:used_bank[i]);
+          printf("[bank%d %d] ",i,spaceleft);
+          if (spaceleft < 0)
+            overflow = 1;
+    }
     printf("bytes free\n");
+    if (overflow > 0) {
+      printf("Fatal: One or more overflowing bank(s)\n");
+      return(1);
+    }
   } else
     printf("Info: %d bytes used/%d total [%0.2f%%] - size of output ROM is %d KB\n",used,size,(float)used/(float)size*100,size/1024);
 
