@@ -142,8 +142,13 @@ for n, arg in enumerate(sys.argv):
         elif arg == "--compile":
             compile_rel = 1
             print("Info: compiled output requested")
+        elif arg[:15] == "--singleheader=":
+            single_h = 1
+            single_h_filename = arg[15:]
+            print("Info: single header file requested (%s)" %single_h_filename)
         elif arg == "--singleheader":
             single_h = 1
+            single_h_filename = "assets2banks.h"
             print("Info: single header file requested (assets2banks.h)")
         else:
             print("Fatal: invalid '{0!s}' parameter".format(arg))
@@ -267,7 +272,7 @@ for ag in AssetGroupList:                                  # now find a place fo
             sys.exit(1)
 
 if single_h == 1 and len(BankList)>0:
-    out_file_h = open("assets2banks.h", 'w')
+    out_file_h = open(single_h_filename, 'w')
 
 for bank_n, b in enumerate(BankList):
     if single_h == 0:
