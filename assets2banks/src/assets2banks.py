@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 # Author: sverx
-# Version: 2.6.0
+# Version: 2.6.1
 
 from __future__ import absolute_import, division, generators, unicode_literals, print_function, nested_scopes
 import sys
@@ -87,7 +87,7 @@ def find(fun, seq):
             return item
 
 def print_usage():
-    print("Usage: assets2banks path [--firstbank=<number>[,<size>]][--compile][--singleheader]")
+    print("Usage: assets2banks path [--firstbank=<number>[,<size>]][--compile][--singleheader[=<filename>]]")
     sys.exit(1)
 
 AssetGroupList = []    # list of the groups (we will sort this)
@@ -127,7 +127,7 @@ for n, arg in enumerate(sys.argv):
                 print("Fatal: invalid firstbank number parameter")
                 print_usage()
 # deprecated --bank1size= option
-# ---------- from here ---------- 
+# ---------- from here ----------
         elif arg[:12] == "--bank1size=":
             print("Warning: --bank1size option is deprecated. Please use --firstbank=1,<size> instead")
             try:
@@ -138,14 +138,14 @@ for n, arg in enumerate(sys.argv):
             except ValueError:
                 print("Fatal: invalid bank1size parameter")
                 print_usage()
-# ---------- to here ---------- 
+# ---------- to here ----------
         elif arg == "--compile":
             compile_rel = 1
             print("Info: compiled output requested")
         elif arg[:15] == "--singleheader=":
             single_h = 1
             single_h_filename = arg[15:]
-            print("Info: single header file requested (%s)" %single_h_filename)
+            print("Info: single header file requested ({0!s})".format(single_h_filename))
         elif arg == "--singleheader":
             single_h = 1
             single_h_filename = "assets2banks.h"
