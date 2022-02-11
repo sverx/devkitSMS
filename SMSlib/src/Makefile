@@ -26,7 +26,7 @@ PEEP_OPTIONS=--peep-file peep-rules.txt --peep-asm
 OUTPUT_LIBS=SMSlib.lib SMSlib_GG.lib
 
 # Files that are compiled once and used for SMS and GG
-SRCS=SMSlib_aPLib.c SMSlib_autotext.c SMSlib_common.c SMSlib_deprecated.c SMSlib_load1bppTiles.c SMSlib_loadTileMapArea.c SMSlib_paddle.c SMSlib_paletteAdv.c SMSlib_PSGaiden.c  SMSlib_spriteAdv.c SMSlib_sprite.c SMSlib_STMcomp.c SMSlib_textrenderer.c SMSlib_threesprites.c SMSlib_twosprites.c SMSlib_UNSAFE.c SMSlib_UNSAFE_zx7.c SMSlib_VRAMmemcpy_brief.c SMSlib_VRAMmemcpy.c SMSlib_VRAMmemset.c SMSlib_zx7.c
+SRCS=SMSlib_aPLib.c SMSlib_autotext.c SMSlib_deprecated.c SMSlib_load1bppTiles.c SMSlib_loadTileMapArea.c SMSlib_paddle.c SMSlib_paletteAdv.c SMSlib_PSGaiden.c  SMSlib_spriteAdv.c SMSlib_sprite.c SMSlib_STMcomp.c SMSlib_textrenderer.c SMSlib_threesprites.c SMSlib_twosprites.c SMSlib_UNSAFE.c SMSlib_UNSAFE_zx7.c SMSlib_VRAMmemcpy_brief.c SMSlib_VRAMmemcpy.c SMSlib_VRAMmemset.c SMSlib_zx7.c
 
 # One .rel per common source file. Add target specific .rel dependencies here.
 OBJS_SMS=$(patsubst %.c,%.rel,$(SRCS)) SMSlib.rel SMSlib_autotext.rel SMSlib_spriteClip.rel
