@@ -58,10 +58,19 @@ SMSlib_spriteClip_GG.rel: SMSlib_sprite.c SMSlib.h peep-rules.txt
 	$(CC) $(CFLAGS) $(PEEP_OPTIONS) -c -o $@ $< -DTARGET_GG
 
 # No --peep-asm for the following since it could break timing of handwritten code
+SMSlib_STMcomp.rel: SMSlib_STMcomp.c
+	$(CC) $(CFLAGS) --peep-file peep-rules.txt -c -o $@ $<
+
+SMSlib_UNSAFE.rel: SMSlib_UNSAFE.c
+	$(CC) $(CFLAGS) --peep-file peep-rules.txt -c -o $@ $<
+
+SMSlib_PSGaiden.rel: SMSlib_PSGaiden.c
+	$(CC) $(CFLAGS) --peep-file peep-rules.txt -c -o $@ $<
+
 SMSlib_zx7.rel: SMSlib_zx7.c
 	$(CC) $(CFLAGS) -c -o $@ $<
 
-SMSlib_UNSAFE_zx7.rel: SMSlib_zx7.c
+SMSlib_UNSAFE_zx7.rel: SMSlib_UNSAFE_zx7.c
 	$(CC) $(CFLAGS) -c -o $@ $<
 
 SMSlib_aPLib.rel: SMSlib_aPLib.c
