@@ -3,12 +3,14 @@
 ### How to use assets2banks
 
 ```
-assets2banks <asset folder> [--firstbank=<number>[,<size>]][--compile][--singleheader[=<filename>]]
+assets2banks <asset folder> [--firstbank=<number>[,<size>]][--compile][--singleheader[=<filename>]][--exclude=<filename>]
 ```
 
 Using the assets2banks utility you can create .c source files and their respective .h header files containing one constant data array for each single file found in the specified asset folder.
 (Adding --singleheader you'll generate a single assets2banks.h file (or any name you prefer giving to it) instead of one single .h header file for each bank)
 Also, if you add the --compile option to your command line, object files (RELs) will be generated in place of the C source files, so you won't have to compile them yourself.
+
+If the asset folder contains files you wish assets2banks to ignore (for instance, a file called .gitignore) you can exclude each file using the --exclude option.
 
 Example usage:
 
