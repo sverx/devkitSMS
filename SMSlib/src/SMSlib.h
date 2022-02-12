@@ -59,6 +59,10 @@ void SMS_setSpriteMode (unsigned char mode) __z88dk_fastcall;
 volatile __at (0xffff) unsigned char ROM_bank_to_be_mapped_on_slot2;
 #define SMS_mapROMBank(n)       ROM_bank_to_be_mapped_on_slot2=(n)
 
+/* additional symbols to control other mapper slots - use with care! */
+volatile __at (0xfffe) unsigned char ROM_bank_to_be_mapped_on_slot1;
+volatile __at (0xfffd) unsigned char ROM_bank_to_be_mapped_on_slot0;
+
 /* macro for SRAM access */
 volatile __at (0xfffc) unsigned char SRAM_bank_to_be_mapped_on_slot2;
 #define SMS_enableSRAM()        SRAM_bank_to_be_mapped_on_slot2=0x08
