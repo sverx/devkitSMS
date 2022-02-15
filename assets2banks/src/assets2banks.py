@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 # Author: sverx
-# Version: 2.6.1
+# Version: 2.6.2
 
 from __future__ import absolute_import, division, generators, unicode_literals, print_function, nested_scopes
 import sys
