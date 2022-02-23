@@ -19,7 +19,7 @@ AR=sdar
 
 ############# END OF BUILD CONFIG OPTIONS #############
 
-OPT=--max-allocs-per-node 1000000
+OPT=--max-allocs-per-node 100000
 CFLAGS=-mz80 $(OPT) $(CONFIG)
 PEEP_OPTIONS=--peep-file peep-rules.txt --peep-asm
 
