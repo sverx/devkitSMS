@@ -3,12 +3,14 @@
 ### How to use assets2banks
 
 ```
-assets2banks <asset folder> [--firstbank=<number>[,<size>]][--compile][--singleheader]
+assets2banks <asset folder> [--firstbank=<number>[,<size>]][--compile][--singleheader[=<filename>]][--exclude=<filename>]
 ```
 
 Using the assets2banks utility you can create .c source files and their respective .h header files containing one constant data array for each single file found in the specified asset folder.
-(Adding --singleheader you'll generate a single assets2banks.h file instead of one single .h header file for each bank)
+(Adding --singleheader you'll generate a single assets2banks.h file (or any name you prefer giving to it) instead of one single .h header file for each bank)
 Also, if you add the --compile option to your command line, object files (RELs) will be generated in place of the C source files, so you won't have to compile them yourself.
+
+If the asset folder contains files you wish assets2banks to ignore (for instance, a file called .gitignore) you can exclude each file using the --exclude option.
 
 Example usage:
 
@@ -67,10 +69,10 @@ Finally, this option can even be used to allocate an asset bigger than 16 KB, of
 Of course you can combine all the options if you wish. For instance this:
 
 ```
-assets2banks assets --firstbank=6 --singleheader --compile
+assets2banks assets --firstbank=6 --singleheader=assets.h --compile
 ```
 
-creates a set of this creates a set of bank*n*.rel (compiled objects) files starting from n=6 and a *single* assets2banks.h header file.
+creates a set of this creates a set of bank*n*.rel (compiled objects) files starting from n=6 and a *single assets.h* header file.
 
 
 Beside that, assets2banks behavior regarding specific assets can optionally be configured using a config file that should be placed in the very same asset folder.

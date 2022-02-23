@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 # Author: sverx
-# Version: 2.6.0
+# Version: 2.6.2
 
 from __future__ import absolute_import, division, generators, unicode_literals, print_function, nested_scopes
 import sys
@@ -87,12 +87,13 @@ def find(fun, seq):
             return item
 
 def print_usage():
-    print("Usage: assets2banks path [--firstbank=<number>[,<size>]][--compile][--singleheader]")
+    print("Usage: assets2banks path [--firstbank=<number>[,<size>]][--compile][--singleheader[=<filename>]][--exclude=<filename>]")
     sys.exit(1)
 
 AssetGroupList = []    # list of the groups (we will sort this)
 AssetList = []         # list of the assets (for inspection)
 BankList = []          # list of the banks
+ExcludeList = []       # list of files to exclude
 
 print("*** sverx's assets2banks converter ***")
 
@@ -127,7 +128,7 @@ for n, arg in enumerate(sys.argv):
                 print("Fatal: invalid firstbank number parameter")
                 print_usage()
 # deprecated --bank1size= option
-# ---------- from here ---------- 
+# ---------- from here ----------
         elif arg[:12] == "--bank1size=":
             print("Warning: --bank1size option is deprecated. Please use --firstbank=1,<size> instead")
             try:
@@ -138,13 +139,20 @@ for n, arg in enumerate(sys.argv):
             except ValueError:
                 print("Fatal: invalid bank1size parameter")
                 print_usage()
-# ---------- to here ---------- 
+# ---------- to here ----------
         elif arg == "--compile":
             compile_rel = 1
             print("Info: compiled output requested")
+        elif arg[:15] == "--singleheader=":
+            single_h = 1
+            single_h_filename = arg[15:]
+            print("Info: single header file requested ({0!s})".format(single_h_filename))
         elif arg == "--singleheader":
             single_h = 1
+            single_h_filename = "assets2banks.h"
             print("Info: single header file requested (assets2banks.h)")
+        elif arg[:10] == "--exclude=":
+            ExcludeList.append(arg[10:])
         else:
             print("Fatal: invalid '{0!s}' parameter".format(arg))
             print_usage()
@@ -233,6 +241,8 @@ except (IOError, OSError):
 
 try:
     for f in os.listdir(assets_path):  # read directory content and create missing assets and assetgroup (one per asset)
+        if f in ExcludeList:
+            continue
         if os.path.isfile(os.path.join(assets_path, f)):
             st = os.stat(os.path.join(assets_path, f))
             a = Asset(str(f), st.st_size)
@@ -267,7 +277,7 @@ for ag in AssetGroupList:                                  # now find a place fo
             sys.exit(1)
 
 if single_h == 1 and len(BankList)>0:
-    out_file_h = open("assets2banks.h", 'w')
+    out_file_h = open(single_h_filename, 'w')
 
 for bank_n, b in enumerate(BankList):
     if single_h == 0:
