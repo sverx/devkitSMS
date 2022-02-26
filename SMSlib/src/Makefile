@@ -46,10 +46,12 @@ SMSlib_GG.lib: $(OBJS_GG)
 # to a target.
 
 SMSlib.rel: SMSlib.c SMSlib.h peep-rules.txt
-	$(CC) $(CFLAGS) $(PEEP_OPTIONS) --reserve-regs-iy -c -o $@ $<
+	#$(CC) $(CFLAGS) $(PEEP_OPTIONS) --reserve-regs-iy -c -o $@ $<
+	$(CC) $(CFLAGS) $(PEEP_OPTIONS) -c -o $@ $<
 
 SMSlib_GG.rel: SMSlib.c SMSlib.h peep-rules.txt
-	$(CC) $(CFLAGS) $(PEEP_OPTIONS) --reserve-regs-iy -c -o $@ $< -DTARGET_GG
+	#$(CC) $(CFLAGS) $(PEEP_OPTIONS) --reserve-regs-iy -c -o $@ $< -DTARGET_GG
+	$(CC) $(CFLAGS) $(PEEP_OPTIONS) -c -o $@ $< -DTARGET_GG
 
 SMSlib_autotext_GG.rel: SMSlib_autotext.c SMSlib.h peep-rules.txt
 	$(CC) $(CFLAGS) $(PEEP_OPTIONS) -c -o $@ $< -DTARGET_GG
