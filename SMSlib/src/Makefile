@@ -30,7 +30,7 @@ SRCS=SMSlib_aPLib.c SMSlib_autotext.c SMSlib_deprecated.c SMSlib_load1bppTiles.c
 
 # One .rel per common source file. Add target specific .rel dependencies here.
 OBJS_SMS=$(patsubst %.c,%.rel,$(SRCS)) SMSlib.rel SMSlib_autotext.rel SMSlib_spriteClip.rel
-OBJS_GG=$(patsubst %.c,%.rel,$(SRC_GG)) SMSlib_GG.rel SMSlib_autotext_GG.rel SMSlib_spriteClip_GG.rel
+OBJS_GG=$(patsubst %.c,%.rel,$(SRCS)) SMSlib_GG.rel SMSlib_autotext_GG.rel SMSlib_spriteClip_GG.rel
 
 ALL: $(OUTPUT_LIBS)
 
