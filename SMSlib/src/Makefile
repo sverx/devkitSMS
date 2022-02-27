@@ -56,7 +56,7 @@ SMSlib_GG.rel: SMSlib.c SMSlib.h peep-rules.txt
 SMSlib_autotext_GG.rel: SMSlib_autotext.c SMSlib.h peep-rules.txt
 	$(CC) $(CFLAGS) $(PEEP_OPTIONS) -c -o $@ $< -DTARGET_GG
 
-SMSlib_spriteClip_GG.rel: SMSlib_sprite.c SMSlib.h peep-rules.txt
+SMSlib_spriteClip_GG.rel: SMSlib_spriteClip.c SMSlib.h peep-rules.txt
 	$(CC) $(CFLAGS) $(PEEP_OPTIONS) -c -o $@ $< -DTARGET_GG
 
 # No --peep-asm for the following since it could break timing of handwritten code
