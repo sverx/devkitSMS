@@ -54,7 +54,7 @@ unsigned char VDPType;                /* used by NTSC/PAL and VDP type detection
 
 unsigned char SMS_Port3EBIOSvalue;    /* initialized by BIOS */
 
-#ifdef FRAME_INT_HOOK
+#ifndef NO_FRAME_INT_HOOK
 /* If non-NULL, will be called by SMS_isr after acknowledging */
 /* the interrupt and reading controller status */
 void (*SMS_theFrameInterruptHandler)(void);
@@ -116,9 +116,6 @@ void SMS_init (void) {
   /* PAL/NTSC detection (SMS only) */
   SMS_detect_VDP_type();
 #endif
-#endif
-#ifdef FRAME_INT_HOOK
-  SMS_theFrameInterruptHandler = 0;
 #endif
 }
 
@@ -298,7 +295,7 @@ void SMS_resetPauseRequest (void) {
 }
 #endif
 
-#ifdef FRAME_INT_HOOK
+#ifndef NO_FRAME_INT_HOOK
 void SMS_setFrameInterruptHandler (void (*theHandlerFunction)(void)) __z88dk_fastcall {
   SMS_theFrameInterruptHandler=theHandlerFunction;
 }
@@ -356,7 +353,7 @@ void SMS_isr (void) __naked {
       MDKeysStatus=0;                       /* (because one might have detached his MD pad) */
     }
     IOPortCtrl=TH_HI;                       /* leave TH high */
-#ifdef FRAME_INT_HOOK
+#ifndef NO_FRAME_INT_HOOK
     if (SMS_theFrameInterruptHandler) {
         SMS_theFrameInterruptHandler();
     }
@@ -406,7 +403,7 @@ void SMS_isr (void) __naked {
 #endif
     cpl
     ld (hl),a                               /* save it in KeysStatus high byte */
-#ifdef FRAME_INT_HOOK
+#ifndef NO_FRAME_INT_HOOK
     ld hl,(_SMS_theFrameInterruptHandler)
     ld a,h
     or l
