@@ -10,7 +10,7 @@
 #pragma disable_warning 85
 
 // 2nd ASM version: 290 CPU cycles
-void SMS_addTwoAdjoiningSprites (unsigned char x, unsigned char y, unsigned char tile) __naked __preserves_regs(iyh,iyl) {
+void SMS_addTwoAdjoiningSprites (unsigned char x, unsigned char y, unsigned char tile) __naked __preserves_regs(iyh,iyl) /* __sdcccall(0) */  {
   __asm
     ld  a,(#_SpriteNextFree)
     cp  a,#MAXSPRITES-1
@@ -41,7 +41,7 @@ void SMS_addTwoAdjoiningSprites (unsigned char x, unsigned char y, unsigned char
     ld (hl),e                        ; write X
     inc hl
     ld (hl),d                        ; write tile number
-    
+
     ld a,(#_spritesWidth)            ; load current sprite width
     add a,e
     jr c,_secondSpriteClipped        ; if new X is overflowing, do not place second sprite
@@ -57,7 +57,7 @@ void SMS_addTwoAdjoiningSprites (unsigned char x, unsigned char y, unsigned char
     add a,#2
     ld (#_SpriteNextFree),a          ; save SpriteNextFree new value
     ret
-    
+
 _secondSpriteClipped:
     ld  hl,#_SpriteNextFree          ; second sprite has been clipped, so just inc SpriteNextFree
     inc (hl)

@@ -7,7 +7,7 @@
 
 #pragma save
 #pragma disable_warning 85
-void UNSAFE_SMS_loadZX7compressedTilesatAddr (const void *src, unsigned int dst) {
+void UNSAFE_SMS_loadZX7compressedTilesatAddr (const void *src, unsigned int dst) /* __sdcccall(0) */  {
 /* **************************************************
 ; by Einar Saukas, Antonio Villena & Metalbrain
 ; modified for sms vram by aralbrec
@@ -18,7 +18,7 @@ void UNSAFE_SMS_loadZX7compressedTilesatAddr (const void *src, unsigned int dst)
 ; *** it to be smaller and faster, but it is not 100% compatible.      ***
    ************************************************** */
   __asm
-  
+
   pop bc
   pop hl         ; move *src from stack into hl
   pop de         ; move dst from stack into de
@@ -96,7 +96,7 @@ _f0:
     ; determine offset
     ld e, (hl)   ; load offset flag (1 bit) + offset value (7 bits)
     inc hl
-    
+
     sla e        ; these two instructions instead of
     inc e        ; 'sll e' undocumented instruction
 

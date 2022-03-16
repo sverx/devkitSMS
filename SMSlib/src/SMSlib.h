@@ -102,13 +102,13 @@ void SMS_crt0_RST18(unsigned int tile) __z88dk_fastcall __preserves_regs(b,c,d,e
 void SMS_load1bppTiles (const void *src, unsigned int tilefrom, unsigned int size, unsigned char color0, unsigned char color1);
 
 /* functions to load compressed tiles into VRAM */
-void SMS_loadPSGaidencompressedTilesatAddr (const void *src, unsigned int dst);
+void SMS_loadPSGaidencompressedTilesatAddr (const void *src, unsigned int dst) /* __sdcccall(0) */;
 #define SMS_loadPSGaidencompressedTiles(src,tilefrom) SMS_loadPSGaidencompressedTilesatAddr((src),TILEtoADDR(tilefrom))
 
 /* UNSAFE functions to load compressed tiles into VRAM */
-void UNSAFE_SMS_loadZX7compressedTilesatAddr (const void *src, unsigned int dst);
+void UNSAFE_SMS_loadZX7compressedTilesatAddr (const void *src, unsigned int dst) /* __sdcccall(0) */;
 #define UNSAFE_SMS_loadZX7compressedTiles(src,tilefrom) UNSAFE_SMS_loadZX7compressedTilesatAddr((src),TILEtoADDR(tilefrom))
-void UNSAFE_SMS_loadaPLibcompressedTilesatAddr (const void *src, unsigned int dst);
+void UNSAFE_SMS_loadaPLibcompressedTilesatAddr (const void *src, unsigned int dst) /* __sdcccall(0) */;
 #define UNSAFE_SMS_loadaPLibcompressedTiles(src,tilefrom) UNSAFE_SMS_loadaPLibcompressedTilesatAddr((src),TILEtoADDR(tilefrom))
 
 /* functions for the tilemap */
@@ -123,12 +123,12 @@ void SMS_loadSTMcompressedTileMapatAddr (unsigned int dst, const void *src);
 /* functions for sprites handling */
 void SMS_initSprites (void);
 #ifdef NO_SPRITE_CHECKS
-void SMS_addSprite (unsigned char x, unsigned char y, unsigned char tile) __naked __preserves_regs(iyh,iyl);
+void SMS_addSprite (unsigned char x, unsigned char y, unsigned char tile) __naked __preserves_regs(iyh,iyl) /* __sdcccall(0) */;
 #else
-signed char SMS_addSprite (unsigned char x, unsigned char y, unsigned char tile) __naked __preserves_regs(iyh,iyl);  /* returns -1 if no more sprites are available, -2 if invalid Y coord */
+signed char SMS_addSprite (unsigned char x, unsigned char y, unsigned char tile) __naked __preserves_regs(iyh,iyl) /* __sdcccall(0) */;  /* returns -1 if no more sprites are available, -2 if invalid Y coord */
 #endif
-void SMS_addTwoAdjoiningSprites (unsigned char x, unsigned char y, unsigned char tile) __naked __preserves_regs(iyh,iyl);     /* doesn't return anything */
-void SMS_addThreeAdjoiningSprites (unsigned char x, unsigned char y, unsigned char tile) __naked __preserves_regs(iyh,iyl);   /* doesn't return anything */
+void SMS_addTwoAdjoiningSprites (unsigned char x, unsigned char y, unsigned char tile) __naked __preserves_regs(iyh,iyl) /* __sdcccall(0) */;     /* doesn't return anything */
+void SMS_addThreeAdjoiningSprites (unsigned char x, unsigned char y, unsigned char tile) __naked __preserves_regs(iyh,iyl) /* __sdcccall(0) */;   /* doesn't return anything */
 signed char SMS_reserveSprite (void);
 void SMS_updateSpritePosition (signed char sprite, unsigned char x, unsigned char y);
 void SMS_updateSpriteImage (signed char sprite, unsigned char tile);
@@ -182,7 +182,7 @@ void SMS_configureTextRenderer (signed int ascii_to_tile_offset) __z88dk_fastcal
 void SMS_autoSetUpTextRenderer (void);
 
 /* decompress ZX7-compressed data to RAM */
-void SMS_decompressZX7 (const void *src, void *dst);
+void SMS_decompressZX7 (const void *src, void *dst) /* __sdcccall(0) */;
 
 /* functions to read joypad(s) */
 unsigned int SMS_getKeysStatus (void);

@@ -38,28 +38,3 @@ signed char SMS_addSpriteClipping (int x, int y, unsigned char tile) {
   *stXN=tile;
   return(SpriteNextFree++);
 }
-
-/*
-// old code
-signed char SMS_addSpriteClipping (int x, int y, unsigned char tile) {
-  unsigned char *stXN;
-  if (SpriteNextFree<MAXSPRITES) {
-    if ((x>clipWin_x1) || (x<0) || (x<((int)(clipWin_x0)-(int)(spritesWidth))))
-      return (-1);                                  // sprite clipped
-    if ((y>clipWin_y1) || (y<((int)(clipWin_y0)-(int)(spritesHeight))))
-      return (-1)   ;                               // sprite clipped
-    if ((y-1)!=0xD0) {                              // avoid placing sprites at this Y!
-      SpriteTableY[SpriteNextFree]=y-1;
-      stXN=&SpriteTableXN[SpriteNextFree*2];
-      *stXN++=x;
-      *stXN=tile;
-      // older code was:
-      // SpriteTableXN[SpriteNextFree*2]=x;
-      // SpriteTableXN[SpriteNextFree*2+1]=tile;
-      return(SpriteNextFree++);
-    } else
-      return (-1);
-  }
-  return (-1);
-}
-*/

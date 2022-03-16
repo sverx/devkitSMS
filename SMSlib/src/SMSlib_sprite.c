@@ -23,7 +23,7 @@ void SMS_initSprites (void) {
 // so it's faster... but you should know what you're doing
 // Also, it doesn't return any sprite handle
 // 1st ASM version: 170 CPU cycles
-void SMS_addSprite (unsigned char x, unsigned char y, unsigned char tile) __naked __preserves_regs(iyh,iyl) {
+void SMS_addSprite (unsigned char x, unsigned char y, unsigned char tile) __naked __preserves_regs(iyh,iyl) /* __sdcccall(0) */  {
   __asm
     ld  hl,#2
     add hl,sp
@@ -55,7 +55,7 @@ void SMS_addSprite (unsigned char x, unsigned char y, unsigned char tile) __nake
 
 #else
 // 3rd ASM version: 212 CPU cycles
-signed char SMS_addSprite (unsigned char x, unsigned char y, unsigned char tile) __naked __preserves_regs(iyh,iyl) {
+signed char SMS_addSprite (unsigned char x, unsigned char y, unsigned char tile) __naked __preserves_regs(iyh,iyl) /* __sdcccall(0) */ {
   __asm
     ld  a,(#_SpriteNextFree)
     cp  a,#MAXSPRITES
@@ -104,24 +104,13 @@ _returnInvalidHandle2:
 #pragma restore
 
 void SMS_copySpritestoSAT (void) {
-  /*
-  SMS_setAddr(SMS_SATAddress);
-  if (SpriteNextFree)
-    SMS_byte_brief_array_to_VDP_data(SpriteTableY,SpriteNextFree);
-  if (SpriteNextFree<64)
-    SMS_byte_to_VDP_data(0xD0);  // write sprite terminator byte if needed
-  if (SpriteNextFree) {
-    SMS_setAddr(SMS_SATAddress+128);
-    SMS_byte_brief_array_to_VDP_data(SpriteTableXN,SpriteNextFree*2);
-  }
-  */
   SMS_setAddr(SMS_SATAddress);
   __asm
     ld a,(#_SpriteNextFree)
     or a
     jr z,_no_sprites
     ld b,a
-    ld c,#_VDPDataPort    
+    ld c,#_VDPDataPort
     ld hl,#_SpriteTableY
 _next_spriteY:
     outi                    ; 16 cycles
@@ -149,20 +138,3 @@ _no_sprites:
     out (#_VDPDataPort),a
   __endasm;
 }
-
-/*
-// previous code: copies the whole SAT, even unused entries
-//     profiling: 10916 cycles (48 screen lines)
-void SMS_copySpritestoSAT (void) {
-  // SMS_set_address_VRAM(SMS_SATAddress);
-  SMS_setAddr(SMS_SATAddress);
-#if MAXSPRITES==64
-  SMS_byte_brief_array_to_VDP_data(SpriteTableY,MAXSPRITES);
-#else
-  SMS_byte_brief_array_to_VDP_data(SpriteTableY,MAXSPRITES+1);
-#endif
-  // SMS_set_address_VRAM(SMS_SATAddress+128);
-  SMS_setAddr(SMS_SATAddress+128);
-  SMS_byte_brief_array_to_VDP_data(SpriteTableXN,MAXSPRITES*2);
-}
-*/

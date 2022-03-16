@@ -12,7 +12,7 @@ unsigned char decompBuffer[32];        /*  decompression buffer */
 #pragma disable_warning 85
 // SMS_loadPSGaidencompressedTiles would otherwise complain:
 // warning 85: unreferenced function argument : 'src'
-void SMS_loadPSGaidencompressedTilesatAddr (const void *src, unsigned int dst) {
+void SMS_loadPSGaidencompressedTilesatAddr (const void *src, unsigned int dst) /* __sdcccall(0) */  {
 /* ***********************************************************************************
    Phantasy Star Gaiden Tile Decoder
    taken from http://www.smspower.org/Development/PhantasyStarGaidenTileDecoder
@@ -30,7 +30,7 @@ __asm
    inc hl
    ld b,(hl)
    inc hl
-   
+
    push ix                  ; preserve ix
 
    push hl                  ; ld ix,hl
