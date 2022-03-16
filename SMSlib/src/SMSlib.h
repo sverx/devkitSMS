@@ -276,6 +276,13 @@ extern volatile unsigned char SMS_VDPFlags;
 
 extern unsigned char SMS_Port3EBIOSvalue;
 
+/* vertical interrupt hook */
+#ifndef NO_FRAME_INT_HOOK
+/* If non-NULL, the specified function will be called by SMS_isr after acknowledging */
+/* the interrupt and reading controller status. */
+void SMS_setFrameInterruptHandler (void (*theHandlerFunction)(void)) __z88dk_fastcall;
+#endif
+
 /* line interrupt */
 void SMS_setLineInterruptHandler (void (*theHandlerFunction)(void)) __z88dk_fastcall;
 void SMS_setLineCounter (unsigned char count) __z88dk_fastcall;

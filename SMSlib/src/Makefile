@@ -17,6 +17,10 @@ AR=sdar
 # Build a lib supporting less sprites to save memory. Default 64 (all).
 #CONFIG+=-DMAXSPRITES=64
 
+# Omit support for a frame interrupt hook to save a few bytes
+# and cycles.
+#CONFIG+=-DNO_FRAME_INT_HOOK
+
 ############# END OF BUILD CONFIG OPTIONS #############
 
 OPT=--max-allocs-per-node 100000
