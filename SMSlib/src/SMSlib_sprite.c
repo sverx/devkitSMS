@@ -114,7 +114,7 @@ void SMS_copySpritestoSAT (void) {
     ld hl,#_SpriteTableY
 _next_spriteY:
     outi                    ; 16 cycles
-    jp nz,_next_spriteY     ; 10 cycles   =>  VRAM safe
+    jr nz,_next_spriteY     ; 12 cycles = 28 (VRAM safe on GG too)
     cp #64                  ;  7 cycles
     jr z,_no_sprite_term    ;  7 cycles
     ld a,#0xD0              ;  7 cycles   =>  VRAM safe
@@ -129,8 +129,8 @@ _no_sprite_term:
     ld b,a
     ld hl,#_SpriteTableXN
 _next_spriteXN:
-    outi                    ; 16       cycles
-    jp nz,_next_spriteXN    ; 10       cycles   =>  VRAM safe
+    outi                    ; 16 cycles
+    jr nz,_next_spriteXN    ; 12 cycles = 28 (VRAM safe on GG too)
     ret
 
 _no_sprites:

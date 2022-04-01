@@ -32,7 +32,7 @@ void SMS_zeroBGPalette (void) {
     xor a
 1$: out (_VDPDataPort),a       ; 11
     nop                        ; 4
-    djnz 1$                    ; 13 = 28 *VRAM SAFE*
+    djnz 1$                    ; 13 = 28 *VRAM SAFE ON GG TOO*
   __endasm;
 }
 
@@ -59,7 +59,7 @@ void SMS_zeroSpritePalette (void) {
     xor a
 1$: out (_VDPDataPort),a       ; 11
     nop                        ; 4
-    djnz 1$                    ; 13 = 28 *VRAM SAFE*
+    djnz 1$                    ; 13 = 28 *VRAM SAFE ON GG TOO*
   __endasm;
 }
 #endif

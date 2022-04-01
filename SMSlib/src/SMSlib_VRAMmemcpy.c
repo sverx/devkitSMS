@@ -33,8 +33,8 @@ __asm
   ld c,#_VDPDataPort
 
 1$:
-  outi
-  jp  nz,1$          ; 10 = 26 (VRAM safe)
+  outi               ; 16
+  jr  nz,1$          ; 12 = 28 (VRAM safe on GG too)
   dec a
   jp  nz,1$
   ret

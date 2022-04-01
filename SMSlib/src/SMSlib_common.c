@@ -84,10 +84,10 @@ inline void SMS_byte_brief_array_to_VDP_data (const unsigned char *data, unsigne
   __asm                                                           \
     ld c,#_VDPDataPort                                            \
 1$: outi                       ; 16                               \
-    jp nz,1$                   ; 10 = 26 *VRAM SAFE*              \
+    jr nz,1$                   ; 12 = 28 *VRAM SAFE ON GG TOO*    \
   __endasm
   // writes B bytes from (HL) on to VDP
-  // it's VRAM safe (at least 26 cycles between writes)
+  // it's VRAM safe on GG too (at least 27 cycles between writes)
 
 #define ASM_LD_DE_IMM(imm)            \
   __asm                               \

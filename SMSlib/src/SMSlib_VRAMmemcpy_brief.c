@@ -27,7 +27,7 @@ __asm
 
 1$:
   outi               ; 16
-  jp  nz,1$          ; 10 = 26 (VRAM safe)
+  jr  nz,1$          ; 12 = 28 (VRAM safe on GG too)
   ret
 __endasm;
 }
