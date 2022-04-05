@@ -7,7 +7,7 @@
 
 #pragma save
 #pragma disable_warning 85
-void UNSAFE_SMS_loadZX7compressedTilesatAddr (const void *src, unsigned int dst) /* __sdcccall(0) */  {
+void UNSAFE_SMS_loadZX7compressedTilesatAddr (const void *src, unsigned int dst) __sdcccall(0) {
 /* **************************************************
 ; by Einar Saukas, Antonio Villena & Metalbrain
 ; modified for sms vram by aralbrec

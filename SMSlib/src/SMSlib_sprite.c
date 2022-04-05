@@ -23,7 +23,7 @@ void SMS_initSprites (void) {
 // so it's faster... but you should know what you're doing
 // Also, it doesn't return any sprite handle
 // 1st ASM version: 170 CPU cycles
-void SMS_addSprite (unsigned char x, unsigned char y, unsigned char tile) __naked __preserves_regs(iyh,iyl) /* __sdcccall(0) */  {
+void SMS_addSprite (unsigned char x, unsigned char y, unsigned char tile) __naked __preserves_regs(iyh,iyl) __sdcccall(0) {
   __asm
     ld  hl,#2
     add hl,sp
@@ -55,7 +55,7 @@ void SMS_addSprite (unsigned char x, unsigned char y, unsigned char tile) __nake
 
 #else
 // 3rd ASM version: 212 CPU cycles
-signed char SMS_addSprite (unsigned char x, unsigned char y, unsigned char tile) __naked __preserves_regs(iyh,iyl) /* __sdcccall(0) */ {
+signed char SMS_addSprite (unsigned char x, unsigned char y, unsigned char tile) __naked __preserves_regs(iyh,iyl) __sdcccall(0) {
   __asm
     ld  a,(#_SpriteNextFree)
     cp  a,#MAXSPRITES

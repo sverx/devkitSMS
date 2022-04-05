@@ -10,7 +10,7 @@
 #pragma disable_warning 85
 
 // 2nd ASM version: 290 CPU cycles
-void SMS_addTwoAdjoiningSprites (unsigned char x, unsigned char y, unsigned char tile) __naked __preserves_regs(iyh,iyl) /* __sdcccall(0) */  {
+void SMS_addTwoAdjoiningSprites (unsigned char x, unsigned char y, unsigned char tile) __naked __preserves_regs(iyh,iyl) __sdcccall(0) {
   __asm
     ld  a,(#_SpriteNextFree)
     cp  a,#MAXSPRITES-1

@@ -8,7 +8,7 @@
 
 #pragma save
 #pragma disable_warning 85
-void SMS_VRAMmemcpy_brief (unsigned int dst, const void *src, unsigned char size) __naked __z88dk_callee __preserves_regs(iyh,iyl) {
+void SMS_VRAMmemcpy_brief (unsigned int dst, const void *src, unsigned char size) __naked __z88dk_callee __preserves_regs(iyh,iyl) __sdcccall(0) {
   //  handwritten asm code
 __asm
 

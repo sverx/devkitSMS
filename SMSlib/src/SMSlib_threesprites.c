@@ -9,7 +9,7 @@
 #pragma save
 #pragma disable_warning 85
 
-void SMS_addThreeAdjoiningSprites (unsigned char x, unsigned char y, unsigned char tile) __naked __preserves_regs(iyh,iyl) /* __sdcccall(0) */  {
+void SMS_addThreeAdjoiningSprites (unsigned char x, unsigned char y, unsigned char tile) __naked __preserves_regs(iyh,iyl) __sdcccall(0) {
   __asm
     ld  a,(#_SpriteNextFree)
     cp  a,#MAXSPRITES-2

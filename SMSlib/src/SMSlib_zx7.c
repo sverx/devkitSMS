@@ -7,7 +7,7 @@
 
 #pragma save
 #pragma disable_warning 85
-void SMS_decompressZX7 (const void *src, void *dst) __naked /* __sdcccall(0) */  {
+void SMS_decompressZX7 (const void *src, void *dst) __naked __sdcccall(0) {
 /* **************************************************
   ZX7 decoder by Einar Saukas & Urusergi ("Turbo" version)
   C wrapper by sverx
