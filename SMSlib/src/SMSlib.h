@@ -15,7 +15,10 @@
 /* library initialization. you don't need to call this if you use devkitSMS crt0.rel */
 void SMS_init (void);
 
-/* VDP operative mode handling functions */
+/* ***************************************************************** */
+/* VDP features handling                                             */
+/* ***************************************************************** */
+
 void SMS_VDPturnOnFeature (unsigned int feature) __z88dk_fastcall;
 void SMS_VDPturnOffFeature (unsigned int feature)__z88dk_fastcall;
 /* turns on/off a VDP feature */
@@ -55,6 +58,13 @@ void SMS_setSpriteMode (unsigned char mode) __z88dk_fastcall;
 #define SPRITEMODE_ZOOMED         0x02
 #define SPRITEMODE_TALL_ZOOMED    0x03
 
+/* wait until next VBlank starts */
+void SMS_waitForVBlank (void);
+
+/* ***************************************************************** */
+/* Cartridge mapper handling                                         */
+/* ***************************************************************** */
+
 /* macro for ROM bankswitching */
 volatile __at (0xffff) unsigned char ROM_bank_to_be_mapped_on_slot2;
 #define SMS_mapROMBank(n)       ROM_bank_to_be_mapped_on_slot2=(n)
@@ -78,8 +88,9 @@ volatile __at (0xfffc) unsigned char SRAM_bank_to_be_mapped_on_slot2;
 /* SRAM access is as easy as accessing an array of char */
 __at (0x8000) unsigned char SMS_SRAM[];
 
-/* wait until next VBlank starts */
-void SMS_waitForVBlank (void);
+/* ***************************************************************** */
+/* Tiles / Background handling                                       */
+/* ***************************************************************** */
 
 void SMS_crt0_RST08(unsigned int addr) __z88dk_fastcall __preserves_regs(a,b,d,e,h,l,iyh,iyl);
 void SMS_crt0_RST18(unsigned int tile) __z88dk_fastcall __preserves_regs(b,c,d,e,h,l,iyh,iyl);
@@ -130,17 +141,22 @@ void SMS_loadSTMcompressedTileMapatAddr (unsigned int dst, const void *src);
 #define SMS_loadSTMcompressedTileMapArea(x,y,src,w) SMS_loadSTMcompressedTileMapatAddr(XYtoADDR((x),(y)),(src))
 // SMS_loadSTMcompressedTileMapArea *DEPRECATED* - will be dropped at some point in 2018
 
-/* functions for sprites handling */
+/* ***************************************************************** */
+/* Sprites handling                                                  */
+/* ***************************************************************** */
+
 void SMS_initSprites (void);
+#define SMS_addSprite(x,y,tile)                   SMS_addSprite_f((y),(((x)&0xff)<<8)|(((tile)&0xff)))
+#define SMS_addTwoAdjoiningSprites(x,y,tile)      SMS_addTwoAdjoiningSprites_f((y),(((x)&0xff)<<8)|(((tile)&0xff)))
+#define SMS_addThreeAdjoiningSprites(x,y,tile)    SMS_addThreeAdjoiningSprites_f((y),(((x)&0xff)<<8)|(((tile)&0xff)))
 #ifdef NO_SPRITE_CHECKS
-void SMS_addSprite (unsigned char x, unsigned char y, unsigned char tile) __naked __preserves_regs(iyh,iyl) __sdcccall(0);
+void SMS_addSprite_f (unsigned char y, unsigned int x_tile) __naked __preserves_regs(d,e,iyh,iyl) __sdcccall(1);               /* doesn't return anything */
+void SMS_addTwoAdjoiningSprites_f (unsigned char y, unsigned int x_tile) __naked __preserves_regs(d,e,iyh,iyl) __sdcccall(1);  /* doesn't return anything */
 #else
-signed char SMS_addSprite_f (unsigned int y, unsigned int x_tile) __naked __preserves_regs(d,e,iyh,iyl) __sdcccall(1);  /* returns -1 if no more sprites are available, -2 if invalid Y coord */
-#define SMS_addSprite(x,y,tile) SMS_addSprite_f((y),(((x)&0xff)<<8)|(((tile)&0xff)))
+signed char SMS_addSprite_f (unsigned int y, unsigned int x_tile) __naked __preserves_regs(d,e,iyh,iyl) __sdcccall(1);         /* returns -1 if no more sprites are available, -2 if invalid Y coord */
+void SMS_addTwoAdjoiningSprites_f (unsigned int y, unsigned int x_tile) __naked __preserves_regs(d,e,iyh,iyl) __sdcccall(1);   /* doesn't return anything */
 #endif
-void SMS_addTwoAdjoiningSprites_f (unsigned int y, unsigned int x_tile) __naked __preserves_regs(d,e,iyh,iyl) __sdcccall(1);     /* doesn't return anything */
-#define SMS_addTwoAdjoiningSprites(x,y,tile) SMS_addTwoAdjoiningSprites_f((y),(((x)&0xff)<<8)|(((tile)&0xff)))
-void SMS_addThreeAdjoiningSprites (unsigned char x, unsigned char y, unsigned char tile) __naked __preserves_regs(iyh,iyl) __sdcccall(0);   /* doesn't return anything */
+void SMS_addThreeAdjoiningSprites_f (unsigned int y, unsigned int x_tile) __naked __preserves_regs(d,e,iyh,iyl) __sdcccall(1); /* doesn't return anything */
 signed char SMS_reserveSprite (void);
 void SMS_updateSpritePosition (signed char sprite, unsigned char x, unsigned char y);
 void SMS_updateSpriteImage (signed char sprite, unsigned char tile);
@@ -195,6 +211,10 @@ void SMS_autoSetUpTextRenderer (void);
 
 /* decompress ZX7-compressed data to RAM */
 void SMS_decompressZX7 (const void *src, void *dst) __sdcccall(0);
+
+/* ***************************************************************** */
+/* Input handling (joypads)                                          */
+/* ***************************************************************** */
 
 /* functions to read joypad(s) */
 unsigned int SMS_getKeysStatus (void);
