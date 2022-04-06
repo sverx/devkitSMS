@@ -135,9 +135,11 @@ void SMS_initSprites (void);
 #ifdef NO_SPRITE_CHECKS
 void SMS_addSprite (unsigned char x, unsigned char y, unsigned char tile) __naked __preserves_regs(iyh,iyl) __sdcccall(0);
 #else
-signed char SMS_addSprite (unsigned char x, unsigned char y, unsigned char tile) __naked __preserves_regs(iyh,iyl) __sdcccall(0);  /* returns -1 if no more sprites are available, -2 if invalid Y coord */
+signed char SMS_addSprite_f (unsigned int y, unsigned int x_tile) __naked __preserves_regs(d,e,iyh,iyl) __sdcccall(1);  /* returns -1 if no more sprites are available, -2 if invalid Y coord */
+#define SMS_addSprite(x,y,tile) SMS_addSprite_f((y),(((x)&0xff)<<8)|(((tile)&0xff)))
 #endif
-void SMS_addTwoAdjoiningSprites (unsigned char x, unsigned char y, unsigned char tile) __naked __preserves_regs(iyh,iyl) __sdcccall(0);     /* doesn't return anything */
+void SMS_addTwoAdjoiningSprites_f (unsigned int y, unsigned int x_tile) __naked __preserves_regs(d,e,iyh,iyl) __sdcccall(1);     /* doesn't return anything */
+#define SMS_addTwoAdjoiningSprites(x,y,tile) SMS_addTwoAdjoiningSprites_f((y),(((x)&0xff)<<8)|(((tile)&0xff)))
 void SMS_addThreeAdjoiningSprites (unsigned char x, unsigned char y, unsigned char tile) __naked __preserves_regs(iyh,iyl) __sdcccall(0);   /* doesn't return anything */
 signed char SMS_reserveSprite (void);
 void SMS_updateSpritePosition (signed char sprite, unsigned char x, unsigned char y);

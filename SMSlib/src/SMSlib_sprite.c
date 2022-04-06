@@ -55,6 +55,7 @@ void SMS_addSprite (unsigned char x, unsigned char y, unsigned char tile) __nake
 
 #else
 // 3rd ASM version: 212 CPU cycles
+/*
 signed char SMS_addSprite (unsigned char x, unsigned char y, unsigned char tile) __naked __preserves_regs(iyh,iyl) __sdcccall(0) {
   __asm
     ld  a,(#_SpriteNextFree)
@@ -97,6 +98,52 @@ _returnInvalidHandle1:
 
 _returnInvalidHandle2:
     ld l,#0xfe
+    ret
+ __endasm;
+}
+*/
+
+// 1st sdcccall(1) ASM version: 162 CPU cycles
+signed char SMS_addSprite_f (unsigned int y, unsigned int x_tile) __naked __preserves_regs(d,e,iyh,iyl) __sdcccall(1) {
+  // Y passed in L
+  // X passed in D
+  // tile passed in E
+  // return value will be in A
+  __asm
+    ld  a,(#_SpriteNextFree)
+    cp  a,#MAXSPRITES
+    jr  nc,_returnInvalidHandle1     ; no sprites left, leave!
+    ld  c,a                          ; save SpriteNextFree value in c
+
+    ld  a,l
+    cp  a,#0xd1
+    jr  z,_returnInvalidHandle2      ; invalid Y, leave!
+
+    ld  hl,#_SpriteTableY
+    ld  b,#0x00
+    add hl,bc                        ; hl+=SpriteNextFree
+    dec a
+    ld (hl),a                        ; write Y (as Y-1)
+
+    ld hl,#_SpriteTableXN
+    ld a,c                           ; save sprite handle to A
+    sla c
+    add hl,bc                        ; hl+=(SpriteNextFree*2)
+    ld (hl),d                        ; write X
+    inc hl
+    ld (hl),e                        ; write tile number
+
+    inc a                            ; increment and
+    ld (#_SpriteNextFree),a          ; save SpriteNextFree value
+    dec a                            ; sprite handle to return
+    ret
+
+_returnInvalidHandle1:
+    ld a,#0xff
+    ret
+
+_returnInvalidHandle2:
+    ld a,#0xfe
     ret
  __endasm;
 }

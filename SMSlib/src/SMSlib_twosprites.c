@@ -10,6 +10,7 @@
 #pragma disable_warning 85
 
 // 2nd ASM version: 290 CPU cycles
+/*
 void SMS_addTwoAdjoiningSprites (unsigned char x, unsigned char y, unsigned char tile) __naked __preserves_regs(iyh,iyl) __sdcccall(0) {
   __asm
     ld  a,(#_SpriteNextFree)
@@ -50,6 +51,60 @@ void SMS_addTwoAdjoiningSprites (unsigned char x, unsigned char y, unsigned char
 
     ld a,(#_spritesTileOffset)       ; load current sprite tile offset
     add a,d
+    inc hl
+    ld (hl),a                        ; write tile number + spritesTileOffset
+
+    ld  a,c
+    add a,#2
+    ld (#_SpriteNextFree),a          ; save SpriteNextFree new value
+    ret
+
+_secondSpriteClipped:
+    ld  hl,#_SpriteNextFree          ; second sprite has been clipped, so just inc SpriteNextFree
+    inc (hl)
+    ret
+ __endasm;
+}
+*/
+
+// 1st sdcccall(1) ASM version: 240 CPU cycles
+void SMS_addTwoAdjoiningSprites_f (unsigned int y, unsigned int x_tile) __naked __preserves_regs(d,e,iyh,iyl) __sdcccall(1) {
+  // Y passed in L
+  // X passed in D
+  // tile passed in E
+  __asm
+    ld  a,(#_SpriteNextFree)
+    cp  a,#MAXSPRITES-1
+    ret nc                           ; we do not have 2 sprites left, leave!
+    ld  c,a                          ; save SpriteNextFree value in c
+    ld  b,#0x00
+
+    ld  a,l
+    cp  a,#0xd1
+    ret z                            ; invalid Y, leave!
+
+    ld  hl,#_SpriteTableY
+    add hl,bc
+    dec a
+    ld (hl),a                        ; write Y  (as Y-1)
+    inc hl
+    ld (hl),a                        ; write Y again for the second sprite (always as Y-1)
+
+    ld hl,#_SpriteTableXN
+    add hl,bc
+    add hl,bc
+    ld (hl),d                        ; write X
+    inc hl
+    ld (hl),e                        ; write tile number
+
+    ld a,(#_spritesWidth)            ; load current sprite width
+    add a,d
+    jr c,_secondSpriteClipped        ; if new X is overflowing, do not place second sprite
+    inc hl
+    ld (hl),a                        ; write X + spritesWidth
+
+    ld a,(#_spritesTileOffset)       ; load current sprite tile offset
+    add a,e
     inc hl
     ld (hl),a                        ; write tile number + spritesTileOffset
 
