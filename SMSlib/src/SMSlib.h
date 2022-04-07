@@ -123,14 +123,14 @@ void SMS_crt0_RST18(unsigned int tile) __z88dk_fastcall __preserves_regs(b,c,d,e
 void SMS_load1bppTiles (const void *src, unsigned int tilefrom, unsigned int size, unsigned char color0, unsigned char color1);
 
 /* functions to load compressed tiles into VRAM */
-void SMS_loadPSGaidencompressedTilesatAddr (const void *src, unsigned int dst) __sdcccall(0);
 #define SMS_loadPSGaidencompressedTiles(src,tilefrom) SMS_loadPSGaidencompressedTilesatAddr((src),TILEtoADDR(tilefrom))
+void SMS_loadPSGaidencompressedTilesatAddr (const void *src, unsigned int dst) __naked __sdcccall(1);
 
 /* UNSAFE functions to load compressed tiles into VRAM */
-void UNSAFE_SMS_loadZX7compressedTilesatAddr (const void *src, unsigned int dst) __sdcccall(0);
 #define UNSAFE_SMS_loadZX7compressedTiles(src,tilefrom) UNSAFE_SMS_loadZX7compressedTilesatAddr((src),TILEtoADDR(tilefrom))
-void UNSAFE_SMS_loadaPLibcompressedTilesatAddr (const void *src, unsigned int dst) __sdcccall(0);
+void UNSAFE_SMS_loadZX7compressedTilesatAddr (const void *src, unsigned int dst) __naked __sdcccall(1);
 #define UNSAFE_SMS_loadaPLibcompressedTiles(src,tilefrom) UNSAFE_SMS_loadaPLibcompressedTilesatAddr((src),TILEtoADDR(tilefrom))
+void UNSAFE_SMS_loadaPLibcompressedTilesatAddr (const void *src, unsigned int dst) __naked __sdcccall(1);
 
 /* functions for the tilemap */
 #define SMS_loadTileMap(x,y,src,size)               SMS_VRAMmemcpy (XYtoADDR((x),(y)),(src),(size))
@@ -210,7 +210,7 @@ void SMS_configureTextRenderer (signed int ascii_to_tile_offset) __z88dk_fastcal
 void SMS_autoSetUpTextRenderer (void);
 
 /* decompress ZX7-compressed data to RAM */
-void SMS_decompressZX7 (const void *src, void *dst) __sdcccall(0);
+void SMS_decompressZX7 (const void *src, void *dst) __naked __sdcccall(1);
 
 /* ***************************************************************** */
 /* Input handling (joypads)                                          */
