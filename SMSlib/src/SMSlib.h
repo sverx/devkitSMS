@@ -319,8 +319,9 @@ unsigned char SMS_getHCount (void);
 /* low level functions */
 void SMS_VRAMmemcpy (unsigned int dst, const void *src, unsigned int size) __naked __z88dk_callee __preserves_regs(iyh,iyl) __sdcccall(1);
 void SMS_VRAMmemcpy_brief (unsigned int dst, const void *src, unsigned char size) __naked __z88dk_callee __preserves_regs(iyh,iyl) __sdcccall(1);
-void SMS_VRAMmemset (unsigned int dst, unsigned char value, unsigned int size);
-void SMS_VRAMmemsetW (unsigned int dst, unsigned int value, unsigned int size);
+#define SMS_VRAMmemset(dst,value,size)   SMS_VRAMmemset_f((value),(dst),(size))
+void SMS_VRAMmemset_f (unsigned char value, unsigned int dst, unsigned int size) __naked __z88dk_callee __preserves_regs(a,h,l,iyh,iyl) __sdcccall(1);
+void SMS_VRAMmemsetW (unsigned int dst, unsigned int value, unsigned int size) __naked __z88dk_callee __preserves_regs(d,e,iyh,iyl) __sdcccall(1);
 
 /* VRAM unsafe functions. Fast, but dangerous! */
 void UNSAFE_SMS_copySpritestoSAT (void);
