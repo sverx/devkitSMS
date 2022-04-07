@@ -8,19 +8,19 @@
 
 #pragma save
 #pragma disable_warning 85
-void SMS_VRAMmemcpy_brief (unsigned int dst, const void *src, unsigned char size) __naked __z88dk_callee __preserves_regs(iyh,iyl) __sdcccall(0) {
-  //  handwritten asm code
+void SMS_VRAMmemcpy_brief (unsigned int dst, const void *src, unsigned char size) __naked __z88dk_callee __preserves_regs(iyh,iyl) __sdcccall(1) {
+  // dst in hl
+  // src in de
+  // size onto the stack
 __asm
-
-  pop de             ; pop ret address
-  pop hl             ; dst
-  set 6, h
+  set 6, h           ; Set VRAM address
   rst #0x08
 
-  pop hl             ; src
+  ex de,hl           ; move src in hl
+
+  pop de             ; pop ret address
   dec sp
   pop bc             ; size (in b)
-
   push de            ; push ret address
 
   ld c,#_VDPDataPort
@@ -28,7 +28,7 @@ __asm
 1$:
   outi               ; 16
   jr  nz,1$          ; 12 = 28 (VRAM safe on GG too)
-  ret
+  ret                ; because this function is naked
 __endasm;
 }
 #pragma restore

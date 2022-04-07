@@ -317,8 +317,8 @@ unsigned char SMS_getVCount (void);
 unsigned char SMS_getHCount (void);
 
 /* low level functions */
-void SMS_VRAMmemcpy (unsigned int dst, const void *src, unsigned int size) __naked __z88dk_callee __preserves_regs(iyh,iyl) __sdcccall(0);
-void SMS_VRAMmemcpy_brief (unsigned int dst, const void *src, unsigned char size) __naked __z88dk_callee __preserves_regs(iyh,iyl) __sdcccall(0);
+void SMS_VRAMmemcpy (unsigned int dst, const void *src, unsigned int size) __naked __z88dk_callee __preserves_regs(iyh,iyl) __sdcccall(1);
+void SMS_VRAMmemcpy_brief (unsigned int dst, const void *src, unsigned char size) __naked __z88dk_callee __preserves_regs(iyh,iyl) __sdcccall(1);
 void SMS_VRAMmemset (unsigned int dst, unsigned char value, unsigned int size);
 void SMS_VRAMmemsetW (unsigned int dst, unsigned int value, unsigned int size);
 
