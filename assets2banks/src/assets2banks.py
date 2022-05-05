@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 # Author: sverx
-# Version: 2.6.2
+# Version: 2.6.3 (bugfix)
 
 from __future__ import absolute_import, division, generators, unicode_literals, print_function, nested_scopes
 import sys
@@ -15,8 +15,11 @@ class Modify:
         self.operator = operator
         self.start = start
         self.length = length
-        self.values = values
-
+        self.values = []
+        if isinstance(values, list):
+            self.values.extend(values)
+        else:
+            self.values.append(values)
 
 class Asset:
     def __init__(self, name, size):
@@ -367,7 +370,7 @@ for bank_n, b in enumerate(BankList):
                         ar[m.start+cnt] ^= int(m.values[cnt % len(m.values)], 0)
                 elif m.operator == 'set':
                     for cnt in range(m.length):
-                        ar[m.start+cnt] = int(m.values[cnt % len(m.values)], 0)   # overwrites the original data
+                        ar[m.start+cnt] = int(m.values[cnt % len(m.values)], 0)   # overwrites the original data with data in m.values list
 
             # now prepend the header
             for cnt in range(len(a.header)):
