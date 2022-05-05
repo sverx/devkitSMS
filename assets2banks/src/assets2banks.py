@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 # Author: sverx
-# Version: 2.6.3 (bugfix)
+# Version: 2.6.4 (better bugfix)
 
 from __future__ import absolute_import, division, generators, unicode_literals, print_function, nested_scopes
 import sys
@@ -15,11 +15,7 @@ class Modify:
         self.operator = operator
         self.start = start
         self.length = length
-        self.values = []
-        if isinstance(values, list):
-            self.values.extend(values)
-        else:
-            self.values.append(values)
+        self.values = values
 
 class Asset:
     def __init__(self, name, size):
@@ -187,7 +183,7 @@ try:
                 ovp = ls[11:].split()
                 try:
                     if len(ovp) == 2:                    # if there are two values only, we overwrite just one value
-                        md = Modify('set', int(ovp[0], 0), 1, ovp[1])
+                        md = Modify('set', int(ovp[0], 0), 1, [ovp[1]])
                     else:
                         md = Modify('set', int(ovp[0], 0), int(ovp[1], 0), ovp[2:])
                 except ValueError:
@@ -199,9 +195,9 @@ try:
                 if mdf[0].lower() == 'add' or mdf[0].lower() == 'and' or mdf[0].lower() == 'or' or mdf[0].lower() == 'xor':
                     try:
                         if len(mdf) == 2:                # if there is one value only after the operator, we modify all array elements
-                            md = Modify(mdf[0].lower(), 0, a.size, mdf[1])
+                            md = Modify(mdf[0].lower(), 0, a.size, [mdf[1]])
                         elif len(mdf) == 3:              # if there are two values only after the operator, we modify one array element only
-                            md = Modify(mdf[0].lower(), mdf[1], 1, mdf[2])
+                            md = Modify(mdf[0].lower(), int(mdf[1], 0), 1, [mdf[2]])
                         else:                            # if there are three (or more) values after the operator, we modify *len* array elements from *start*
                             md = Modify(mdf[0].lower(), int(mdf[1], 0), int(mdf[2], 0), mdf[3:])
                     except ValueError:
