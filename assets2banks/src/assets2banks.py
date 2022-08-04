@@ -26,6 +26,21 @@ class Asset:
         self.modifies = []
         self.header = []
         self.footer = []
+        self.data = []
+
+    def load(self):
+        in_file = open(os.path.join(assets_path, self.name), 'rb')
+        if self.style == 0:
+            self.data = array.array('B')
+            self.data.fromfile(in_file, self.o_size)
+        else:
+            self.data = array.array('H')                  # 'I' is for 32 bits integers
+            self.data.fromfile(in_file, self.o_size//2)
+            if self.o_size % 2:
+                # odd file size... as this shouldn't happen and last byte won't be read, return a warning
+                print("Warning: asset '{0}' has odd size but declared as 'unsigned int'".format(a.name))
+                print("         so the last byte has been discarded")
+        in_file.close()
 
     def set_style(self, style):
         self.style = style
@@ -86,7 +101,7 @@ def find(fun, seq):
             return item
 
 def print_usage():
-    print("Usage: assets2banks path [--firstbank=<number>[,<size>]][--compile][--singleheader[=<filename>]][--exclude=<filename>]")
+    print("Usage: assets2banks path [--firstbank=<number>[,<size>]][--compile][--singleheader[=<filename>]][--exclude=<filename>][--allowsplitting]")
     sys.exit(1)
 
 AssetGroupList = []    # list of the groups (we will sort this)
@@ -101,6 +116,7 @@ if 2 <= len(sys.argv):
     first_bank = 2                                                  # first bank will be number 2
     compile_rel = 0                                                 # RELs not requested
     single_h = 0                                                    # generate separate .h files
+    allowsplitting = 0                                              # Allow splitting large assets in multiple parts
 else:
     print_usage()
 
@@ -142,6 +158,9 @@ for n, arg in enumerate(sys.argv):
         elif arg == "--compile":
             compile_rel = 1
             print("Info: compiled output requested")
+        elif arg == "--allowsplitting":
+            allowsplitting = 1
+            print("Asset splitting enabled")
         elif arg[:15] == "--singleheader=":
             single_h = 1
             single_h_filename = arg[15:]
@@ -256,6 +275,7 @@ except (IOError, OSError):
     print("Fatal: can't access '{0}' folder".format(assets_path))
     sys.exit(1)
 
+
 AssetGroupList.sort(key=lambda g: g.size, reverse=True)    # sort the AssetGroupList by size, descending
 
 for ag in AssetGroupList:                                  # now find a place for each assetgroup
@@ -270,10 +290,38 @@ for ag in AssetGroupList:                                  # now find a place fo
             BankList.append(b)
         else:
             if len(ag.assets) == 1:
-                print("Fatal: asset {0!s} too big to fit ({1!s} bytes are needed)".format(ag.assets[0].name, ag.size))
+                if not allowsplitting:
+                    print("Fatal: asset {0!s} too big to fit ({1!s} bytes are needed) and splitting is not enabled.".format(ag.assets[0].name, ag.size))
+                    sys.exit(1)
+
+                # Get the asset
+                asset = ag.assets[0]
+                # Read the file now
+                asset.load()
+
+                todo = ag.size
+                partno = 0
+                offset = 0
+
+                while offset < todo:
+                    l = 16384;
+                    if todo - offset < 16384:
+                        l = todo - offset
+
+                    apart = Asset(asset.name + "_PART" + str(partno), l)
+                    apart.data = asset.data[offset:offset+l];
+                    apartgrp = AssetGroup()
+                    apartgrp.add_asset(apart)
+                    b = Bank(16384);
+                    b.add_assetgroup(apartgrp)
+                    BankList.append(b)
+
+                    offset += l
+                    partno += 1
+
             else:
                 print("Fatal: assetgroup {{{0!s}}} too big to fit ({1!s} bytes are needed)".format(', '.join(str(i.name) for i in ag.assets), ag.size))
-            sys.exit(1)
+                sys.exit(1)
 
 if single_h == 1 and len(BankList)>0:
     out_file_h = open(single_h_filename, 'w')
@@ -320,7 +368,7 @@ for bank_n, b in enumerate(BankList):
     asset_addr = 0
     for ag in b.assetgroups:
         for a in ag.assets:
-            in_file = open(os.path.join(assets_path, a.name), 'rb')
+
             if a.style == 0:
                 out_file_h.write("extern const unsigned char\t{0}[{1!s}];\n".format(fix_name(a.name), a.size))
                 if compile_rel == 0:
@@ -339,16 +387,22 @@ for bank_n, b in enumerate(BankList):
                 out_file_rel.write("R 00 00 07 00\n")     # this is because we mapped assets in area number 7
 
             # read the file contents (using original size 'o_size' as len)
-            if a.style == 0:
-                ar = array.array('B')
-                ar.fromfile(in_file, a.o_size)
+            if len(a.data) > 0:
+                ar = a.data
             else:
-                ar = array.array('H')                  # 'I' is for 32 bits integers
-                ar.fromfile(in_file, a.o_size//2)
-                if a.o_size % 2:
-                    # odd file size... as this shouldn't happen and last byte won't be read, return a warning
-                    print("Warning: asset '{0}' has odd size but declared as 'unsigned int'".format(a.name))
-                    print("         so the last byte has been discarded")
+                in_file = open(os.path.join(assets_path, a.name), 'rb')
+                if a.style == 0:
+                    ar = array.array('B')
+                    ar.fromfile(in_file, a.o_size)
+                else:
+                    ar = array.array('H')                  # 'I' is for 32 bits integers
+                    ar.fromfile(in_file, a.o_size//2)
+                    if a.o_size % 2:
+                        # odd file size... as this shouldn't happen and last byte won't be read, return a warning
+                        print("Warning: asset '{0}' has odd size but declared as 'unsigned int'".format(a.name))
+                        print("         so the last byte has been discarded")
+                in_file.close()
+
 
             # do the requested modifies to the data
             for m in a.modifies:
@@ -419,7 +473,7 @@ for bank_n, b in enumerate(BankList):
                                                                          format(asset_addr // 256, "02X")))
             if compile_rel == 0:
                 out_file_c.write("};\n\n")
-            in_file.close()
+
     if single_h == 0:
         out_file_h.close()
 
