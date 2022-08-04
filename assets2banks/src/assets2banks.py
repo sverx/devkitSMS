@@ -96,7 +96,7 @@ ExcludeList = []       # list of files to exclude
 
 print("*** sverx's assets2banks converter ***")
 
-if 2 <= len(sys.argv) <= 5:
+if 2 <= len(sys.argv):
     assets_path = sys.argv[1]
     first_bank = 2                                                  # first bank will be number 2
     compile_rel = 0                                                 # RELs not requested
