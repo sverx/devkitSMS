@@ -28,20 +28,6 @@ class Asset:
         self.footer = []
         self.data = []
 
-    def load(self):
-        in_file = open(os.path.join(assets_path, self.name), 'rb')
-        if self.style == 0:
-            self.data = array.array('B')
-            self.data.fromfile(in_file, self.o_size)
-        else:
-            self.data = array.array('H')                  # 'I' is for 32 bits integers
-            self.data.fromfile(in_file, self.o_size//2)
-            if self.o_size % 2:
-                # odd file size... as this shouldn't happen and last byte won't be read, return a warning
-                print("Warning: asset '{0}' has odd size but declared as 'unsigned int'".format(a.name))
-                print("         so the last byte has been discarded")
-        in_file.close()
-
     def set_style(self, style):
         self.style = style
 
@@ -65,6 +51,47 @@ class Asset:
         else:
             self.size += len(self.footer) * 2
             return len(self.footer) *2
+
+    def process(self):
+        # Load the asset from disk
+        in_file = open(os.path.join(assets_path, self.name), 'rb')
+        if self.style == 0:
+            self.data = array.array('B')
+            self.data.fromfile(in_file, self.o_size)
+        else:
+            self.data = array.array('H')                  # 'I' is for 32 bits integers
+            self.data.fromfile(in_file, self.o_size//2)
+            if self.o_size % 2:
+                # odd file size... as this shouldn't happen and last byte won't be read, return a warning
+                print("Warning: asset '{0}' has odd size but declared as 'unsigned int'".format(a.name))
+                print("         so the last byte has been discarded")
+        in_file.close()
+
+        # do the requested modifies to the data
+        for m in self.modifies:
+            if m.operator == 'add':
+                for cnt in range(m.length):
+                    self.data[m.start+cnt] += int(m.values[cnt % len(m.values)], 0)
+            elif m.operator == 'and':
+                for cnt in range(m.length):
+                    self.data[m.start+cnt] &= int(m.values[cnt % len(m.values)], 0)
+            elif m.operator == 'or':
+                for cnt in range(m.length):
+                    self.data[m.start+cnt] |= int(m.values[cnt % len(m.values)], 0)
+            elif m.operator == 'xor':
+                for cnt in range(m.length):
+                    self.data[m.start+cnt] ^= int(m.values[cnt % len(m.values)], 0)
+            elif m.operator == 'set':
+                for cnt in range(m.length):
+                    self.data[m.start+cnt] = int(m.values[cnt % len(m.values)], 0)   # overwrites the original data with data in m.values list
+
+        # now prepend the header
+        for cnt in range(len(a.header)):
+            self.data.insert(cnt, int(self.header[cnt], 0))
+
+        # then append the footer
+        for cnt in range(len(a.footer)):
+            self.data.append(int(self.footer[cnt], 0))
 
 
 class AssetGroup:
@@ -275,6 +302,15 @@ except (IOError, OSError):
     print("Fatal: can't access '{0}' folder".format(assets_path))
     sys.exit(1)
 
+# At this point, all assets and groups have been created. Read the source
+# data from disk and process transformations (add header/footer, etc)
+for ag in AssetGroupList:
+    for a in ag.assets:
+        a.process()
+        if len(a.data) != a.size:
+            print("Fatal: Internal error")
+            sys.exit(1)
+
 
 AssetGroupList.sort(key=lambda g: g.size, reverse=True)    # sort the AssetGroupList by size, descending
 
@@ -289,39 +325,52 @@ for ag in AssetGroupList:                                  # now find a place fo
             b.add_assetgroup(ag)
             BankList.append(b)
         else:
-            if len(ag.assets) == 1:
-                if not allowsplitting:
-                    print("Fatal: asset {0!s} too big to fit ({1!s} bytes are needed) and splitting is not enabled.".format(ag.assets[0].name, ag.size))
-                    sys.exit(1)
+            if not allowsplitting:
+                print("Fatal: asset group too big to fit ({1!s} bytes are needed) and splitting is not enabled.".format(ag.size))
+                sys.exit(1)
 
-                # Get the asset
-                asset = ag.assets[0]
-                # Read the file now
-                asset.load()
+            # AssetGroups are added to Banks. We want to split the current group in two or more
+            # parts and add those to consecutive banks, so they are consecutive in the outputs.
+            # If necessary, some assets will be split as well.
 
-                todo = ag.size
+            apartgrp = AssetGroup()       # First new group
+
+            for a in ag.assets:           # Iterate assets of original (oversized) group
+
+                todo = a.size
                 partno = 0
                 offset = 0
-
                 while offset < todo:
-                    l = 16384;
-                    if todo - offset < 16384:
-                        l = todo - offset
+                    gf = 16384 - apartgrp.size  # Compute the group free space
+                    if gf == 0:
+                        b = Bank(16384)
+                        b.add_assetgroup(apartgrp) # If it is full, it's time to commit it to a bank
+                        BankList.append(b)
 
-                    apart = Asset(asset.name + "_PART" + str(partno), l)
-                    apart.data = asset.data[offset:offset+l];
-                    apartgrp = AssetGroup()
-                    apartgrp.add_asset(apart)
-                    b = Bank(16384);
-                    b.add_assetgroup(apartgrp)
-                    BankList.append(b)
+                        apartgrp = AssetGroup()    # Create a new group to continue...
+                        gf = 16384
+
+                    # Compute how much of the current asset we can add to the group
+                    l = gf
+                    if todo-offset < l:
+                        l = todo-offset
+
+                    if a.size <= gf and offset == 0:
+                        apartgrp.add_asset(a)
+                    else:
+                        part = Asset(a.name + "_PART" + str(partno), l)
+                        part.data = a.data[offset:offset+l];
+                        apartgrp.add_asset(part)
 
                     offset += l
                     partno += 1
 
-            else:
-                print("Fatal: assetgroup {{{0!s}}} too big to fit ({1!s} bytes are needed)".format(', '.join(str(i.name) for i in ag.assets), ag.size))
-                sys.exit(1)
+            if apartgrp.size > 0:
+                b = Bank(16384)
+                b.add_assetgroup(apartgrp)
+                BankList.append(b)
+
+# Output stage
 
 if single_h == 1 and len(BankList)>0:
     out_file_h = open(single_h_filename, 'w')
@@ -386,49 +435,7 @@ for bank_n, b in enumerate(BankList):
                                                                format(asset_addr // 256, "02X")))
                 out_file_rel.write("R 00 00 07 00\n")     # this is because we mapped assets in area number 7
 
-            # read the file contents (using original size 'o_size' as len)
-            if len(a.data) > 0:
-                ar = a.data
-            else:
-                in_file = open(os.path.join(assets_path, a.name), 'rb')
-                if a.style == 0:
-                    ar = array.array('B')
-                    ar.fromfile(in_file, a.o_size)
-                else:
-                    ar = array.array('H')                  # 'I' is for 32 bits integers
-                    ar.fromfile(in_file, a.o_size//2)
-                    if a.o_size % 2:
-                        # odd file size... as this shouldn't happen and last byte won't be read, return a warning
-                        print("Warning: asset '{0}' has odd size but declared as 'unsigned int'".format(a.name))
-                        print("         so the last byte has been discarded")
-                in_file.close()
-
-
-            # do the requested modifies to the data
-            for m in a.modifies:
-                if m.operator == 'add':
-                    for cnt in range(m.length):
-                        ar[m.start+cnt] += int(m.values[cnt % len(m.values)], 0)
-                elif m.operator == 'and':
-                    for cnt in range(m.length):
-                        ar[m.start+cnt] &= int(m.values[cnt % len(m.values)], 0)
-                elif m.operator == 'or':
-                    for cnt in range(m.length):
-                        ar[m.start+cnt] |= int(m.values[cnt % len(m.values)], 0)
-                elif m.operator == 'xor':
-                    for cnt in range(m.length):
-                        ar[m.start+cnt] ^= int(m.values[cnt % len(m.values)], 0)
-                elif m.operator == 'set':
-                    for cnt in range(m.length):
-                        ar[m.start+cnt] = int(m.values[cnt % len(m.values)], 0)   # overwrites the original data with data in m.values list
-
-            # now prepend the header
-            for cnt in range(len(a.header)):
-                ar.insert(cnt, int(a.header[cnt], 0))
-
-            # then append the footer
-            for cnt in range(len(a.footer)):
-                ar.append(int(a.footer[cnt], 0))
+            ar = a.data;
 
             if compile_rel == 1:
                 out_file_rel.write("T {0!s} {1!s} 00".format(format(asset_addr % 256, "02X"),
