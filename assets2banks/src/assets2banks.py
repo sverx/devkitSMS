@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 # Author: sverx
-# Version: 2.6.4 (better bugfix)
+# Version: 2.7 (asset splitting [by raphnet])
 
 from __future__ import absolute_import, division, generators, unicode_literals, print_function, nested_scopes
 import sys
