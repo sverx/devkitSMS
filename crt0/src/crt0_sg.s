@@ -35,14 +35,14 @@
   .area _HEADER (ABS)
   ;; Reset vector
   .org  0
-  di        ; disable interrupt
-  im 1      ; interrupt mode 1 (this won't change)
+  di                ; disable interrupt
+  im 1              ; interrupt mode 1 (this will not change)
   jp  init
 
-  .org    0x38                    ; handle IRQ
+  .org    0x38      ; handle IRQ
   jp _SG_isr
 
-  .org     0x66                   ; handle NMI
+  .org     0x66     ; handle NMI
   jp _SG_nmi_isr
 
   .org   0x70
@@ -55,17 +55,23 @@ init:
   ld bc,#0x0400-17  ;   for 1 KB minus 17 bytes
   ldir              ;   do that
 
+  ;; ensure this runs fine on SC-3000 too
+  ld a,#0x9F
+  out (0xDF),a      ; Config PPI (no effect on SG-1000)
+  ld a,#7
+  out (0xDE),a      ; Select ROW 7 (row 7 of PPI is joypad = default - no effect on SG-1000)
+
   ;; Initialise global variables
   call    gsinit
   call    _SG_init
-  ei        ; re-enable interrupts before going to main()
+  ei                ; re-enable interrupts before going to main()
   call  _main
   jp  _exit
 
-  .rept 128     ; this is a block of 128 OUTI
-    outi        ; made for enabling UNSAFE but FAST
-  .endm         ; short data transfers to VRAM
-_outi_block::   ; _outi_block label points to END of block
+  .rept 128         ; this is a block of 128 OUTI
+    outi            ; made for enabling UNSAFE but FAST
+  .endm             ; short data transfers to VRAM
+_outi_block::       ; _outi_block label points to END of block
   ret
 
   ;; Ordering of segments for the linker.
