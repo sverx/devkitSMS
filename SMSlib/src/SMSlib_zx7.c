@@ -7,19 +7,12 @@
 
 #pragma save
 #pragma disable_warning 85
-void SMS_decompressZX7 (const void *src, void *dst) __naked /* __sdcccall(0) */  {
+void SMS_decompressZX7 (const void *src, void *dst) __naked __sdcccall(1) {
 /* **************************************************
   ZX7 decoder by Einar Saukas & Urusergi ("Turbo" version)
   C wrapper by sverx
 ***************************************************** */
   __asm
-        pop bc
-        pop hl         ; move *src from stack into hl
-        pop de         ; move *dst from stack into de
-        push de
-        push hl
-        push bc
-
         ld      a, #0x80
 dzx7t_copy_byte_loop:
         ldi                             ; copy literal byte
@@ -87,7 +80,7 @@ dzx7t_load_bits:
         ld      a, (hl)                 ; load another group of 8 bits
         inc     hl
         rla
-        ret
+        ret                             ; because this function is naked
   __endasm;
 }
 #pragma restore

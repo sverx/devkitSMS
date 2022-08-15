@@ -9,9 +9,11 @@
 #define DISABLE_INTERRUPTS    __asm di __endasm
 #define ENABLE_INTERRUPTS     __asm ei __endasm
 
+/*
 #define WAIT_VRAM             __asm nop \
                                     nop \
                                     nop __endasm
+*/
 
 #define SMS_SATAddress    ((unsigned int)0x7F00)
 
