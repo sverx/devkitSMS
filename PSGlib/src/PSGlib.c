@@ -539,7 +539,7 @@ _PSG_ReadByte_B:
   ld b,(hl)                      ; load PSG byte (in B)
   inc hl                         ; point to next byte
   bit 6,h
-  ret z, _nobankchange
+  ret z
   res 6,h                        ; Reset the bit (back to slot 2)
   inc a                          ; And advance to next bank
   ld (_PSGMusicPointerBank), a   ; Save new bank
