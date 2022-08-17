@@ -15,7 +15,7 @@
 
 #define BANK_SIZE           0x4000
 #define BANK_ADDR           0x8000
-#define MAX_SLOT2_BANKS     62
+#define MAX_SLOT2_BANKS     256
 #define SEGA_HEADER_ADDR    0x7ff0
 #define SDSC_HEADER_ADDR    0x7fe0
 #define CRT0_END            0x200
@@ -24,7 +24,7 @@
 
 #define BYTE_TO_BCD(n)      (((n)/10)*16+((n)%10))
 
-unsigned char buf[1024*1024];    // generated ROM max: 1MB
+unsigned char buf[MAX_SLOT2_BANKS * 0x4000]; // generated ROM max: 256 16k banks / 4MB
 unsigned int size=0;
 unsigned int used=CRT0_END,used_low=CRT0_END;
 int use_additional_banks=0;
