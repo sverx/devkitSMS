@@ -552,11 +552,10 @@ _PSG_ReadByte_C:
   ld c,(hl)                      ; load PSG byte (in C)
   inc hl                         ; point to next byte
   bit 6,h
-  jp z, _nobankchangeC
+  ret z
   res 6,h                        ; Reset the bit (back to slot 2)
   inc a                          ; And advance to next bank
   ld (_PSGMusicPointerBank), a   ; Save new bank
-_nobankchangeC:
   ret
 
 
