@@ -495,7 +495,7 @@ _substring:
   ld hl,(_PSGMusicStart)
   add hl,bc                           ; make substring current
 #ifdef MULTIBANK
-  ; Restrict to slot 2 (bit 16 set, bit 15 cleared)
+  ; Restrict to slot 2 (bit 15 set, bit 14 cleared)
   set 7, h
   res 6, h
 
