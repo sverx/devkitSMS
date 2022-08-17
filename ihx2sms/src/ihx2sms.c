@@ -4,7 +4,7 @@
   with 'broken' I mean that the program it's actually assuming that each new declaration of data
   at address 0x8000 informs that we have to allocate a new ROM bank in the final SMS file
 
-  sverx\2015-2019
+  sverx\2015-2022
 
 */
 
@@ -15,7 +15,7 @@
 
 #define BANK_SIZE           0x4000
 #define BANK_ADDR           0x8000
-#define MAX_SLOT2_BANKS     62
+#define MAX_SLOT2_BANKS     254
 #define SEGA_HEADER_ADDR    0x7ff0
 #define SDSC_HEADER_ADDR    0x7fe0
 #define CRT0_END            0x200
@@ -24,7 +24,7 @@
 
 #define BYTE_TO_BCD(n)      (((n)/10)*16+((n)%10))
 
-unsigned char buf[1024*1024];    // generated ROM max: 1MB
+unsigned char buf[256 * BANK_SIZE];  // generated ROM max: 256 16k banks -> 4MB
 unsigned int size=0;
 unsigned int used=CRT0_END,used_low=CRT0_END;
 int use_additional_banks=0;
@@ -73,7 +73,7 @@ int get_slot2_bank_order(const char* map_file) {
                     return 1;
                 }
             }
-            
+
             if (feof(fMAP)) {
                 if (nameidx == 0) {
                     return 0; // no slot2 segments found
@@ -123,18 +123,18 @@ int count_set_bits (unsigned int value) {
 }
 
 int main(int argc, char const* *argv) {
-  
+
   unsigned int i,dest_addr;
   char tmp[3];
   unsigned int checksum=0;
   int using_map=0;
   int cur_arg=1;
-  
+
   printf("*** sverx's ihx2sms converter ***\n");
-  
+
   if (argc<3)
     usage(1);
-  
+
   while (cur_arg<(argc-2)) {
     if (strcmp(argv[cur_arg], "-m")==0)
       using_map=(++cur_arg)+1;
@@ -164,12 +164,12 @@ int main(int argc, char const* *argv) {
 
   while (!feof(fIN)) {
     fscanf(fIN,":%2x%4x%2x%s\n", &count, &addr, &type, data);
-    
+
     // printf(":%02x-%04x-%02x-%s\n", count, addr, type, data);
-    
+
     switch (type) {
       case 0: // DATA
-      
+
         if (addr==BANK_ADDR) {
           if (use_additional_banks)
             add_banks++;
@@ -180,7 +180,7 @@ int main(int argc, char const* *argv) {
             return 1;
           }
         }
-      
+
         for (i=0;i<count;i++) {
           if ((addr+i)>=BANK_ADDR) {
             if (using_map) {
@@ -190,22 +190,22 @@ int main(int argc, char const* *argv) {
             }
           }
           else
-            dest_addr=addr+i;  
-          
-          strncpy (tmp,&data[i*2],2); 
+            dest_addr=addr+i;
+
+          strncpy (tmp,&data[i*2],2);
           buf[dest_addr]=strtol(tmp,NULL,16);
-          
+
           // printf("*%02x-%04x\n", buf[dest_addr], dest_addr);
-          
+
           if (dest_addr>=size)
             size=dest_addr+1;
         }
-        
+
         if (addr+count>0xC000) {
           printf("Fatal: allocating ROM at or past 0xC000\n");
           return(1);
         }
-        
+
         if (addr>=CRT0_END) {
           used+=count;
           if (addr<BANK_ADDR)
@@ -213,18 +213,18 @@ int main(int argc, char const* *argv) {
         }
 
         break;
-        
+
       case 1: // END (just ignore)
-    break;  
-    
+    break;
+
     }
-    
+
   }
   fclose (fIN);
 
   if (size%BANK_SIZE)
     size=BANK_SIZE*((size/BANK_SIZE)+1);
-  
+
   if (size>32*1024)
     printf("Info: %d bytes used/%d total [%0.2f%%] - %d bytes used in banks 0,1 [%0.2f%%] - size of output ROM is %d KB\n",used,size,(float)used/(float)size*100, used_low,(float)used_low/((float)32*1024)*100, size/1024);
   else
@@ -254,7 +254,7 @@ int main(int argc, char const* *argv) {
     } else {
       printf("Warning: SEGA header NOT found, ROM won't be bootable on european/american Master System\n");
     }
-  } else { 
+  } else {
     /* it's probably a 16 KB ROM, check/update SEGA header checksum */
     if (!strncmp("TMR SEGA",(char *)&buf[SEGA_HEADER_ADDR_16K],8)) {
       for (i=0;i<SEGA_HEADER_ADDR_16K;i++)
@@ -272,7 +272,7 @@ int main(int argc, char const* *argv) {
     printf("Fatal: can't open output SMS file\n");
     return(1);
   }
-  
+
   if (padding_type!=0) {
     if (padding_type==1) {
       while (size%(64*1024)!=0)

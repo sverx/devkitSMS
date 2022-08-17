@@ -1,5 +1,5 @@
 ;--------------------------------------------------------------------------
-; ***** this is a modified version aimed to SMS homebrew - sverx\2015 *****
+; ***** this is a modified version aimed to SMS homebrew - sverx\2022 *****
 ;--------------------------------------------------------------------------
 ;--------------------------------------------------------------------------
 ;  crt0.s - Generic crt0.s for a Z80
@@ -53,22 +53,24 @@ _SMS_crt0_RST18::
         ld a,l                          ; (respecting VRAM time costraints)
         out (#0xBE),a                   ; 11
         ld a,h                          ; 4
-        sub #0                          ; 7
-        nop                             ; 4 = 26 (VRAM SAFE)
+        inc hl                          ; 6
+        dec hl                          ; 6 = 27 (VRAM SAFE on every GameGear)
         out (#0xBE),a
         ret
 ;--------------------------------------------------------------------------
 init:
-        ld de,#0xfffc                   ; initialize mappers
-        xor a
-        ld (de),a                       ; [0xfffc]=$00
-        ld b,#3
-mapper_loop:
-        inc de
-        ld (de),a                       ; [0xfffd]=$00,[0xfffe]=$01,[0xffff]=$02
-        inc a
-        djnz mapper_loop
+        ld hl,#0x0000                   ; initialize mappers
+        ld (#0xfffc),hl                 ; [0xfffc]=$00, [0xfffd]=$00
+        ld hl,#0x0201
+        ld (#0xfffe),hl                 ; [0xfffe]=$01, [0xffff]=$02
         jr clear_ram
+;--------------------------------------------------------------------------
+get_bank::                              ; get current code bank num into A
+        ld a,(#0xfffe)                  ; (read current page from mapper)
+        ret
+set_bank::                              ; set current code bank num to A
+        ld (#0xfffe),a                  ; (restore caller page)
+        ret
 ;--------------------------------------------------------------------------
         .org    0x38                    ; handle IRQ
         jp _SMS_isr
@@ -92,14 +94,13 @@ clear_ram:
         halt
         jr 1$
 ;--------------------------------------------------------------------------
-        .ascii 'devkitSMS'
+        .ascii 'devkitSMS'              ; this is shameless
 ;--------------------------------------------------------------------------
         .org     0x66                   ; handle NMI
         jp _SMS_nmi_isr
 ;--------------------------------------------------------------------------
         ; here's a block of 128 OUTI instructions, made for enabling
-        ;    UNSAFE but FAST
-        ; short data transfers to VRAM
+        ; UNSAFE but FAST short data transfers to VRAM
 ;--------------------------------------------------------------------------
 _OUTI128::                              ; _OUTI128 label points to a block of 128 OUTI and a RET
         .rept 64

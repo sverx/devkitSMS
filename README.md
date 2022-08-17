@@ -5,7 +5,7 @@ a collection of tools and code (with a *very* presumptuous name) for SEGA Master
 
 ### How to code your own programs using devkitSMS:
 
-* download SDCC - version 4.0.4 (build #11929) or newer **required**, up to version 4.1.11 at most - get 4.1.0 [here](https://sourceforge.net/projects/sdcc/files/)
+* download SDCC - version 4.2.0 or newer **required**
 * install it ("include files" and "Z80 library" are the only components required, you shouldn't need anything else)
 * read its [manual](http://sdcc.sourceforge.net/doc/sdccman.pdf)
 * make sure that your installation works - details are at page 20 of the PDF manual
@@ -13,7 +13,7 @@ a collection of tools and code (with a *very* presumptuous name) for SEGA Master
   (if you're on Linux, both programs are supplied in the Linux folders - if you're not on Windows or on Linux please compile ihx2sms and/or makesms youself from the sources)
 * place `assets2banks.exe` (and/or the legacy `folder2c.exe` tool) from this package into your SDCC `bin` folder
   (both are optional as you can use other tools to convert your data assets. If you're not on Windows please compile `folder2c.c` yourself from the sources. `assets2banks.py` python source is also provided)
-* for SMS/GG:  place `crt0_sms.rel` and `crt0b_sms.rel` from this package into your project folder (or a crt0 folder on your projects root)
+* for SMS/GG:  place `crt0_sms.rel` from this package into your project folder (or a crt0 folder on your projects root)
 * for SMS: place `SMSlib.h` in your project folder and `SMSlib.lib` in SDCC `lib/z80` folder
 * for GG:  place `SMSlib.h` in your project folder and `SMSlib_GG.lib` in SDCC `lib/z80` folder
 * for SG-1000: place `crt0_sg.rel` from this package into your project folder (or a crt0 folder on your projects root)
@@ -115,10 +115,10 @@ void some_function (void) __banked {
   sdcc -c -mz80 --codeseg BANK1 banked_code_1.c
   sdcc -c -mz80 --codeseg BANK2 banked_code_2.c
 ```
-* use the provided `crt0b_sms.rel` as the *first* module in your linker call
+* use the provided `crt0_sms.rel` as the *first* module in your linker call
 * instruct the linker to place all the banked code at address 0x4000 + the _virtual_ address of the bank, which is banknumber×2¹⁶ (so code segment BANK1 goes at 0x14000, code segment BANK2 goes at 0x24000 and so on...) and the compiled banked code modules in ascending order as in:
 ```
-  sdcc -o your_program.ihx -mz80 --no-std-crt0 --data-loc 0xC000 -Wl-b_BANK1=0x14000 -Wl-b_BANK2=0x24000 crt0b_sms.rel SMSlib.lib main.rel banked_code_1.rel banked_code_2.rel
+  sdcc -o your_program.ihx -mz80 --no-std-crt0 --data-loc 0xC000 -Wl-b_BANK1=0x14000 -Wl-b_BANK2=0x24000 crt0_sms.rel SMSlib.lib main.rel banked_code_1.rel banked_code_2.rel
 ```
 * use the newer `makesms` tool to convert the ihx output to the sms file _instead_ of the `ihx2sms` tool, as this works in a different way. Usage is very similar:
 ```

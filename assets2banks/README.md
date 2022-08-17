@@ -3,12 +3,16 @@
 ### How to use assets2banks
 
 ```
-assets2banks <asset folder> [--firstbank=<number>[,<size>]][--compile][--singleheader[=<filename>]]
+assets2banks <asset folder> [--firstbank=<number>[,<size>]][--compile][--singleheader[=<filename>]][--exclude=<filename>][--allowsplitting]
 ```
 
 Using the assets2banks utility you can create .c source files and their respective .h header files containing one constant data array for each single file found in the specified asset folder.
 (Adding --singleheader you'll generate a single assets2banks.h file (or any name you prefer giving to it) instead of one single .h header file for each bank)
 Also, if you add the --compile option to your command line, object files (RELs) will be generated in place of the C source files, so you won't have to compile them yourself.
+
+If the asset folder contains files you wish assets2banks to ignore (for instance, a file called .gitignore) you can exclude each file using the --exclude option.
+
+Assets and assetgroups bigger than a single bank (16 kB) are now supported using the --allowsplitting option.
 
 Example usage:
 
@@ -72,6 +76,13 @@ assets2banks assets --firstbank=6 --singleheader=assets.h --compile
 
 creates a set of this creates a set of bank*n*.rel (compiled objects) files starting from n=6 and a *single assets.h* header file.
 
+If an asset (or an assetgroup) is bigger than 16 kB, it's also possible to split that to multiple banks using the --allowsplitting option. For example using:
+
+```
+assets2banks assets --singleheader=assets.h --compile --allowsplitting
+```
+
+if the size of the 'bigfile' asset found in the assets folder is more than 16 kB, the program will split it into multiple parts called `bigfile_PART0`, `bigfile_PART1`, etc. and fit the parts in successive banks.
 
 Beside that, assets2banks behavior regarding specific assets can optionally be configured using a config file that should be placed in the very same asset folder.
 

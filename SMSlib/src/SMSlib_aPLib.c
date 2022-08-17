@@ -18,15 +18,8 @@
 
 #pragma save
 #pragma disable_warning 85
-void UNSAFE_SMS_loadaPLibcompressedTilesatAddr (const void *src, unsigned int dst) {
+void UNSAFE_SMS_loadaPLibcompressedTilesatAddr (const void *src, unsigned int dst) __naked __sdcccall(1) {
 __asm
-  pop bc
-  pop hl      ; pop src
-  pop de      ; pop dst
-  push de
-  push hl
-  push bc
-
   push ix     ; preserve ix
 
   ; Set the write address
@@ -410,9 +403,10 @@ _b3:
   djnz _b3
   ex af, af'     ; '
   ret
-  
+
 _leave:
   pop ix         ; restore ix
+  ret            ; because this function is naked
 __endasm;
 }
 #pragma restore

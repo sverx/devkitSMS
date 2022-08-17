@@ -7,27 +7,18 @@
 
 #pragma save
 #pragma disable_warning 85
-void UNSAFE_SMS_loadZX7compressedTilesatAddr (const void *src, unsigned int dst) {
-/* **************************************************
-; by Einar Saukas, Antonio Villena & Metalbrain
-; modified for sms vram by aralbrec
-; modified for asm by Maxim
-; C wrapper/made interrupt safe by sverx
-; ========================================================================
-; *** This version only supports match lengths up to 255. This enables ***
-; *** it to be smaller and faster, but it is not 100% compatible.      ***
-   ************************************************** */
+void UNSAFE_SMS_loadZX7compressedTilesatAddr (const void *src, unsigned int dst) __naked __sdcccall(1) {
+/* =====================================================================
+* by Einar Saukas, Antonio Villena & Metalbrain
+* modified for sms vram by aralbrec
+* modified for asm by Maxim
+* C wrapper/made interrupt safe by sverx
+* ======================================================================
+* This version only supports match lengths up to 255. This enables
+* it to be smaller and faster, but it is not 100% compatible.
+===================================================================== */
   __asm
-  
-  pop bc
-  pop hl         ; move *src from stack into hl
-  pop de         ; move dst from stack into de
-  push de
-  push hl
-  push bc
-
-  ; Set VRAM address
-  ld c, #0xbf
+  ld c, #0xbf    ; Set VRAM address
   di
   out (c),e
   out (c),d
@@ -96,7 +87,7 @@ _f0:
     ; determine offset
     ld e, (hl)   ; load offset flag (1 bit) + offset value (7 bits)
     inc hl
-    
+
     sla e        ; these two instructions instead of
     inc e        ; 'sll e' undocumented instruction
 
@@ -163,6 +154,7 @@ _nextFlagsByte:
 
 _done:
   pop hl
+  ret            ; because this function is naked
   __endasm;
 }
 #pragma restore
