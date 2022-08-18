@@ -67,19 +67,29 @@ unsigned char SMS_readPaddle (unsigned char port) __z88dk_fastcall __naked {
   ; because the bits may be in the middle of changing and are therefore
   ; not reliable. (Remember the real world is analog)
   ;
+
+    ld d, #255
 wait_5_set_sync:
+    dec d
+    jp Z, paddle_timeout
     in a,(#0xDC)
     bit 5,a
     jr z, wait_5_set_sync    ; wait until bit 5 is 1
 
+    ld d, #255
 wait_5_reset:
+    dec d
+    jp Z, paddle_timeout
     in a,(#0xDC)
     bit 5,a
     jr nz, wait_5_reset     ; wait until bit 5 is 0
     and #0x0F
     ld l,a                  ; save lower 4 bits into l
 
+    ld d, #255
 wait_5_set:
+    dec d
+    jp Z, paddle_timeout
     in a,(#0xDC)
     bit 5,a
     jr z, wait_5_set        ; wait until bit 5 is 1
@@ -101,12 +111,18 @@ read_second_pad:
   ; because the bits may be in the middle of changing and are therefore
   ; not reliable. (Remember the real world is analog)
 
+    ld d, #255
 wait_3_set_sync:
+    dec d
+    jp Z, paddle_timeout
     in a,(#0xDD)
     bit 3,a
     jr z, wait_3_set_sync   ; wait until bit 3 is 1
 
+    ld d, #255
 wait_3_reset:
+    dec d
+    jp Z, paddle_timeout
     in a,(#0xDD)            ; ensure we are reading both ports same moment
     ld e,a
     in b,(c)
@@ -126,7 +142,10 @@ wait_3_reset:
     or l                    ; together with l
     ld l,a                  ; into l (bits 2,3)
 
+    ld d, #255
 wait_3_set:
+    dec d
+    jp Z, paddle_timeout
     in a,(#0xDD)            ; ensure we are reading both ports same moment
     ld e,a
     in b,(c)
@@ -146,6 +165,10 @@ wait_3_set:
     or h                    ; together with h (bits 6,7)
     or l                    ; together with lower part
     ld l,a
+    ret
+
+paddle_timeout:
+    ld l,#128
     ret
 
   __endasm;
