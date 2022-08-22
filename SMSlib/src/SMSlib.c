@@ -406,7 +406,7 @@ void SMS_isr (void) __naked {
 #ifndef NO_FRAME_INT_HOOK
     ld hl,(_SMS_theFrameInterruptHandler)
     ld a,h
-    or l
+    or a,l
     jr z,2$                                 /* NULL? Do not call it */
     push bc
     push de

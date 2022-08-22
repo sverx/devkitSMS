@@ -25,7 +25,7 @@ AR=sdar
 
 OPT=--max-allocs-per-node 100000
 CFLAGS=-mz80 $(OPT) $(CONFIG)
-PEEP_OPTIONS=--peep-file peep-rules.txt --peep-asm
+PEEP_OPTIONS=--peep-file peep-rules.txt
 
 OUTPUT_LIBS=SMSlib.lib SMSlib_GG.lib
 
@@ -63,16 +63,7 @@ SMSlib_autotext_GG.rel: SMSlib_autotext.c SMSlib.h peep-rules.txt
 SMSlib_spriteClip_GG.rel: SMSlib_spriteClip.c SMSlib.h peep-rules.txt
 	$(CC) $(CFLAGS) $(PEEP_OPTIONS) -c -o $@ $< -DTARGET_GG
 
-# No --peep-asm for the following since it could break timing of handwritten code
-SMSlib_STMcomp.rel: SMSlib_STMcomp.c
-	$(CC) $(CFLAGS) --peep-file peep-rules.txt -c -o $@ $<
-
-SMSlib_UNSAFE.rel: SMSlib_UNSAFE.c
-	$(CC) $(CFLAGS) --peep-file peep-rules.txt -c -o $@ $<
-
-SMSlib_PSGaiden.rel: SMSlib_PSGaiden.c
-	$(CC) $(CFLAGS) --peep-file peep-rules.txt -c -o $@ $<
-
+# The following are compiled without --peep-rules
 SMSlib_zx7.rel: SMSlib_zx7.c
 	$(CC) $(CFLAGS) -c -o $@ $<
 
