@@ -77,6 +77,7 @@ void SMS_configureTextRenderer (signed int ascii_to_tile_offset);  /* set the va
 void SMS_autoSetUpTextRenderer (void);                             /* load a standard font character set into tiles 0-95, set BG palette to B/W and turn on the screen */
 void SMS_putchar (char c);                                         /* faster than plain putchar() */
 void SMS_printstring (const char *str);                            /* faster than printf() for unformatted strings */
+SMS_printStringatXY(x,y,s);                                        /* macro - prints a string starting at X/Y */
 
 /* decompress ZX7-compressed data to RAM */
 void SMS_decompressZX7 (void *src, void *dst);
