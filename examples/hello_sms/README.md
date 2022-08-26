@@ -15,7 +15,7 @@ Show how to:
 This example is not-interactive and the screen should look exactly like
 this when run:
 
-![Expected result][./screenshots/hello.png]
+![Expected result](screenshots/hello.png)
 
 ## Compilation
 
