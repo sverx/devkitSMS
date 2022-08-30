@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 # Author: sverx
-# Version: 2.7 (asset splitting [by raphnet])
+# Version: 2.7.1 (bugfix)
 
 from __future__ import absolute_import, division, generators, unicode_literals, print_function, nested_scopes
 import sys
@@ -307,7 +307,7 @@ except (IOError, OSError):
 for ag in AssetGroupList:
     for a in ag.assets:
         a.process()
-        if len(a.data) != a.size:
+        if (a.style == 0 and len(a.data) != a.size) or (a.style == 1 and len(a.data) != a.size/2):
             print("Fatal: Internal error")
             sys.exit(1)
 
@@ -501,4 +501,3 @@ else:
 
 if single_h == 1 and len(BankList)>0:
     out_file_h.close()
-
