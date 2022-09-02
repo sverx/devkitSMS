@@ -1,7 +1,7 @@
 devkitSMS
 =======
 
-a collection of tools and code (with a *very* presumptuous name) for SEGA Master System / SEGA Game Gear / SEGA SG-1000 homebrew development using 'C' language (and the SDCC compiler).
+a collection of tools and code (with a *very* presumptuous name) for SEGA Master System / SEGA Game Gear / SEGA SG-1000 / SEGA SC-3000 homebrew development using 'C' language (and the SDCC compiler).
 
 ### How to code your own programs using devkitSMS:
 
@@ -34,7 +34,7 @@ a collection of tools and code (with a *very* presumptuous name) for SEGA Master
 ```
   note that you should put `crt0_sms.rel` *first*, and you should put the library *after* your code.
   
-### How to use devkitSMS/SGlib to code your own SG program:
+### How to use devkitSMS/SGlib to code your own SG/SC program:
 
 * include `SGlib.h` in your sources
 * compile your program:
@@ -47,7 +47,7 @@ a collection of tools and code (with a *very* presumptuous name) for SEGA Master
 ```
   note that you should put `crt0_sg.rel` *first*, and you should put `SGlib.rel` *after* your code.
   
-### How to use devkitSMS/PSGlib to use PSG audio/SFX in your SMS/GG/SG program:
+### How to use devkitSMS/PSGlib to use PSG audio/SFX in your SMS/GG/SG/SC program:
 
 * include `PSGlib.h` in your sources
 * compile your program

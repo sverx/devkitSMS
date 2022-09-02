@@ -23,8 +23,8 @@ void SG_VDPturnOffFeature (unsigned int feature);
 #define SG_displayOff()  SG_VDPturnOffFeature(SG_VDPFEATURE_SHOWDISPLAY)  /* turns off display */
 
 void SG_setSpriteMode (unsigned char mode);
-#define SG_SPRITEMODE_NORMAL	       0x00
-#define SG_SPRITEMODE_LARGE 	       0x01
+#define SG_SPRITEMODE_NORMAL           0x00
+#define SG_SPRITEMODE_LARGE            0x01
 #define SG_SPRITEMODE_ZOOMED           0x02
 #define SG_SPRITEMODE_LARGE_ZOOMED     0x03
 
@@ -63,9 +63,9 @@ void SG_setTile (unsigned char tile);
 
 /* functions for sprites handling */
 void SG_initSprites (void);
-_Bool SG_addSprite (unsigned char x, unsigned char y, unsigned char tile, unsigned char attr);	/* returns false if no more sprites are available */
+_Bool SG_addSprite (unsigned char x, unsigned char y, unsigned char tile, unsigned char attr);  /* returns false if no more sprites are available */
 void SG_setClippingWindow (unsigned char x0, unsigned char y0, unsigned char x1, unsigned char y1);
-_Bool SG_addSpriteClipping (int x, int y, unsigned char tile, unsigned char attr);				/* returns false if no more sprites are available or sprite clipped */
+_Bool SG_addSpriteClipping (int x, int y, unsigned char tile, unsigned char attr);              /* returns false if no more sprites are available or sprite clipped */
 void SG_finalizeSprites (void);
 void SG_copySpritestoSAT (void);
 
@@ -78,30 +78,39 @@ unsigned int SG_getKeysReleased (void);
 /* handy defines for joypad(s) handling */
 #ifndef CONTROLLER_PORTS
 #define CONTROLLER_PORTS
-#define PORT_A_KEY_UP		0x0001
-#define PORT_A_KEY_DOWN 	0x0002
-#define PORT_A_KEY_LEFT 	0x0004
-#define PORT_A_KEY_RIGHT	0x0008
-#define PORT_A_KEY_1		0x0010
-#define PORT_A_KEY_2		0x0020
-#define PORT_A_KEY_START	PORT_A_KEY_1  /* handy alias */
+#define PORT_A_KEY_UP     0x0001
+#define PORT_A_KEY_DOWN   0x0002
+#define PORT_A_KEY_LEFT   0x0004
+#define PORT_A_KEY_RIGHT  0x0008
+#define PORT_A_KEY_1      0x0010
+#define PORT_A_KEY_2      0x0020
+#define PORT_A_KEY_START  PORT_A_KEY_1  /* handy alias */
 
-#define PORT_B_KEY_UP		0x0040
-#define PORT_B_KEY_DOWN 	0x0080
-#define PORT_B_KEY_LEFT 	0x0100
-#define PORT_B_KEY_RIGHT	0x0200
-#define PORT_B_KEY_1		0x0400
-#define PORT_B_KEY_2		0x0800
-#define PORT_B_KEY_START	PORT_B_KEY_1  /* handy alias */
+#define PORT_B_KEY_UP     0x0040
+#define PORT_B_KEY_DOWN   0x0080
+#define PORT_B_KEY_LEFT   0x0100
+#define PORT_B_KEY_RIGHT  0x0200
+#define PORT_B_KEY_1      0x0400
+#define PORT_B_KEY_2      0x0800
+#define PORT_B_KEY_START  PORT_B_KEY_1  /* handy alias */
 
-#define RESET_KEY_NOT		0x1000        /* 0 = pressed */
-#define CARTRIDGE_SLOT		0x2000        /* ??? */
-#define PORT_A_TH		0x4000        /* for light gun */
-#define PORT_B_TH		0x8000        /* for light gun */
+#define RESET_KEY         0x1000
+#define CARTRIDGE_SLOT    0x2000        /* ??? */
+#define PORT_A_TH         0x4000        /* for light gun */
+#define PORT_B_TH         0x8000        /* for light gun */
 #endif
 
-_Bool SG_queryPauseRequested (void);          /* true if the pause key has been pressed */
-void SG_resetPauseRequest (void);             /* reset/acknowledge pause requests */
+_Bool SG_queryPauseRequested (void);    /* true if the pause key has been pressed */
+void SG_resetPauseRequest (void);       /* reset/acknowledge pause requests */
+
+_Bool SG_detectKeyboard (void);         /* true if an attached keyboard is detected */
+void SG_scanKeyboardJoypad (void);      /* this scans the keyboard keys (emulating a joypad) */
+
+/* functions to read the keyboard virtual joypad(s) */
+unsigned int SG_getKeyboardJoypadStatus (void);
+unsigned int SG_getKeyboardJoypadPressed (void);
+unsigned int SG_getKeyboardJoypadHeld (void);
+unsigned int SG_getKeyboardJoypadReleased (void);
 
 /* low level functions */
 void SG_VRAMmemcpy (unsigned int dst, void *src, unsigned int size);
@@ -110,5 +119,5 @@ void SG_VRAMmemset (unsigned int dst, unsigned char value, unsigned int size);
 void SG_VRAMmemsetW (unsigned int dst, unsigned int value, unsigned int size);
 
 /* the Interrupt Service Routines (do not modify) */
-void SG_isr (void) __interrupt;
+void SG_isr (void) __critical __interrupt(0);
 void SG_nmi_isr (void) __critical __interrupt;

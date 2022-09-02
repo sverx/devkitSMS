@@ -40,6 +40,16 @@ unsigned int SG_getKeysPressed (void);    /* the keys that were up last frame an
 unsigned int SG_getKeysHeld (void);       /* the keys that were down last frame and still down now */
 unsigned int SG_getKeysReleased (void);   /* the keys that were down last frame and up now */
 
+/* keyboard detection and handling */
+_Bool SG_detectKeyboard (void);         /* true if an attached keyboard is detected */
+void SG_scanKeyboardJoypad (void);      /* this scans the keyboard keys (emulating a joypad) */
+
+/* functions to read the keyboard virtual joypad(s) */
+unsigned int SG_getKeyboardJoypadStatus (void);
+unsigned int SG_getKeyboardJoypadPressed (void);
+unsigned int SG_getKeyboardJoypadHeld (void);
+unsigned int SG_getKeyboardJoypadReleased (void);
+
 /* pause handling */
 _Bool SG_queryPauseRequested (void);      /* the pause key has been pressed since previous check */
 void SG_resetPauseRequest (void);         /* reset/acknowledge pause requests */

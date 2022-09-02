@@ -21,62 +21,70 @@ __sfr __at 0x7F VDPHCounterPort;
 __sfr __at 0xDC IOPortL;
 /* define IOPort (joypad) */
 __sfr __at 0xDD IOPortH;
+/* define PPI_A */
+__sfr __at 0xDC SC_PPI_A;
+/* define PPI_B */
+__sfr __at 0xDD SC_PPI_B;
+/* define PPI_C */
+__sfr __at 0xDE SC_PPI_C;
+/* define SC_PPI_CTRL */
+__sfr __at 0xDF SC_PPI_CTRL;
 
-#define HI(x)				((x)>>8)
-#define LO(x)				((x)&0xFF)
+#define HI(x)       ((x)>>8)
+#define LO(x)       ((x)&0xFF)
 
 #ifndef MAXSPRITES
-#define MAXSPRITES 			32
+#define MAXSPRITES      32
 #endif
 
-#define DISABLE_INTERRUPTS		__asm di __endasm
-#define ENABLE_INTERRUPTS		__asm ei __endasm
+#define DISABLE_INTERRUPTS    __asm di __endasm
+#define ENABLE_INTERRUPTS     __asm ei __endasm
 
-#define WAIT_VRAM			__asm nop \
-                                              nop \
-					      nop __endasm
+#define WAIT_VRAM             __asm nop \
+                                    nop \
+                                    nop __endasm
 
 /*
-                SG1000 VRAM memory map:
+                SG-1000 VRAM memory map:
 
-		$0000	+--------+
-		        |   PG	 |	($1800 bytes, pattern generator table)
-		$1800	+--------+
-                        |   PN	 |	($0300 bytes, nametable)
-		$1B00	+--------+
-		        |   SA	 |	($0080 bytes, sprite attribute table)
-		$1B80	+--------+
-		        |	 |	($0480 bytes free)
-		$2000	+--------+
-		        |   CT	 |	($1800 bytes, colour table)
-		$3800	+--------+
-		        |   SG	 |	($0800 bytes, sprite generator table)
-			+--------+
+    $0000 +--------+
+          |   PG   |  ($1800 bytes, pattern generator table)
+    $1800 +--------+
+          |   PN   |  ($0300 bytes, nametable)
+    $1B00 +--------+
+          |   SA   |  ($0080 bytes, sprite attribute table)
+    $1B80 +--------+
+          |        |  ($0480 bytes free)
+    $2000 +--------+
+          |   CT   |  ($1800 bytes, colour table)
+    $3800 +--------+
+          |   SG   |  ($0800 bytes, sprite generator table)
+          +--------+
 */
 
-#define PNTADDRESS			0x1800
-#define SATADDRESS 			0x1B00
-#define PGTADDRESS 			0x0000
-#define CGTADDRESS			0x2000
-#define SGTADDRESS			0x3800
+#define PNTADDRESS      0x1800
+#define SATADDRESS      0x1B00
+#define PGTADDRESS      0x0000
+#define CGTADDRESS      0x2000
+#define SGTADDRESS      0x3800
 
 /* the VDP registers initialization value */
 const unsigned char VDPReg_init[8]={
-                  0x02, // Mode2
-                  0xa0,	// 16KB, screen off, VBlank IRQ, sprite 8x8, no zoom
-                  0x06,	// PN bits 13-10 = 0 1 1 0	   (address = $1800)
-                  0xff,	// CT bits 13-7  = 1 x x x x x x x (address = $2000)
-                  0x03,	// PG bits 13-11 = 0 x x	   (address = $0000)
-                  0x36,	// SA bits 13-7  = 0 1 1 0 1 1 0   (address = $1B00)
-                  0x07,	// SG bits 13-11 = 1 1 1	   (address = $3800)
-                  0x01	// text color (unused in Mode2) / backdrop (black)
+  0x02, // Mode2
+  0xa0, // 16KB, screen off, VBlank IRQ, sprite 8x8, no zoom
+  0x06, // PN bits 13-10 = 0 1 1 0     (address = $1800)
+  0xff, // CT bits 13-7  = 1 x x x x x x x (address = $2000)
+  0x03, // PG bits 13-11 = 0 x x     (address = $0000)
+  0x36, // SA bits 13-7  = 0 1 1 0 1 1 0   (address = $1B00)
+  0x07, // SG bits 13-11 = 1 1 1     (address = $3800)
+  0x01  // text color (unused in Mode2) / backdrop (black)
 };
 
 /* the VDP registers #0 and #1 'shadow' RAM */
-unsigned char	VDPReg[2]={0x02, 0xa0};
+unsigned char VDPReg[2]={0x02, 0xa0};
 
-volatile bool	VDPBlank;		// used by INTerrupt
-volatile bool 	PauseRequested; 	// used by NMI
+volatile bool VDPBlank;   // used by INTerrupt
+volatile bool   PauseRequested;   // used by NMI
 
 #ifdef AUTODETECT_SPRITE_OVERFLOW
 unsigned char spriteOverflowFlipflop=0;
@@ -86,22 +94,23 @@ volatile bool VDPSpriteOverflow=false;
 #endif
 
 volatile unsigned int KeysStatus, PreviousKeysStatus;
+volatile unsigned int KBDKeysStatus, KBDPreviousKeysStatus;
 
 /* variables for sprite windowing and clipping */
-unsigned int	spritesHeight=8, spritesWidth=8;
-unsigned char	clipWin_x0, clipWin_y0, clipWin_x1, clipWin_y1;
+unsigned int  spritesHeight=8, spritesWidth=8;
+unsigned char clipWin_x0, clipWin_y0, clipWin_x1, clipWin_y1;
 
 #if MAXSPRITES==32
-unsigned char	SpriteTable[MAXSPRITES*4];
+unsigned char SpriteTable[MAXSPRITES*4];
 #else
-unsigned char	SpriteTable[(MAXSPRITES+1)*4];
+unsigned char SpriteTable[(MAXSPRITES+1)*4];
 #endif
-unsigned char	SpriteNextFree;
+unsigned char SpriteNextFree;
 
 #ifndef NESTED_DI_EI_SUPPORT
 /* macro definitions (no nested DI/EI support) */
-#define SG_write_to_VDPRegister(VDPReg,value)	{ DISABLE_INTERRUPTS; VDPControlPort=(value); VDPControlPort=(VDPReg)|0x80; ENABLE_INTERRUPTS; }
-#define SG_set_address_VRAM(address) 		{ DISABLE_INTERRUPTS; VDPControlPort=LO(address); VDPControlPort=HI(address)|0x40; ENABLE_INTERRUPTS; }
+#define SG_write_to_VDPRegister(VDPReg,value)  do{DISABLE_INTERRUPTS; VDPControlPort=(value);     VDPControlPort=(VDPReg)|0x80;    ENABLE_INTERRUPTS;}while(0)
+#define SG_set_address_VRAM(address)           do{DISABLE_INTERRUPTS; VDPControlPort=LO(address); VDPControlPort=HI(address)|0x40; ENABLE_INTERRUPTS;}while(0)
 #else
 /* inline __critical functions (nested DI/EI supported!) */
 inline void SG_write_to_VDPRegister (unsigned char VDPReg, unsigned char value) {
@@ -151,7 +160,7 @@ inline void SG_byte_brief_array_to_VDP_data (const unsigned char *data, unsigned
 inline void SG_word_to_VDP_data (unsigned int data) {
   /* INTERNAL FUNCTION */
   VDPDataPort = LO (data);
-  WAIT_VRAM;				/* ensure we're not pushing data too fast */
+  WAIT_VRAM;        /* ensure we're not pushing data too fast */
   VDPDataPort = HI (data);
 }
 
@@ -284,9 +293,9 @@ _Bool SG_addSpriteClipping (int x, int y, unsigned char tile, unsigned char attr
   unsigned char idx;
   if (SpriteNextFree < MAXSPRITES) {
     if ((x > clipWin_x1) || (x < ((int) clipWin_x0 - spritesWidth)))
-      return false;															// sprite clipped
+      return false;                             // sprite clipped
     if ((y > clipWin_y1) || (y < ((int) clipWin_y0 - spritesHeight)))
-      return false;															// sprite clipped
+      return false;                             // sprite clipped
     if (y - 1 != 0xd0) {
 #ifdef AUTODETECT_SPRITE_OVERFLOW
       spriteOverflowCounter ++;
@@ -332,23 +341,109 @@ unsigned int SG_getKeysStatus (void) {
 }
 
 unsigned int SG_getKeysPressed (void) {
-  return (KeysStatus&(~PreviousKeysStatus));
+  return (KeysStatus & (~PreviousKeysStatus));
 }
 
 unsigned int SG_getKeysHeld (void) {
-  return (KeysStatus&PreviousKeysStatus);
+  return (KeysStatus & PreviousKeysStatus);
 }
 
 unsigned int SG_getKeysReleased (void) {
-  return ((~KeysStatus)&PreviousKeysStatus);
+  return ((~KeysStatus) & PreviousKeysStatus);
 }
 
 _Bool SG_queryPauseRequested (void) {
-  return(PauseRequested);
+  return (PauseRequested);
 }
 
 void SG_resetPauseRequest (void) {
   PauseRequested=false;
+}
+
+#define PPI_TEST_VALUE_1   0x55
+#define PPI_TEST_VALUE_2   0xAA
+
+_Bool SG_detectKeyboard (void) {
+  bool kbd_detected=false;
+
+  SC_PPI_CTRL=0x92;              // Init PPI (if present). PortC = Ouput, PortA + PortB = Input
+  SC_PPI_C=PPI_TEST_VALUE_1;     // write test value 1
+  if (SC_PPI_C==PPI_TEST_VALUE_1) {
+    SC_PPI_C=PPI_TEST_VALUE_2;   // write test value 2
+    if (SC_PPI_C==PPI_TEST_VALUE_2) {
+      kbd_detected=true;
+    }
+  }
+
+  SC_PPI_C=0x07;                 // Set row 7 (joypad) as default
+  return (kbd_detected);
+}
+
+void SG_scanKeyboardJoypad (void) {
+  unsigned char tmp;
+  unsigned int status=0;        // all keys not pressed unless some detection happens
+
+  SC_PPI_C=0x06;                // we'll read row 6
+  tmp=SC_PPI_A;                 // read kbd data
+  if (!(tmp & 0x20))            // check bit 5 (right arrow key)
+    status|=PORT_A_KEY_RIGHT;
+  if (!(tmp & 0x40))            // check bit 6 (up arrow key)
+    status|=PORT_A_KEY_UP;
+  if (!(SC_PPI_B & 0x04))       // read kbd data (on PPI_B) and check bit 2 ('CTRL' key)
+    status|=PORT_B_KEY_2;
+
+  SC_PPI_C=0x05;                // we'll read row 5
+  if (!(SC_PPI_A & 0x20))       // read kbd data and check bit 5 (left arrow key)
+    status|=PORT_A_KEY_LEFT;
+  if (!(SC_PPI_B & 0x08))       // read kbd data (on PPI_B) and check bit 3 ('FUNC' key)
+    status|=PORT_B_KEY_1;
+
+  SC_PPI_C=0x04;                // we'll read row 4
+  if (!(SC_PPI_A & 0x20))       // read kbd data and check bit 5 (down arrow key)
+    status|=PORT_A_KEY_DOWN;
+
+  SC_PPI_C=0x03;                // we'll read row 3
+  if (!(SC_PPI_A & 0x10))       // read kbd data and check bit 4 (Ins/Del key)
+    status|=PORT_A_KEY_2;
+
+  SC_PPI_C=0x02;                // we'll read row 2
+  tmp=SC_PPI_A;                 // read kbd data
+  if (!(tmp & 0x10))            // read kbd data and check bit 4 (Home/Clr key)
+    status|=PORT_A_KEY_1;
+  if (!(tmp & 0x04))            // read kbd data and check bit 2 ('D' key)
+    status|=PORT_B_KEY_RIGHT;
+
+  SC_PPI_C=0x01;                // we'll read row 1
+  tmp=SC_PPI_A;                 // read kbd data
+  if (!(tmp & 0x02))            // read kbd data and check bit 1 ('W' key)
+    status|=PORT_B_KEY_UP;
+  if (!(tmp & 0x04))            // read kbd data and check bit 2 ('S' key)
+    status|=PORT_B_KEY_DOWN;
+
+  SC_PPI_C=0x00;                // we'll read row 0
+  if (!(SC_PPI_A & 0x04))       // read kbd data and check bit 2 ('A' key)
+    status|=PORT_B_KEY_LEFT;
+
+  SC_PPI_C=0x07;                // set row 7 (joypad) as default
+
+  KBDPreviousKeysStatus=KBDKeysStatus;
+  KBDKeysStatus=status;
+}
+
+unsigned int SG_getKeyboardJoypadStatus (void) {
+  return (KBDKeysStatus);
+}
+
+unsigned int SG_getKeyboardJoypadPressed (void) {
+  return (KBDKeysStatus & (~KBDPreviousKeysStatus));
+}
+
+unsigned int SG_getKeyboardJoypadHeld (void) {
+  return (KBDKeysStatus & KBDPreviousKeysStatus);
+}
+
+unsigned int SG_getKeyboardJoypadReleased (void) {
+  return ((~KBDKeysStatus) & KBDPreviousKeysStatus);
 }
 
 /* low level functions, just to be used for dirty tricks ;) */
@@ -374,21 +469,21 @@ void SG_VRAMmemsetW (unsigned int dst, unsigned int value, unsigned int size) {
   SG_set_address_VRAM(dst);
   while (size>0) {
     SG_byte_to_VDP_data(LO(value));
-    WAIT_VRAM;													/* ensure we're not pushing data too fast */
+    WAIT_VRAM;                          /* ensure we're not pushing data too fast */
     SG_byte_to_VDP_data(HI(value));
     size-=2;
   }
 }
 
 /* Interrupt Service Routines */
-void SG_isr (void) __interrupt {
+void SG_isr (void) __critical __interrupt(0) {
   volatile unsigned char VDPStatus=VDPStatusPort;  /* this also aknowledge interrupt at VDP */
 #ifdef AUTODETECT_SPRITE_OVERFLOW
   VDPSpriteOverflow=(VDPStatus & 0x40);
   VDPSpriteCollision=(VDPStatus & 0x20);
 #endif
   if (VDPStatus & 0x80) {
-    VDPBlank=true;				 /* frame interrupt */
+    VDPBlank=true;         /* frame interrupt */
     /* read key input */
     PreviousKeysStatus=KeysStatus;
     KeysStatus=~(((IOPortH)<<8)|IOPortL);
@@ -397,6 +492,6 @@ void SG_isr (void) __interrupt {
   ENABLE_INTERRUPTS;
 }
 
-void SG_nmi_isr (void) __critical __interrupt {		/* this is for NMI */
+void SG_nmi_isr (void) __critical __interrupt {   /* this is for NMI */
   PauseRequested = true;
 }
