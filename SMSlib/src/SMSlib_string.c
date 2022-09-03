@@ -12,7 +12,7 @@ void SMS_putchar (unsigned char c) {
   SMS_setTile(c+SMS_TextRenderer_offset);
 }
 
-void SMS_printstring (const unsigned char *str) {
+void SMS_print (const unsigned char *str) {
   // If using SMS_TextRenderer_offset directly, SDCC
   // ends up loading it from memory inside the loop.
   //

@@ -212,10 +212,10 @@ void SMS_zeroSpritePalette (void);
 /* text renderer */
 void SMS_configureTextRenderer (signed int ascii_to_tile_offset) __z88dk_fastcall;
 void SMS_autoSetUpTextRenderer (void);
-void SMS_putchar (unsigned char c);              /* faster than plain putchar() */
-void SMS_printstring (const unsigned char *str); /* faster than printf() for unformatted strings */
+void SMS_putchar (unsigned char c);         /* faster than plain putchar() */
+void SMS_print (const unsigned char *str);  /* faster than printf() for unformatted strings */
 /* Macro to print a string at a given location */
-#define SMS_printStringatXY(x,y,s) do { SMS_setNextTileatXY(x,y); SMS_printstring(s); } while(0)
+#define SMS_printatXY(x,y,s) do { SMS_setNextTileatXY(x,y); SMS_print(s); } while(0)
 
 
 /* decompress ZX7-compressed data to RAM */
