@@ -12,6 +12,11 @@ void SMS_configureTextRenderer (signed int ascii_to_tile_offset) __z88dk_fastcal
   SMS_TextRenderer_offset=ascii_to_tile_offset;
 }
 
+#pragma save
+#pragma disable_warning 59
+
 int putchar (int c) {
   SMS_setTile(c+SMS_TextRenderer_offset);
 }
+
+#pragma restore
