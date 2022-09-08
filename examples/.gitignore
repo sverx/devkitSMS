@@ -1,0 +1,10 @@
+*.ram
+*.swp
+*.map
+*.asm
+*.lst
+*.ihx
+*.lk
+*.noi
+*.rel
+*.sym
