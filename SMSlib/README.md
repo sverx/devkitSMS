@@ -29,6 +29,9 @@ void SMS_loadBGPaletteHalfBrightness (void *palette);
 void SMS_loadSpritePaletteHalfBrightness (void *palette);
 void SMS_zeroBGPalette (void);
 void SMS_zeroSpritePalette (void);
+RGB(r,g,b)                                          /* macro - compute SMS color (0-3)      */
+RGB8(r,g,b)                                         /* macro - compute SMS color (0-255)    */
+RGBHTML(RGB24bit);                                  /* macro - compute SMS color (0xRRGGBB) */
 
 /* colors/palettes functions: GG only */
 void GG_setBGPaletteColor (unsigned char entry, unsigned int color);
@@ -37,7 +40,10 @@ void GG_loadBGPalette (void *palette);
 void GG_loadSpritePalette (void *palette);
 GG_setNextBGColoratIndex(i);                        /* macro - sets which BG color to set next */
 GG_setNextSpriteColoratIndex(i);                    /* macro - sets which sprite color to set next */
-void GG_setColor (unsigned char color);             /* set color */ 
+void GG_setColor (unsigned char color);             /* set color */
+RGB(r,g,b)                                          /* macro - compute SMS color (0-3)      */
+RGB8(r,g,b)                                         /* macro - compute SMS color (0-255)    */
+RGBHTML(RGB24bit);                                  /* macro - compute SMS color (0xRRGGBB) */
 
 /* functions to load tiles into VRAM */
 void SMS_loadTiles (void *src, unsigned int Tilefrom, unsigned int size);
@@ -110,6 +116,17 @@ void SMS_setLineInterruptHandler (void (*theHandlerFunction)(void));  /* link yo
 void SMS_setLineCounter (unsigned char count);                        /* choose on which line trigger the IRQ */
 SMS_enableLineInterrupt()                                             /* macro - turns on line IRQ */
 SMS_disableLineInterrupt()                                            /* macro - turns off line IRQ */
+
+/* vertical interrupt hook */
+
+/* If non-NULL, the specified function will be called by SMS_isr after acknowledging */
+/* the interrupt and reading controller status. */
+void SMS_setFrameInterruptHandler (void (*theHandlerFunction)(void)); /* link to your interrupt handler */
+
+/* Other VDP handling */
+unsigned char SMS_getVCount (void);       /* Get Vertical count register */
+unsigned char SMS_getHCount (void);       /* Get Horizontal count register */
+unsigned char SMS_VDPType (void);         /* VDPType handling (SMS only) */
 
 /* ROM banking */
 SMS_mapROMBank(n);                        /* macro - maps bank n at address 0x8000 (slot 2) */
