@@ -1,3 +1,4 @@
+#include <stdio.h>
 #include "SMSlib.h"
 
 void main(void)
@@ -10,10 +11,18 @@ void main(void)
   SMS_autoSetUpTextRenderer();
 
   /* Set the target of the next background write */
-  SMS_setNextTileatXY(8,11);
+  SMS_setNextTileatXY(4,10);
 
-  /* Write text to the background */
-  SMS_printstring("Hello, World!");
+  /* printf() is available */
+  printf("Hello, World! [1/3]");
+
+  /* When formatting is not needed, SMS_print is faster */
+  SMS_setNextTileatXY(4,11);
+  SMS_print("Hello, World! [2/3]");
+
+  /* The above (setting XY and then printing is common, so
+   * the SMS_printatXY macro is there for convenience */
+  SMS_printatXY(4,12,"Hello, World! [3/3]");
 
   /* Turn on the display */
   SMS_displayOn();
