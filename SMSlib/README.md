@@ -47,6 +47,7 @@ RGBHTML(RGB24bit);                                  /* macro - compute SMS color
 
 /* functions to load tiles into VRAM */
 void SMS_loadTiles (void *src, unsigned int Tilefrom, unsigned int size);
+void SMS_loadSTC0compressedTiles (void *src, unsigned int Tilefrom);
 void SMS_loadPSGaidencompressedTiles (void *src, unsigned int Tilefrom);
 
 /* UNSAFE macros to load compressed tiles into VRAM (can be safely used only when screen is off) */
