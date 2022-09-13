@@ -202,7 +202,7 @@ int main(int argc, char const* *argv) {
       }
       addMerge(argv[cur_arg], BANK_SIZE);
     }
-    else if (strcmp(argv[cur_arg], "-emptyfill")) {
+    else if (strcmp(argv[cur_arg], "-emptyfill")==0) {
       cur_arg++;
       if (cur_arg >=(argc)) {
         fprintf(stderr, "Missing value for -emptyfill\n");
