@@ -12,26 +12,35 @@
 
 /* About multi bank support
  *
- * If PSGlib is compiled with MULTIBANK, the current bank in slot 2
- * will be remembered by PSGlib and the bank will be switched
- * automatically when calling PSGFrame(), but you must still take care
- * of switching to the correct bank before calling PSGPlay, PSGPlayLoops
- * or PSGPlayNoRepeat.
+ * If PSGlib is compiled with PSGLIB_MULTIBANK, the PSGPlayX functions
+ * also take a bank argument. This initial bank is remembered by
+ * PSGlib and the bank will be switched automatically when calling
+ * PSGFrame().
  *
- * PSGlib will automatically switch banks if the song data occupies more
- * than 16kB, but it is assumed that the data is not segmented. (i.e.
- * consecutive in ROM)
+ * PSGlib will automatically switch bank if the song data occupies
+ * more than 16kB, but it is assumed that the data is not segmented.
+ * (i.e. it must be consecutive in ROM)
  *
- * Make sure to save/restore the bank in slot 2 before calling
- * PSGFrame(), as bank 2 will change.
+ * When PSGFrame() returns, the current bank in slot 2 may have
+ * been changed, so keep this in mind and take the necessary
+ * steps if necessary. (Set the bank again after the call, or
+ * use SMS_saveROMBank/restoreROMBank)
  *
- * (SMS_saveROMBank/restoreROMBank can help here!)
+ * When NOT compiled with PSGLIB_MULTIBANK, you must
+ * set the correct bank before calling PSGFrame manually and
+ * the song data cannot exceed 16kB.
  */
 
+#ifdef PSGLIB_MULTIBANK
+void PSGPlay (void *song, unsigned char bank);
+void PSGPlayLoops (void *song, unsigned char loops, unsigned char bank);
+void PSGPlayNoRepeat (void *song, unsigned char bank);
+#else
 void PSGPlay (void *song);
 void PSGPlayLoops (void *song, unsigned char loops);
-void PSGCancelLoop (void);
 void PSGPlayNoRepeat (void *song);
+#endif
+void PSGCancelLoop (void);
 void PSGStop (void);
 void PSGResume (void);
 unsigned char PSGGetStatus (void);

@@ -23,14 +23,13 @@
 
 /* define PSGPort (SDCC z80 syntax) */
 __sfr __at 0x7F PSGPort;
-static volatile __at (0xffff) unsigned char ROM_bank_to_be_mapped_on_slot2;
 
 // fundamental vars
 unsigned char PSGMusicStatus;              // are we playing a background music?
 void *PSGMusicStart;                       // the pointer to the beginning of music
 void *PSGMusicPointer;                     // the pointer to the current
 void *PSGMusicLoopPoint;                   // the pointer to the loop begin
-#ifdef MULTIBANK
+#ifdef PSGLIB_MULTIBANK
 unsigned char PSGMusicStartBank;
 unsigned char PSGMusicPointerBank;
 unsigned char PSGMusicLoopPointBank;
@@ -44,7 +43,7 @@ unsigned char PSGMusicVolumeAttenuation;   // the volume attenuation applied to 
 //  decompression vars
 unsigned char PSGMusicSubstringLen;        // lenght of the substring we are playing
 void *PSGMusicSubstringRetAddr;            // return to this address when substring is over
-#ifdef MULTIBANK
+#ifdef PSGLIB_MULTIBANK
 unsigned char PSGMusicSubstringRetBank;
 #endif
 
@@ -112,7 +111,11 @@ void PSGResume (void) {
  }
 }
 
+#ifdef PSGLIB_MULTIBANK
+void PSGPlay (void *song, unsigned char bank) {
+#else
 void PSGPlay (void *song) {
+#endif
 /* *********************************************************************
   receives the address of the PSG to start playing (continuously)
 */
@@ -126,19 +129,27 @@ void PSGPlay (void *song) {
   PSGMusicSubstringLen=0;       // reset the substring len (for compression)
   PSGMusicLastLatch=PSGLatch|PSGChannel0|PSGVolumeData|0x0F;   // latch channel 0, volume=0xF (silent)
   PSGMusicStatus=PSG_PLAYING;
-#ifdef MULTIBANK
-  PSGMusicStartBank = ROM_bank_to_be_mapped_on_slot2;
-  PSGMusicPointerBank = ROM_bank_to_be_mapped_on_slot2;
-  PSGMusicLoopPointBank = ROM_bank_to_be_mapped_on_slot2;
+#ifdef PSGLIB_MULTIBANK
+  PSGMusicStartBank = bank;
+  PSGMusicPointerBank = bank;
+  PSGMusicLoopPointBank = bank;
 #endif
 }
 
+#ifdef PSGLIB_MULTIBANK
+void PSGPlayLoops (void *song, unsigned char bank, unsigned char loops) {
+#else
 void PSGPlayLoops (void *song, unsigned char loops) {
+#endif
 /* *********************************************************************
   receives the address of the PSG to start playing (continuously) and
   the number of loops (going back to loop point) requested
 */
+#ifdef PSGLIB_MULTIBANK
+  PSGPlay(song, bank);
+#else
   PSGPlay(song);
+#endif
   PSGLoopFlag=0;
   PSGLoopCounter=loops;
 }
@@ -151,11 +162,20 @@ void PSGCancelLoop (void) {
   PSGLoopCounter=0;
 }
 
+#ifdef PSGLIB_MULTIBANK
+void PSGPlayNoRepeat (void *song,
+   unsigned char bank) {
+#else
 void PSGPlayNoRepeat (void *song) {
+#endif
 /* *********************************************************************
   receives the address of the PSG to start playing (once)
 */
+#ifdef PSGLIB_MULTIBANK
+  PSGPlay(song, bank);
+#else
   PSGPlay(song);
+#endif
   PSGLoopFlag=0;
   PSGLoopCounter=0;
 }
@@ -295,7 +315,7 @@ __asm
   ld hl,(_PSGMusicPointer)       ; read current address
 
 _intLoop:
-#ifdef MULTIBANK
+#ifdef PSGLIB_MULTIBANK
   call _PSG_ReadByte_B           ; load PSG byte (in B)
 #else
   ld b,(hl)                      ; load PSG byte (in B)
@@ -309,7 +329,7 @@ _intLoop:
   ld (_PSGMusicSubstringLen),a   ; save len
   jr nz,_continue
   ld hl,(_PSGMusicSubstringRetAddr)  ; substring is over, retrieve return address
-#ifdef MULTIBANK
+#ifdef PSGLIB_MULTIBANK
   ld a,(_PSGMusicSubstringRetBank)   ; also retreive the return bank
   ld (_PSGMusicPointerBank), a
 #endif
@@ -452,7 +472,7 @@ _output_NoLatch:
 
 _setLoopPoint:
   ld (_PSGMusicLoopPoint),hl
-#ifdef MULTIBANK
+#ifdef PSGLIB_MULTIBANK
   ld a, (_PSGMusicPointerBank)
   ld (_PSGMusicLoopPointBank), a
 #endif
@@ -461,7 +481,7 @@ _setLoopPoint:
 
 _musicLoop:
   ld hl,(_PSGMusicLoopPoint)
-#ifdef MULTIBANK
+#ifdef PSGLIB_MULTIBANK
   ld a, (_PSGMusicLoopPointBank)
   ld (_PSGMusicPointerBank), a
 #endif
@@ -478,7 +498,7 @@ _musicLoop:
 _substring:
   sub PSGSubString-4                  ; len is value - $08 + 4
   ld (_PSGMusicSubstringLen),a        ; save len
-#ifdef MULTIBANK
+#ifdef PSGLIB_MULTIBANK
   call _PSG_ReadByte_C                ; load substring address (offset)
   call _PSG_ReadByte_B
 #else
@@ -488,13 +508,13 @@ _substring:
   inc hl
 #endif
   ld (_PSGMusicSubstringRetAddr),hl   ; save return address
-#ifdef MULTIBANK
+#ifdef PSGLIB_MULTIBANK
   ld a, (0xFFFF)
   ld (_PSGMusicSubstringRetBank),a    ; save return bank
 #endif
   ld hl,(_PSGMusicStart)
   add hl,bc                           ; make substring current
-#ifdef MULTIBANK
+#ifdef PSGLIB_MULTIBANK
   ; Restrict to slot 2 (bit 15 set, bit 14 cleared)
   set 7, h
   res 6, h
@@ -519,14 +539,14 @@ _high_part_Tone:
   ld (_PSGChan2HighTone),a            ; save channel 2 tone HIGH data
   ld a,(_PSGChannel2SFX)              ; channel 2 free?
   or a
-#ifdef MULTIBANK
+#ifdef PSGLIB_MULTIBANK
   jp z,_send2PSG_B
 #else
   jr z,_send2PSG_B
 #endif
   jp _intLoop
 
-#ifdef MULTIBANK
+#ifdef PSGLIB_MULTIBANK
  // Reads a byte from HL, increment HL and take care of
  // bank overflow.
  //

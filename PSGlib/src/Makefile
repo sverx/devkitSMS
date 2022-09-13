@@ -32,7 +32,7 @@ PSGlib.rel: PSGlib.c PSGlib.h
 	$(CC) $(CFLAGS) $(PEEP_OPTIONS) -c -o $@ $<
 
 PSGlib_multibank.rel: PSGlib.c PSGlib.h
-	$(CC) $(CFLAGS) $(PEEP_OPTIONS) -c -o $@ $< -DMULTIBANK
+	$(CC) $(CFLAGS) $(PEEP_OPTIONS) -c -o $@ $< -DPSGLIB_MULTIBANK
 
 # Default rules
 %.rel: %.c SMSlib.h peep-rules.txt
