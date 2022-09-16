@@ -14,17 +14,31 @@
 #define BANK_SIZE           0x4000
 #define CRT0_END            0x200
 #define BANK_ADDR           0x4000
+#define MAX_ROM_SIZE        (4*1024*1024)  // generated ROM max: 4MB
+#define DEFAULT_EMPTY_FILL  0x00
 
 #define SEGA_HEADER_ADDR_16K    0x3ff0
 #define SDSC_HEADER_ADDR_16K    0x3fe0
 
-unsigned char buf[4*1024*1024];    // generated ROM max: 4MB
+unsigned char buf[MAX_ROM_SIZE];
 unsigned short used_bank[256];
 unsigned int size=0;
 unsigned char segment=0;
 unsigned char padding_type=0;
 unsigned int used=CRT0_END,used_low=CRT0_END;
 unsigned int count, addr, type;
+unsigned char emptyfill = DEFAULT_EMPTY_FILL;
+
+struct merge {
+  char *filename;
+  unsigned int src;
+  unsigned int len;
+  unsigned int dst;
+};
+
+#define MAX_MERGES  8
+struct merge merges[MAX_MERGES];
+int num_merges;
 
 char data[256];
 
@@ -32,7 +46,18 @@ FILE *fIN;
 FILE *fOUT;
 
 void usage (int ret_value) {
-  printf("Usage: makesms [-pm|-pp] infile.ihx outfile.sms\n");
+  printf("Usage: makesms [options] infile.ihx outfile.sms\n");
+  printf("\nSupported options:\n");
+  printf(" -pm                        Pad ROM size to a multiple of 64kB\n");
+  printf(" -pp                        Pad ROM size to a power of 2\n");
+  printf(" -mbin file:src:len:dst     Merge contents of binary file into ROM before\n");
+  printf("                            updating header and checksum. Offsets and length\n");
+  printf("                            expressed in bytes.\n");
+  printf(" -mbank file:src:banks:dst  Merge contents of binary file into ROM before\n");
+  printf("                            updating header and checksum. Offsets and length\n");
+  printf("                            expressed in banks.\n");
+  printf(" -emptyfill value           Fill unused memory with specified value. Default: 0x%02x\n", DEFAULT_EMPTY_FILL);
+
   exit(ret_value);
 }
 
@@ -43,6 +68,105 @@ int count_set_bits (unsigned int value) {
     value>>=1;
   }
   return (cnt);
+}
+
+int addMerge(const char *arg, int mult) {
+
+  struct merge mg;
+  char *filename, *tmp;
+
+  if (num_merges >= MAX_MERGES) {
+    fprintf(stderr, "Too many merges");
+    return -1;
+  }
+
+  filename = strdup(arg);
+  if (!filename) {
+    perror("strdup");
+    return -1;
+  }
+
+  // Find first separator
+  tmp = strchr(filename, ':');
+  if (!tmp) {
+    fprintf(stderr, "Invalid -mbin argument\n");
+    return -1;
+  }
+  *tmp = 0; // replace sparator by NUL to end string
+  mg.filename = filename;
+
+  // skip NUL
+  tmp++;
+
+  if (3 != sscanf(tmp, "%i:%i:%i", &mg.src, &mg.len, &mg.dst)) {
+    fprintf(stderr, "Missing -mbin argument\n");
+    free(filename);
+    return -1;
+  }
+
+  mg.src *= mult;
+  mg.len *= mult;
+  mg.dst *= mult;
+
+  if (mg.dst + mg.len >= MAX_ROM_SIZE) {
+    fprintf(stderr, "Merge exceeds max ROM size\n");
+    free(filename);
+    return -1;
+  }
+
+  memcpy(&merges[num_merges], &mg, sizeof(struct merge));
+  num_merges++;
+
+  return 0;
+}
+
+void freeMerges(void) {
+  int i;
+
+  for (i=0; i<num_merges; i++) {
+    free(merges[i].filename);
+  }
+}
+
+int processMerges(void) {
+  int i, j;
+  FILE *fptr;
+
+  for (i=0; i<num_merges; i++) {
+    fptr = fopen(merges[i].filename, "rb");
+    if (!fptr) {
+      perror(merges[i].filename);
+      return -1;
+    }
+    if (fseek(fptr, merges[i].src, SEEK_SET) != 0) {
+      perror("Could not seek");
+      fclose(fptr);
+      return -1;
+    }
+    // Check for non-empty content
+    for (j=merges[i].dst; j<merges[i].dst + merges[i].len; j++) {
+      if (buf[j] != emptyfill) {
+        fprintf(stderr, "Error: Attempt to merge over non-empty (!= 0x%02x) content\n", emptyfill);
+        fclose(fptr);
+        return -1;
+      }
+    }
+    // addMerge already checked that this fits in the ROM buffer
+    if (fread(buf + merges[i].dst, merges[i].len, 1, fptr) != 1) {
+      perror("error reading merge source");
+      fclose(fptr);
+      return -1;
+    }
+    // grow ROM size (potentially)
+    if (merges[i].dst + merges[i].len > size) {
+      size = merges[i].dst + merges[i].len;
+    }
+    // verbose
+    printf("Merged %d bytes from %s:0x%06x to ROM:0x%06x\n", merges[i].len, merges[i].filename, merges[i].src, merges[i].dst);
+    fclose(fptr);
+  }
+
+  return 0;
 }
 
 int main(int argc, char const* *argv) {
@@ -62,8 +186,32 @@ int main(int argc, char const* *argv) {
       padding_type=1;
     else if (strcmp(argv[cur_arg], "-pp")==0)
       padding_type=2;
+    else if (strcmp(argv[cur_arg], "-mbin")==0) {
+      cur_arg++;
+      if (cur_arg >=(argc)) {
+        fprintf(stderr, "Missing value for -mbin\n");
+        usage(1);
+      }
+      addMerge(argv[cur_arg], 1);
+    }
+    else if (strcmp(argv[cur_arg], "-mbank")==0) {
+      cur_arg++;
+      if (cur_arg >=(argc)) {
+        fprintf(stderr, "Missing value for -mbank\n");
+        usage(1);
+      }
+      addMerge(argv[cur_arg], BANK_SIZE);
+    }
+    else if (strcmp(argv[cur_arg], "-emptyfill")==0) {
+      cur_arg++;
+      if (cur_arg >=(argc)) {
+        fprintf(stderr, "Missing value for -emptyfill\n");
+        usage(1);
+      }
+      emptyfill = strtol(argv[cur_arg], NULL, 0);
+    }
     else {
-      printf("Fatal: can't understand argument '%s'\n",argv[cur_arg]);
+      fprintf(stderr, "Fatal: can't understand argument '%s'\n",argv[cur_arg]);
       usage(1);
     }
     cur_arg++;
@@ -74,6 +222,9 @@ int main(int argc, char const* *argv) {
     printf("Fatal: can't open input IHX file\n");
     return(1);
   }
+
+  // Initialize buffer with fill value
+  memset(buf, emptyfill, MAX_ROM_SIZE);
 
   while (!feof(fIN)) {
     fscanf(fIN,":%2x%4x%2x%s\n", &count, &addr, &type, data);
@@ -133,6 +284,10 @@ int main(int argc, char const* *argv) {
   }
   fclose (fIN);
 
+  if (processMerges()) {
+    return(1);
+  }
+
   if (size%BANK_SIZE)
     size=BANK_SIZE*((size/BANK_SIZE)+1);      // make BIN size exact multiple of BANK_SIZE
 
@@ -174,6 +329,7 @@ int main(int argc, char const* *argv) {
   fOUT=fopen(argv[argc-1],"wb");
   if (!fOUT) {
     printf("Fatal: can't open output SMS file\n");
+    freeMerges();
     return(1);
   }
 
@@ -190,6 +346,8 @@ int main(int argc, char const* *argv) {
 
   fwrite (&buf, 1, size, fOUT);
   fclose (fOUT);
+
+  freeMerges();
 
   return (0);
 }
