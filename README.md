@@ -9,17 +9,17 @@ a collection of tools and code (with a *very* presumptuous name) for SEGA Master
 * install it ("include files" and "Z80 library" are the only components required, you shouldn't need anything else)
 * read its [manual](http://sdcc.sourceforge.net/doc/sdccman.pdf)
 * make sure that your installation works - details are at page 20 of the PDF manual
-* place `ihx2sms.exe` and `makesms.exe` from this package into your SDCC `bin` folder
-  (if you're on Linux, both programs are supplied in the Linux folders - if you're not on Windows or on Linux please compile ihx2sms and/or makesms youself from the sources)
-* place `assets2banks.exe` (and/or the legacy `folder2c.exe` tool) from this package into your SDCC `bin` folder
-  (both are optional as you can use other tools to convert your data assets. If you're not on Windows please compile `folder2c.c` yourself from the sources. `assets2banks.py` python source is also provided)
-* for SMS/GG:  place `crt0_sms.rel` from this package into your project folder (or a crt0 folder on your projects root)
-* for SMS: place `SMSlib.h` in your project folder and `SMSlib.lib` in SDCC `lib/z80` folder
-* for GG:  place `SMSlib.h` in your project folder and `SMSlib_GG.lib` in SDCC `lib/z80` folder
-* for SG-1000: place `crt0_sg.rel` from this package into your project folder (or a crt0 folder on your projects root)
-* for SG-1000: place `SGlib.h` and `SGlib.rel` in your project folder (or a SGlib folder on your projects root)
-* (optional) if you plan to use PSG music/SFX, place `PSGlib.h` and `PSGlib.rel` in your project folder
-* (optional) if you plan to use MoonBlaster modules for FM music, place `MBMlib.h` and `MBMlib.rel` in your project folder
+* place `ihx2sms(.exe)` and `makesms(.exe)` from this package into your SDCC `bin` folder
+  (if you're on Linux or on Windows, both programs are supplied in the Linux or Windows folders, otherwise you can compile ihx2sms and makesms youself from the provided sources)
+* place `assets2banks.exe` (and/or the legacy `folder2c(.exe)` tool) from this package into your SDCC `bin` folder
+  (both are optional as you can use other tools to convert your data assets. If you're not on Linux or Windows please compile `folder2c.c` yourself from the sources. `assets2banks.py` python source is also provided for Linux users and for those using a Python interpreter)
+* for SMS/GG:  place `crt0_sms.rel` from this package in a crt0 folder in your projects root (or directly into your project folder if you prefer doing so)
+* for SMS: place `SMSlib.h` in a SMSlib folder in your projects root (or directly into your project folder if you prefer doing so) and `SMSlib.lib` in SDCC `lib/z80` folder
+* for GG: place `SMSlib.h` in a SMSlib folder in your projects root (or directly into your project folder if you prefer doing so) and `SMSlib_GG.lib` in SDCC `lib/z80` folder
+* for SG-1000/SC-3000: place `crt0_sg.rel` from this package in a crt0 folder in your projects root (or directly into your project folder if you prefer doing so)
+* for SG-1000/SC-3000: place `SGlib.h` and `SGlib.rel` in a SGlib folder in your projects root (or directly into your project folder if you prefer doing so)
+* (optional) if you plan to use PSG music/SFX, place `PSGlib.h` and `PSGlib.rel` in a PSGlib folder in your projects root (or directly into your project folder if you prefer doing so)
+* (optional) if you plan to use MoonBlaster modules for FM music, place `MBMlib.h` and `MBMlib.rel` in a MBMlib folder in your projects root (or directly into your project folder if you prefer doing so)
 
 ### How to use devkitSMS/SMSlib to code your own SMS/GG program:
 
@@ -34,7 +34,7 @@ a collection of tools and code (with a *very* presumptuous name) for SEGA Master
 ```
   note that you should put `crt0_sms.rel` *first*, and you should put the library *after* your code.
   
-### How to use devkitSMS/SGlib to code your own SG/SC program:
+### How to use devkitSMS/SGlib to code your own SG-1000/SC-3000 program:
 
 * include `SGlib.h` in your sources
 * compile your program:
