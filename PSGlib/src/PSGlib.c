@@ -509,7 +509,7 @@ _substring:
 #endif
   ld (_PSGMusicSubstringRetAddr),hl   ; save return address
 #ifdef PSGLIB_MULTIBANK
-  ld a, (0xFFFF)
+  ld a,(_PSGMusicPointerBank)
   ld (_PSGMusicSubstringRetBank),a    ; save return bank
 #endif
   ld hl,(_PSGMusicStart)
