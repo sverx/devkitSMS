@@ -10,7 +10,7 @@ void SMS_saveTileMapArea(unsigned char x, unsigned char y, void *dst, unsigned c
     unsigned short *d = dst;
 
     for (i=0; i<height; i++) {
-        SMS_setAddr(SMS_PNTAddress_r + (y + i) * 64 + x * 2);
+        SMS_setAddr((SMS_PNTAddress & ~0x4000) + (y + i) * 64 + x * 2);
         for (j=0; j<width; j++) {
             *d++ = SMS_getTile();
         }
@@ -23,7 +23,6 @@ void SMS_saveTileMapArea(unsigned char x, unsigned char y, void *dst, unsigned c
 unsigned short SMS_getTile(void) __z88dk_fastcall __naked
 {
     __asm
-
     in a, (#0xBE)  ; 11
     ld l, a        ; 4
     inc hl         ; 6
@@ -31,7 +30,6 @@ unsigned short SMS_getTile(void) __z88dk_fastcall __naked
     in a, (#0xBE)  ; 11
     ld h, a        ; 4
     ret
-
     __endasm;
 }
 
