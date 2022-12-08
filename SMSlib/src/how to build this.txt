@@ -54,6 +54,9 @@ sdcc -o SMSlib_PSGaiden.rel -c -mz80 %OPT% --peep-file peep-rules.txt SMSlib_PSG
 sdcc -o SMSlib_textrenderer.rel -c -mz80 %OPT% --peep-file peep-rules.txt SMSlib_textrenderer.c
 @if %errorlevel% NEQ 0 goto :EOF
 
+sdcc -o SMSlib_textrenderer.rel -c -mz80 %OPT% --peep-file peep-rules.txt SMSlib_readVRAM.c
+@if %errorlevel% NEQ 0 goto :EOF
+
 sdcc -o SMSlib_textrenderer.rel -c -mz80 %OPT% --peep-file peep-rules.txt SMSlib_string.c
 @if %errorlevel% NEQ 0 goto :EOF
 
