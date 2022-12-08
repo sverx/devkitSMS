@@ -65,6 +65,10 @@ void SMS_setTile (unsigned int tile);
 void SMS_loadSTMcompressedTileMap (unsigned char x, unsigned char y, unsigned char *src);
 void SMS_loadSTMcompressedTileMapArea (unsigned char x, unsigned char y, unsigned char *src, unsigned char width); /* *DEPRECATED* ('width' ignored!) */
 
+/* Functions for reading back tilemap and VRAM */
+unsigned short SMS_getTile(void);
+void SMS_saveTileMapArea(unsigned char x, unsigned char y, void *dst, unsigned char width, unsigned char height);
+
 /* sprite handling */
 void SMS_initSprites (void);                /* we're going to start declaring sprites, in front-to-back order */
 signed char SMS_addSprite (unsigned char x, unsigned char y, unsigned char tile);  /* declare a sprite - returns handle or -1 if no more sprites are available */

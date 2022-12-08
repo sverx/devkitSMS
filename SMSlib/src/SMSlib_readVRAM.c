@@ -4,8 +4,7 @@
    ************************************************** */
 #include "SMSlib.h"
 
-void SMS_saveTileMapArea(unsigned char x, unsigned char y, void *dst, unsigned char width, unsigned char height)
-{
+void SMS_saveTileMapArea(unsigned char x, unsigned char y, void *dst, unsigned char width, unsigned char height) {
     unsigned char i,j;
     unsigned short *d = dst;
 
@@ -20,8 +19,7 @@ void SMS_saveTileMapArea(unsigned char x, unsigned char y, void *dst, unsigned c
 #pragma save
 #pragma disable_warning 85
 
-unsigned short SMS_getTile(void) __z88dk_fastcall __naked
-{
+unsigned short SMS_getTile(void) __z88dk_fastcall __naked {
     __asm
     in a, (#0xBE)  ; 11
     ld l, a        ; 4
