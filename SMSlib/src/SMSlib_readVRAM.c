@@ -24,11 +24,11 @@ unsigned short SMS_getTile(void) __z88dk_fastcall __naked
 {
     __asm
 
-    in a, (#0xBE)  ; 13
+    in a, (#0xBE)  ; 11
     ld l, a        ; 4
-    inc hl         ; 11
-    dec hl         ; 11
-    in a, (#0xBE)  ; 13
+    inc hl         ; 6
+    dec hl         ; 6
+    in a, (#0xBE)  ; 11
     ld h, a        ; 4
     ret
 
