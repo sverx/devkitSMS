@@ -3,6 +3,7 @@
    ( part of devkitSMS - github.com/sverx/devkitSMS )
    ************************************************** */
 #include "SMSlib.h"
+#include "SMSlib_common.c"
 
 void SMS_saveTileMapArea(unsigned char x, unsigned char y, void *dst, unsigned char width, unsigned char height) {
     unsigned char i,j;
