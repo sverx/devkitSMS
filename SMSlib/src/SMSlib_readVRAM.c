@@ -31,4 +31,42 @@ unsigned int SMS_getTile(void) __naked __z88dk_fastcall __preserves_regs(b,c,d,e
     __endasm;
 }
 
+void SMS_readVRAM(unsigned char *dst, unsigned int src, unsigned int size) __naked __z88dk_callee __preserves_regs(iyh,iyl) __sdcccall(1)
+{
+	// dst in hl
+	// src in de
+	// size onto the stack
+__asm
+	ld c, #0xBF     ; VDP control port
+
+	; Make sure this is a read (write bit is set if TILEtoADDR is used to compute src)
+	ld a, d
+	and a, #0x3f
+
+	di
+	out (c),e
+	out (c),a
+	ei
+
+    pop de          ; pop ret address
+	pop bc          ; pop size
+	push de         ; push ret address
+
+	dec bc
+	inc b
+	inc c
+
+	ld a,b
+	ld b,c
+
+	ld c,#_VDPDataPort
+1$:
+	ini
+	jr  nz,1$
+	dec a
+	jp nz, 1$
+	ret
+
+__endasm;
+}
 #pragma restore
