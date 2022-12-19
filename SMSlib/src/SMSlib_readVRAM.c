@@ -6,14 +6,14 @@
 #include "SMSlib_common.c"
 
 void SMS_saveTileMapArea(unsigned char x, unsigned char y, void *dst, unsigned char width, unsigned char height) {
-    unsigned char i,j;
+    unsigned char i;
     unsigned int *d = dst;
+    unsigned int src = (SMS_PNTAddress & ~0x4000) + y * 64 + x * 2;
 
     for (i=0; i<height; i++) {
-        SMS_setAddr((SMS_PNTAddress & ~0x4000) + (y + i) * 64 + x * 2);
-        for (j=0; j<width; j++) {
-            *d++ = SMS_getTile();
-        }
+        SMS_readVRAM(d, src, width * 2);
+        d += width;
+        src += 64;
     }
 }
 
