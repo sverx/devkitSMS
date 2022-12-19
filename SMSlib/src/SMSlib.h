@@ -150,6 +150,7 @@ void SMS_loadSTMcompressedTileMapatAddr (unsigned int dst, const void *src);
 /* Functions for reading back tilemap and VRAM */
 unsigned int SMS_getTile(void) __naked __z88dk_fastcall __preserves_regs(b,c,d,e,iyh,iyl);
 void SMS_saveTileMapArea(unsigned char x, unsigned char y, void *dst, unsigned char width, unsigned char height);
+void SMS_readVRAM(unsigned char *dst, unsigned int src, unsigned int size) __naked __z88dk_callee __preserves_regs(iyh,iyl) __sdcccall(1);
 
 /* ***************************************************************** */
 /* Sprites handling                                                  */
