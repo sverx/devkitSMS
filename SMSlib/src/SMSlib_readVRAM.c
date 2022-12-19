@@ -6,7 +6,7 @@
 
 void SMS_saveTileMapArea(unsigned char x, unsigned char y, void *dst, unsigned char width, unsigned char height) {
     unsigned char i,j;
-    unsigned short *d = dst;
+    unsigned int *d = dst;
 
     for (i=0; i<height; i++) {
         SMS_setAddr((SMS_PNTAddress & ~0x4000) + (y + i) * 64 + x * 2);
@@ -19,14 +19,14 @@ void SMS_saveTileMapArea(unsigned char x, unsigned char y, void *dst, unsigned c
 #pragma save
 #pragma disable_warning 85
 
-unsigned short SMS_getTile(void) __z88dk_fastcall __naked {
+unsigned int SMS_getTile(void) __naked __z88dk_fastcall __preserves_regs(b,c,d,e,iyh,iyl) {
     __asm
-    in a, (#0xBE)  ; 11
-    ld l, a        ; 4
+    in a,(#0xBE)   ; 11
+    ld l,a         ; 4
     inc hl         ; 6
-    dec hl         ; 6
-    in a, (#0xBE)  ; 11
-    ld h, a        ; 4
+    dec hl         ; 6 = 27 (safe on every Game Gear too)
+    in a,(#0xBE)
+    ld h,a
     ret
     __endasm;
 }

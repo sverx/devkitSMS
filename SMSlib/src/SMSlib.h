@@ -148,7 +148,7 @@ void SMS_loadSTMcompressedTileMapatAddr (unsigned int dst, const void *src);
 // SMS_loadSTMcompressedTileMapArea *DEPRECATED* - will be dropped at some point in 2018
 
 /* Functions for reading back tilemap and VRAM */
-unsigned short SMS_getTile(void) __z88dk_fastcall __naked;
+unsigned int SMS_getTile(void) __naked __z88dk_fastcall __preserves_regs(b,c,d,e,iyh,iyl);
 void SMS_saveTileMapArea(unsigned char x, unsigned char y, void *dst, unsigned char width, unsigned char height);
 
 /* ***************************************************************** */
