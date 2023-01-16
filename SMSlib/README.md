@@ -54,12 +54,14 @@ void SMS_loadPSGaidencompressedTiles (void *src, unsigned int Tilefrom);
 UNSAFE_SMS_loadaPLibcompressedTiles(src,tilefrom);
 UNSAFE_SMS_loadZX7compressedTiles(src,tilefrom);
 
-/* functions for tilemap loading/handling */
+/* functions for tilemap loading */
 void SMS_loadTileMap (unsigned char x, unsigned char y, void *src, unsigned int size);
 void SMS_loadTileMapArea (unsigned char x, unsigned char y,  unsigned int *src, unsigned char width, unsigned char height);
-/* *deprecated* */ void SMS_setTileatXY (unsigned char x, unsigned char y, unsigned int tile);
+
+/* functions/macro for tilemap handling */
 void SMS_setNextTileatXY (unsigned char x, unsigned char y);
 void SMS_setTile (unsigned int tile);
+SMS_setTileatXY (unsigned char x, unsigned char y, unsigned int tile);    /* macro - puts a tile at X/Y */
 
 /* functions to load STM compressed tilemaps */
 void SMS_loadSTMcompressedTileMap (unsigned char x, unsigned char y, unsigned char *src);
