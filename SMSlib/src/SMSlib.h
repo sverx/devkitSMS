@@ -224,7 +224,6 @@ void SMS_print (const unsigned char *str);  /* faster than printf() for unformat
 /* Macro to print a string at a given location */
 #define SMS_printatXY(x,y,s) do { SMS_setNextTileatXY(x,y); SMS_print(s); } while(0)
 
-
 /* decompress compressed data to RAM */
 void SMS_decompressZX7 (const void *src, void *dst) __naked __sdcccall(1);
 void SMS_decompressaPLib (const void *src, void *dst) __naked __sdcccall(1);

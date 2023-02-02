@@ -92,8 +92,9 @@ void SMS_putchar (char c);                                         /* faster tha
 void SMS_print(const char *str);                                   /* faster than printf() for unformatted strings */
 SMS_printatXY(x,y,s);                                              /* macro - prints a string starting at X/Y */
 
-/* decompress ZX7-compressed data to RAM */
+/* decompress compressed data to RAM */
 void SMS_decompressZX7 (void *src, void *dst);
+void SMS_decompressaPLib (void *src, void *dst);
 
 /* input handling */
 unsigned int SMS_getKeysStatus (void);    /* the current status of the keys */
