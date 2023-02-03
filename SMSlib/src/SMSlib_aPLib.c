@@ -22,9 +22,8 @@ unsigned int  aPLib_R0;
 #pragma disable_warning 85
 void SMS_decompressaPLib (const void *src, void *dst) __naked __sdcccall(1) {
   __asm
-depack:
-             ;hl = source
-             ;de = dest
+  ;hl = source
+  ;de = dest
   ldi
   xor a
   ld (_aPLib_LWM),a
@@ -168,6 +167,36 @@ _apbranch1:
   xor a
   ld (_aPLib_LWM),a
   jp _aploop
+
+ap_getbit:
+  push bc
+    ld bc,(_aPLib_bits)
+    rrc c
+    jr nc,_plus9
+    ld b,(hl)
+    inc hl
+_plus9:
+    ld a,c
+    and b
+    ld (_aPLib_bits),bc
+  pop bc
+  ret
+
+ap_getbitbc: ;doubles BC and adds the read bit
+  sla c
+  rl b
+  call ap_getbit
+  ret z
+  inc bc
+  ret
+
+ap_getgamma:
+  ld bc,#1
+_minus3:
+  call ap_getbitbc
+  call ap_getbit
+  jr nz,_minus3
+  ret
   __endasm;
 }
 #pragma restore
