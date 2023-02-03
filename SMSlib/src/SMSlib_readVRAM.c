@@ -32,7 +32,7 @@ unsigned int SMS_getTile(void) __naked __z88dk_fastcall __preserves_regs(b,c,d,e
     __endasm;
 }
 
-void SMS_readVRAM(unsigned char *dst, unsigned int src, unsigned int size) __naked __z88dk_callee __preserves_regs(iyh,iyl) __sdcccall(1)
+void SMS_readVRAM(void *dst, unsigned int src, unsigned int size) __naked __z88dk_callee __preserves_regs(iyh,iyl) __sdcccall(1)
 {
     // dst in hl
     // src in de
@@ -63,7 +63,7 @@ __asm
     ld c,#_VDPDataPort
 1$:
     ini             ; 16
-    jr  nz,1$       ; 12
+    jr  nz,1$       ; 12 = 28 (safe on every Game Gear too)
     dec a
     jp nz, 1$
     ret
