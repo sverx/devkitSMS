@@ -50,6 +50,10 @@ void SMS_loadTiles (void *src, unsigned int Tilefrom, unsigned int size);
 void SMS_loadSTC0compressedTiles (void *src, unsigned int Tilefrom);
 void SMS_loadPSGaidencompressedTiles (void *src, unsigned int Tilefrom);
 
+/* macros to load compressed tiles into VRAM */
+SMS_loadSTC0compressedTiles(src,tilefrom)
+SMS_loadZX7compressedTiles(src,tilefrom)
+
 /* UNSAFE macros to load compressed tiles into VRAM (can be safely used only when screen is off) */
 UNSAFE_SMS_loadaPLibcompressedTiles(src,tilefrom);
 UNSAFE_SMS_loadZX7compressedTiles(src,tilefrom);
@@ -66,6 +70,10 @@ SMS_setTileatXY (unsigned char x, unsigned char y, unsigned int tile);    /* mac
 /* functions to load STM compressed tilemaps */
 void SMS_loadSTMcompressedTileMap (unsigned char x, unsigned char y, unsigned char *src);
 void SMS_loadSTMcompressedTileMapArea (unsigned char x, unsigned char y, unsigned char *src, unsigned char width); /* *DEPRECATED* ('width' ignored!) */
+
+/* functions to decompress compressed data to RAM */
+void SMS_decompressZX7 (const void *src, void *dst);
+void SMS_decompressaPLib (const void *src, void *dst);
 
 /* Functions for reading back tilemap and VRAM */
 unsigned short SMS_getTile(void);

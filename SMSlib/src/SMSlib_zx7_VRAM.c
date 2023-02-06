@@ -126,21 +126,21 @@ _f1:
       res 6, h
       inc c      ; ld c, $bf
 _b3:
-      di
+      di                ; 4 = 29, safe on every GG
       out (c),l
       out (c),h
       ei                ; 4
       inc iy            ; 10
       dec iy            ; 10
-      in a,(#0xbe)      ; 4 (surely safe...) = 28, safe on every GG
+      in a,(#0xbe)      ; 4 (surely safe cycles) = 28, safe on every GG
       di
       out (c),e
       out (c),d
       ei
       out (#0xbe),a
-      inc hl
-      inc de
-      djnz _b3
+      inc hl            ; 6
+      inc de            ; 6
+      djnz _b3          ; 13
     pop af
 
     dec c        ; restore VRAM write port
