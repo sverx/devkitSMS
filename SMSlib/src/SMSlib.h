@@ -162,8 +162,6 @@ unsigned int SMS_getTile(void) __naked __z88dk_fastcall __preserves_regs(b,c,d,e
 #define SMS_readNextTilefromLoc(loc) SMS_setAddr(SMS_PNTAddress_READ|((unsigned int)(loc)<<1))
 #define SMS_readNextTilefromAddr(a)  SMS_setAddr(a)
 
-#define SMS_getTileatXY(x,y,tile) do{SMS_setAddr(XYtoREADADDR((x),(y)));SMS_getTile(tile);}while(0)
-
 /* Functions for reading back tilemap and VRAM */
 void SMS_saveTileMapArea(unsigned char x, unsigned char y, void *dst, unsigned char width, unsigned char height);
 void SMS_readVRAM(void *dst, unsigned int src, unsigned int size) __naked __z88dk_callee __preserves_regs(iyh,iyl) __sdcccall(1);
