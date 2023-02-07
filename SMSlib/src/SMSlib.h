@@ -103,13 +103,14 @@ void SMS_crt0_RST18(unsigned int tile) __z88dk_fastcall __preserves_regs(b,c,d,e
 #define SMS_setTile(tile)         SMS_crt0_RST18(tile)
 #define SMS_setAddr(addr)         SMS_crt0_RST08(addr)
 
-/* PNT define (has address and VDP flags) */
+/* PNT define (address and VDP flags for writing) */
 #define SMS_PNTAddress            0x7800
-/* macro for turning x,y into VRAM addr */
+/* macros for turning x,y into VRAM addr for writing */
 #define XYtoADDR(x,y)             (SMS_PNTAddress|((((unsigned int)(y)<<5)+((unsigned char)(x)))<<1))
 #define SMS_setNextTileatXY(x,y)  SMS_setAddr(XYtoADDR((x),(y)))
 #define SMS_setNextTileatLoc(loc) SMS_setAddr(SMS_PNTAddress|((unsigned int)(loc)<<1))
 #define SMS_setNextTileatAddr(a)  SMS_setAddr(a)
+
 #define SMS_setTileatXY(x,y,tile) do{SMS_setAddr(XYtoADDR((x),(y)));SMS_setTile(tile);}while(0)
 
 #define SMS_VDPVRAMWrite          0x4000
@@ -149,8 +150,21 @@ void SMS_loadSTMcompressedTileMapatAddr (unsigned int dst, const void *src);
 #define SMS_loadSTMcompressedTileMapArea(x,y,src,w) SMS_loadSTMcompressedTileMapatAddr(XYtoADDR((x),(y)),(src))
 // SMS_loadSTMcompressedTileMapArea *DEPRECATED* - will be dropped at some point in 2018
 
-/* Functions for reading back tilemap and VRAM */
+/* function for reading back tiles from PNT */
 unsigned int SMS_getTile(void) __naked __z88dk_fastcall __preserves_regs(b,c,d,e,iyh,iyl);
+
+/* PNT define (address and VDP flags for reading) */
+#define SMS_PNTAddress_READ       0x3800
+
+/* macros for turning x,y into VRAM addr for reading */
+#define XYtoREADADDR(x,y)            (SMS_PNTAddress_READ|((((unsigned int)(y)<<5)+((unsigned char)(x)))<<1))
+#define SMS_readNextTilefromXY(x,y)  SMS_setAddr(XYtoREADADDR((x),(y)))
+#define SMS_readNextTilefromLoc(loc) SMS_setAddr(SMS_PNTAddress_READ|((unsigned int)(loc)<<1))
+#define SMS_readNextTilefromAddr(a)  SMS_setAddr(a)
+
+#define SMS_getTileatXY(x,y,tile) do{SMS_setAddr(XYtoREADADDR((x),(y)));SMS_getTile(tile);}while(0)
+
+/* Functions for reading back tilemap and VRAM */
 void SMS_saveTileMapArea(unsigned char x, unsigned char y, void *dst, unsigned char width, unsigned char height);
 void SMS_readVRAM(void *dst, unsigned int src, unsigned int size) __naked __z88dk_callee __preserves_regs(iyh,iyl) __sdcccall(1);
 
