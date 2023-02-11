@@ -75,9 +75,6 @@ sdcc -o SMSlib_zx7.rel -c -mz80 %OPT% SMSlib_zx7.c
 sdcc -o SMSlib_zx7_VRAM.rel -c -mz80 %OPT% SMSlib_zx7_VRAM.c
 @if %errorlevel% NEQ 0 goto :EOF
 
-sdcc -o SMSlib_UNSAFE_zx7.rel -c -mz80 %OPT% SMSlib_UNSAFE_zx7.c
-@if %errorlevel% NEQ 0 goto :EOF
-
 sdcc -o SMSlib_aPLib.rel -c -mz80 %OPT% SMSlib_aPLib.c
 @if %errorlevel% NEQ 0 goto :EOF
 
@@ -91,9 +88,9 @@ sdcc -o SMSlib_deprecated.rel -c -mz80 %OPT% --peep-file peep-rules.txt SMSlib_d
 @if %errorlevel% NEQ 0 goto :EOF
 
 
-sdar r SMSlib.lib SMSlib.rel SMSlib_sprite.rel SMSlib_twosprites.rel SMSlib_paletteAdv.rel SMSlib_spriteAdv.rel SMSlib_spriteClip.rel SMSlib_STC0comp.rel SMSlib_PSGaiden.rel SMSlib_STMcomp.rel SMSlib_loadTileMapArea.rel SMSlib_load1bppTiles.rel SMSlib_VRAMmemcpy.rel SMSlib_VRAMmemcpy_brief.rel SMSlib_VRAMmemset.rel SMSlib_UNSAFE.rel SMSlib_textrenderer.rel SMSlib_string.rel SMSlib_getTile.rel SMSlib_readVRAM.rel SMSlib_autotext.rel SMSlib_zx7.rel SMSlib_zx7_VRAM.rel SMSlib_UNSAFE_zx7.rel SMSlib_aPLib.rel SMSlib_UNSAFE_aPLib.rel SMSlib_paddle.rel SMSlib_deprecated.rel
+sdar r SMSlib.lib SMSlib.rel SMSlib_sprite.rel SMSlib_twosprites.rel SMSlib_paletteAdv.rel SMSlib_spriteAdv.rel SMSlib_spriteClip.rel SMSlib_STC0comp.rel SMSlib_PSGaiden.rel SMSlib_STMcomp.rel SMSlib_loadTileMapArea.rel SMSlib_load1bppTiles.rel SMSlib_VRAMmemcpy.rel SMSlib_VRAMmemcpy_brief.rel SMSlib_VRAMmemset.rel SMSlib_UNSAFE.rel SMSlib_textrenderer.rel SMSlib_string.rel SMSlib_getTile.rel SMSlib_readVRAM.rel SMSlib_autotext.rel SMSlib_zx7.rel SMSlib_zx7_VRAM.rel SMSlib_aPLib.rel SMSlib_UNSAFE_aPLib.rel SMSlib_paddle.rel SMSlib_deprecated.rel
 @if %errorlevel% NEQ 0 goto :EOF
 
-sdar r SMSlib_GG.lib SMSlib_GG.rel SMSlib_sprite.rel SMSlib_twosprites.rel SMSlib_paletteAdv.rel SMSlib_spriteAdv.rel SMSlib_spriteClip_GG.rel SMSlib_STC0comp.rel SMSlib_PSGaiden.rel SMSlib_STMcomp.rel SMSlib_loadTileMapArea.rel SMSlib_load1bppTiles.rel SMSlib_VRAMmemcpy.rel SMSlib_VRAMmemcpy_brief.rel SMSlib_VRAMmemset.rel SMSlib_UNSAFE.rel SMSlib_textrenderer.rel SMSlib_string.rel SMSlib_getTile.rel SMSlib_readVRAM.rel SMSlib_autotext_GG.rel SMSlib_zx7.rel SMSlib_zx7_VRAM.rel SMSlib_UNSAFE_zx7.rel SMSlib_aPLib.rel SMSlib_UNSAFE_aPLib.rel SMSlib_deprecated.rel
+sdar r SMSlib_GG.lib SMSlib_GG.rel SMSlib_sprite.rel SMSlib_twosprites.rel SMSlib_paletteAdv.rel SMSlib_spriteAdv.rel SMSlib_spriteClip_GG.rel SMSlib_STC0comp.rel SMSlib_PSGaiden.rel SMSlib_STMcomp.rel SMSlib_loadTileMapArea.rel SMSlib_load1bppTiles.rel SMSlib_VRAMmemcpy.rel SMSlib_VRAMmemcpy_brief.rel SMSlib_VRAMmemset.rel SMSlib_UNSAFE.rel SMSlib_textrenderer.rel SMSlib_string.rel SMSlib_getTile.rel SMSlib_readVRAM.rel SMSlib_autotext_GG.rel SMSlib_zx7.rel SMSlib_zx7_VRAM.rel SMSlib_aPLib.rel SMSlib_UNSAFE_aPLib.rel SMSlib_deprecated.rel
 @if %errorlevel% NEQ 0 goto :EOF
 

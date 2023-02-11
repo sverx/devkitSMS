@@ -136,8 +136,6 @@ void SMS_loadPSGaidencompressedTilesatAddr (const void *src, unsigned int dst) _
 void SMS_loadZX7compressedTilesatAddr (const void *src, unsigned int dst) __naked __sdcccall(1);
 
 /* UNSAFE functions to load compressed tiles into VRAM */
-#define UNSAFE_SMS_loadZX7compressedTiles(src,tilefrom) UNSAFE_SMS_loadZX7compressedTilesatAddr((src),TILEtoADDR(tilefrom))
-void UNSAFE_SMS_loadZX7compressedTilesatAddr (const void *src, unsigned int dst) __naked __sdcccall(1);
 #define UNSAFE_SMS_loadaPLibcompressedTiles(src,tilefrom) UNSAFE_SMS_loadaPLibcompressedTilesatAddr((src),TILEtoADDR(tilefrom))
 void UNSAFE_SMS_loadaPLibcompressedTilesatAddr (const void *src, unsigned int dst) __naked __sdcccall(1);
 
