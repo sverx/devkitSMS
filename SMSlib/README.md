@@ -5,7 +5,7 @@ Currently defined functions/macros:
 
  - Basic VDP handling
 ```
-void SMS_init (void);                               /* you don't even need to call this if you're using devkitSMS crt0 */
+void SMS_init (void);                               /* you don't need to call this if you're using devkitSMS crt0 */
 void SMS_VDPturnOnFeature (unsigned int feature);   /* check feature list in SMSlib.h */
 void SMS_VDPturnOffFeature (unsigned int feature);
 SMS_displayOn();                                    /* macro - turns on screen */
@@ -36,7 +36,7 @@ RGB8(r,g,b)                                         /* macro - compute SMS color
 RGBHTML(RGB24bit);                                  /* macro - compute SMS color (0xRRGGBB) */
 ```
 
- - Colors/palettes functions (GameGear only)
+ - Colors/palettes functions (Game Gear only)
 ```
 void GG_setBGPaletteColor (unsigned char entry, unsigned int color);
 void GG_setSpritePaletteColor (unsigned char entry, unsigned int color);
@@ -71,7 +71,6 @@ void SMS_loadTileMapArea (unsigned char x, unsigned char y,  unsigned int *src, 
 
 /* functions to load an STM compressed tilemap */
 void SMS_loadSTMcompressedTileMap (unsigned char x, unsigned char y, unsigned char *src);
-void SMS_loadSTMcompressedTileMapArea (unsigned char x, unsigned char y, unsigned char *src, unsigned char width); /* *DEPRECATED* ('width' ignored!) */
 ```
 
  - Functions/macros for tilemap handling
@@ -91,6 +90,8 @@ void SMS_decompressaPLib (const void *src, void *dst);
 ```
 SMS_readNextTilefromXY(x,y)
 unsigned short SMS_getTile(void);
+SMS_getTileatXY(x,y)                   /* macro - returns the tile at X/Y (unsigned int) */
+
 void SMS_saveTileMapArea(unsigned char x, unsigned char y, void *dst, unsigned char width, unsigned char height);
 void SMS_readVRAM(void *dst, unsigned int src, unsigned int size);
 ```
@@ -107,7 +108,6 @@ void SMS_updateSpriteImage (signed char sprite, unsigned char tile);
 void SMS_hideSprite (signed char sprite);
 void SMS_setClippingWindow (unsigned char x0, unsigned char y0, unsigned char x1, unsigned char y1); /* set the sprite window. sprites completely outside the window will be clipped */
 signed char SMS_addSpriteClipping (int x, int y, unsigned char tile);   /* declare a sprite inside the window - returns handle or -1 if no more sprites are available or sprite clipped */
-void SMS_finalizeSprites (void);            /* *DEPRECATED* - will be dropped sometime in 2018 */
 void SMS_copySpritestoSAT (void);           /* copy sprites to Sprites Attribute Table (do that during vBlank) */
 ```
 
@@ -168,7 +168,6 @@ unsigned char SMS_VDPType (void);         /* VDPType handling (SMS only) */
 ```
 SMS_mapROMBank(n);                        /* macro - maps bank n at address 0x8000 (slot 2) */
 
-/* SRAM access/banking */
 SMS_enableSRAM();                         /* macro - enable SRAM at address 0x8000 (slot 2) */
 SMS_enableSRAMBank(n);                    /* macro - enable SRAM bank n (0 or 1) at address 0x8000 (slot 2) */
 SMS_disableSRAM();                        /* macro - disable SRAM */
