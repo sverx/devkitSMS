@@ -89,13 +89,13 @@ dzx7s_offset_end:
   ld a,c
   ld c,#0xbf
 
-outer_loop:
+dzx7s_outer_loop:
   push bc
   ld b,a
 
-inner_loop:
-  nop               ; 4
-  di                ; 4 = 27 (safe on every Game Gear)
+dzx7s_inner_loop:
+  nop                     ; 4
+  di                      ; 4 = 27 (safe on every Master System or Game Gear)
   out (c),l
   out (c),h
   ei             ; 4
@@ -103,19 +103,25 @@ inner_loop:
   xor a          ; 4
   ret nz         ; 5      (this ret will never happen, it is just to wait 5 cycles)
   nop            ; 4
-  nop            ; 4 = 27 (safe on every Game Gear)
+  nop            ; 4 = 27 (safe on every Master System or Game Gear)
   in a,(#0xbe)
 
-  di
+  nop            ; 4
+  nop            ; 4
+  nop            ; 4
+  nop            ; 4
+  nop            ; 4
+  nop            ; 4
+  di             ; 4 = 28 (safe on every Master System or Game Gear)
   out (c),e
   out (c),d
   ei
   out (#0xbe),a
-  inc de            ; 6
-  djnz inner_loop   ; 13
+  inc de                  ; 6
+  djnz dzx7s_inner_loop   ; 13
   ld a,b
   pop bc
-  djnz outer_loop
+  djnz dzx7s_outer_loop
   ld c,b
   res 6,d
   ; ***********************
