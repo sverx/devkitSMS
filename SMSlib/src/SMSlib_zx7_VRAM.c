@@ -15,11 +15,13 @@ void SMS_loadZX7compressedTilesatAddr (const void *src, unsigned int dst) __nake
 * C wrapper/made interrupt safe/VDP timing safe by sverx
 ===================================================================== */
   __asm
-  ld c,#0xbf     ; Set VRAM address
-  di
+  ld c,#0xbf     ; VDP control port
+  set 6,d        ; set VRAM write bit
+  di             ; set VRAM address
   out (c),e
   out (c),d
   ei
+  res 6,d        ; remove VRAM write bit
   dec c          ; data port
 
   ld a,#0x80     ; Signal bit for flags byte (1<<7)
@@ -59,7 +61,7 @@ dzx7s_len_value_loop:
   inc hl
   sla e
   inc e
-  jr  nc,dzx7s_offset_end    ; if offset flag is set, load 4 extra bits
+  jr nc,dzx7s_offset_end     ; if offset flag is set, load 4 extra bits
   ld d, #0x10                ; bit marker to load 4 bits
 
 dzx7s_rld_next_bit:
@@ -85,8 +87,6 @@ dzx7s_offset_end:
   inc b
   inc c
   ld a,c
-
-no_adjust:
   ld c,#0xbf
 
 outer_loop:
@@ -101,7 +101,7 @@ inner_loop:
   ei             ; 4
   inc hl         ; 6
   xor a          ; 4
-  ret nz         ; 5
+  ret nz         ; 5      (this ret will never happen, it is just to wait 5 cycles)
   nop            ; 4
   nop            ; 4 = 27 (safe on every Game Gear)
   in a,(#0xbe)
