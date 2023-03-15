@@ -18,12 +18,14 @@ void SMS_loadTileMapColumnatAddr (unsigned int dst, const void *src, unsigned in
     push bc            ; push ret address
 
     set 6,h            ; set VRAM address for write
+    ld bc,#64          ; preload VRAM offset between lines
 
 1$:
-    ld c,#_VDPControlPort
+    ld a,l
     di                 ; make it interrupt SAFE
-    out (c),l
-    out (c),h
+    out (#_VDPControlPort),a
+    ld a,h
+    out (#_VDPControlPort),a
     ei
 
     ld a,(de)
@@ -36,7 +38,6 @@ void SMS_loadTileMapColumnatAddr (unsigned int dst, const void *src, unsigned in
     dec iyl            ; decrement the counter
     ret z              ; return if zero
 
-    ld bc,#64
     add hl,bc
     jp 1$
   __endasm;
