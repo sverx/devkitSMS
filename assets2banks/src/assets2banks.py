@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 # Author: sverx
-# Version: 2.7.1 (bugfix)
+# Version: 2.7.2 (bugfix)
 
 from __future__ import absolute_import, division, generators, unicode_literals, print_function, nested_scopes
 import sys
@@ -71,19 +71,39 @@ class Asset:
         for m in self.modifies:
             if m.operator == 'add':
                 for cnt in range(m.length):
-                    self.data[m.start+cnt] += int(m.values[cnt % len(m.values)], 0)
+                    if (m.start+cnt)<len(self.data):
+                        self.data[m.start+cnt] += int(m.values[cnt % len(m.values)], 0)
+                    else:
+                        print("Fatal: trying to modify data from asset '{0}' past its end".format(a.name))
+                        sys.exit(1)
             elif m.operator == 'and':
                 for cnt in range(m.length):
-                    self.data[m.start+cnt] &= int(m.values[cnt % len(m.values)], 0)
+                    if (m.start+cnt)<len(self.data):
+                        self.data[m.start+cnt] &= int(m.values[cnt % len(m.values)], 0)
+                    else:
+                        print("Fatal: trying to modify data from asset '{0}' past its end".format(a.name))
+                        sys.exit(1)
             elif m.operator == 'or':
                 for cnt in range(m.length):
-                    self.data[m.start+cnt] |= int(m.values[cnt % len(m.values)], 0)
+                    if (m.start+cnt)<len(self.data):
+                        self.data[m.start+cnt] |= int(m.values[cnt % len(m.values)], 0)
+                    else:
+                        print("Fatal: trying to modify data from asset '{0}' past its end".format(a.name))
+                        sys.exit(1)
             elif m.operator == 'xor':
                 for cnt in range(m.length):
-                    self.data[m.start+cnt] ^= int(m.values[cnt % len(m.values)], 0)
+                    if (m.start+cnt)<len(self.data):
+                        self.data[m.start+cnt] ^= int(m.values[cnt % len(m.values)], 0)
+                    else:
+                        print("Fatal: trying to modify data from asset '{0}' past its end".format(a.name))
+                        sys.exit(1)
             elif m.operator == 'set':
                 for cnt in range(m.length):
-                    self.data[m.start+cnt] = int(m.values[cnt % len(m.values)], 0)   # overwrites the original data with data in m.values list
+                    if (m.start+cnt)<len(self.data):
+                        self.data[m.start+cnt] = int(m.values[cnt % len(m.values)], 0)   # overwrites the original data with data in m.values list
+                    else:
+                        print("Fatal: trying to overwrite asset '{0}' past its end".format(a.name))
+                        sys.exit(1)
 
         # now prepend the header
         for cnt in range(len(a.header)):
