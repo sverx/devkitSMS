@@ -141,7 +141,9 @@ void UNSAFE_SMS_loadaPLibcompressedTilesatAddr (const void *src, unsigned int ds
 
 /* functions for the tilemap */
 #define SMS_loadTileMap(x,y,src,size)               SMS_VRAMmemcpy (XYtoADDR((x),(y)),(src),(size))
-void SMS_loadTileMapArea (unsigned char x, unsigned char y, const void *src, unsigned char width, unsigned char height);
+
+void SMS_loadTileMapAreaatAddr (unsigned int dst, const void *src, unsigned char width, unsigned char height) __naked __z88dk_callee __sdcccall(1);
+#define SMS_loadTileMapArea(x,y,src,width,height)   SMS_loadTileMapAreaatAddr(XYtoADDR((x),(y)),(src),(width),(height))
 
 void SMS_loadTileMapColumnatAddr (unsigned int dst, const void *src, unsigned int height) __naked __z88dk_callee __sdcccall(1);
 #define SMS_loadTileMapColumn(x,y,src,height)       SMS_loadTileMapColumnatAddr(XYtoADDR((x),(y)),(src),(height))
