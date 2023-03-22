@@ -233,6 +233,8 @@ void SMS_loadBGPaletteHalfBrightness (const void *palette) __z88dk_fastcall;
 void SMS_loadSpritePaletteHalfBrightness (const void *palette) __z88dk_fastcall;
 void SMS_zeroBGPalette (void);
 void SMS_zeroSpritePalette (void);
+void SMS_loadBGPaletteafterColorSubtraction (const void *palette, const unsigned char subtraction_color);
+void SMS_loadSpritePaletteafterColorSubtraction (const void *palette, const unsigned char subtraction_color);
 #endif
 
 /* text renderer */
