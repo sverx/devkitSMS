@@ -17,6 +17,9 @@
 #define MAX_ROM_SIZE        (4*1024*1024)  // generated ROM max: 4MB
 #define DEFAULT_EMPTY_FILL  0x00
 
+#define SEGA_HEADER_ADDR_32K    0x7ff0
+#define SDSC_HEADER_ADDR_32K    0x7fe0
+
 #define SEGA_HEADER_ADDR_16K    0x3ff0
 #define SDSC_HEADER_ADDR_16K    0x3fe0
 
@@ -25,7 +28,7 @@ unsigned short used_bank[256];
 unsigned int size=0;
 unsigned char segment=0;
 unsigned char padding_type=0;
-unsigned int used=CRT0_END,used_low=CRT0_END;
+unsigned int used=CRT0_END;
 unsigned int count, addr, type;
 unsigned char emptyfill = DEFAULT_EMPTY_FILL;
 
@@ -171,7 +174,7 @@ int processMerges(void) {
 
 int main(int argc, char const* *argv) {
 
-  unsigned int i,dest_addr,dest_bank;
+  unsigned int i,dest_addr;
   char tmp[3];
   unsigned int checksum=0;
   int cur_arg=1;
@@ -223,6 +226,8 @@ int main(int argc, char const* *argv) {
     return(1);
   }
 
+  used_bank[0]=CRT0_END;
+
   // Initialize buffer with fill value
   memset(buf, emptyfill, MAX_ROM_SIZE);
 
@@ -234,13 +239,11 @@ int main(int argc, char const* *argv) {
     switch (type) {
       case 0: // DATA
 
-          if (addr>=BANK_ADDR) {
-            dest_addr=(segment*16*1024)+(addr & 0x3fff);
-            dest_bank=segment;
-          } else {
-            dest_addr=addr;
-            dest_bank=0;
-          }
+        if ((addr>=BANK_ADDR) && (segment!=0)) {
+          dest_addr=(segment*16*1024)+(addr & 0x3fff);
+        } else {
+          dest_addr=addr;
+        }
 
         for (i=0;i<count;i++) {
 
@@ -249,21 +252,20 @@ int main(int argc, char const* *argv) {
 
           // printf("*%02x-%04x\n", buf[dest_addr], dest_addr);
 
-          if ((dest_addr+i)>=size)
+          if (addr>=CRT0_END) {
+            if (++used_bank[(dest_addr+i)/BANK_ADDR]>BANK_SIZE) {
+              printf("Fatal: Bank %d overflow.\n", (dest_addr+i)/BANK_ADDR);
+              return(1);
+            }
+          }
+
+          if ((dest_addr+i)>=size) {
             size=(dest_addr+i)+1;
-        }
+          }
+        }  // end for
 
         if (addr>=CRT0_END) {
           used+=count;
-          if (addr<BANK_ADDR)
-            used_low+=count;
-        }
-
-        used_bank[dest_bank]+=count;
-
-        if (used_bank[dest_bank]>BANK_SIZE) {
-          printf("Fatal: Bank %d overflow.\n", dest_bank);
-          return(1);
         }
 
         break;
@@ -291,19 +293,27 @@ int main(int argc, char const* *argv) {
   if (size%BANK_SIZE)
     size=BANK_SIZE*((size/BANK_SIZE)+1);      // make BIN size exact multiple of BANK_SIZE
 
+  printf("Info: %d bytes used/%d total [%0.2f%%] - size of output ROM is %d KB\n",used,size,(float)used/(float)size*100, size/1024);
+
   if (size>BANK_SIZE) {
-    printf("Info: %d bytes used/%d total [%0.2f%%] - %d bytes used in bank 0 [%0.2f%%] - size of output ROM is %d KB\n",used,size,(float)used/(float)size*100, used_low,(float)used_low/((float)16*1024)*100, size/1024);
     printf("Info: ");
     for (i=0;i<size/BANK_SIZE;i++)
-          printf("[bank%d %d] ",i,BANK_SIZE-((i==0)?used_low:used_bank[i]));
+          printf("[bank%d %d] ",i,BANK_SIZE-used_bank[i]);
     printf("bytes free\n");
-  } else
-    printf("Info: %d bytes used/%d total [%0.2f%%] - size of output ROM is %d KB\n",used,size,(float)used/(float)size*100,size/1024);
-
-
+  }
 
   /* check/update SDSC header date */
-  if (!strncmp("SDSC",(char *)&buf[SDSC_HEADER_ADDR_16K],4)) {
+  if (!strncmp("SDSC",(char *)&buf[SDSC_HEADER_ADDR_32K],4)) {
+    if (!memcmp("\0\0\0\0",&buf[SDSC_HEADER_ADDR_32K+6],4)) {
+      time_t curr_time = time(NULL);
+      struct tm *compile_time = localtime(&curr_time);
+      buf[SDSC_HEADER_ADDR_32K+6]=BYTE_TO_BCD(compile_time->tm_mday);
+      buf[SDSC_HEADER_ADDR_32K+7]=BYTE_TO_BCD(compile_time->tm_mon+1);
+      buf[SDSC_HEADER_ADDR_32K+8]=BYTE_TO_BCD((compile_time->tm_year+1900)%100);
+      buf[SDSC_HEADER_ADDR_32K+9]=BYTE_TO_BCD((compile_time->tm_year+1900)/100);
+      printf("Info: release date in SDSC header updated\n");
+    }
+  } else if (!strncmp("SDSC",(char *)&buf[SDSC_HEADER_ADDR_16K],4)) {
     if (!memcmp("\0\0\0\0",&buf[SDSC_HEADER_ADDR_16K+6],4)) {
       time_t curr_time = time(NULL);
       struct tm *compile_time = localtime(&curr_time);
@@ -316,7 +326,13 @@ int main(int argc, char const* *argv) {
   }
 
   /* check/update SEGA header checksum */
-  if (!strncmp("TMR SEGA",(char *)&buf[SEGA_HEADER_ADDR_16K],8)) {
+  if (!strncmp("TMR SEGA",(char *)&buf[SEGA_HEADER_ADDR_32K],8)) {
+    for (i=0;i<SEGA_HEADER_ADDR_32K;i++)
+      checksum+=buf[i];
+    buf[SEGA_HEADER_ADDR_32K+10]=checksum&0x00FF;
+    buf[SEGA_HEADER_ADDR_32K+11]=checksum>>8;
+    printf("Info: SEGA header found, checksum updated\n");
+  } else if (!strncmp("TMR SEGA",(char *)&buf[SEGA_HEADER_ADDR_16K],8)) {
     for (i=0;i<SEGA_HEADER_ADDR_16K;i++)
       checksum+=buf[i];
     buf[SEGA_HEADER_ADDR_16K+10]=checksum&0x00FF;
