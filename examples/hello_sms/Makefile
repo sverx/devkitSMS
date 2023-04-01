@@ -9,7 +9,7 @@ SMSLIB_LIB=$(SMSLIB_BASE)/SMSlib.lib          # Use distributed lib
 #SMSLIB_LIB=$(SMSLIB_BASE)/src/SMSlib.lib      # Use locally compiled lib
 
 CFLAGS=-mz80 -I$(SMSLIB_INCDIR) --peep-file $(PEEP_RULES)
-LDFLAGS=--no-std-crt0 --data-loc 0xC000
+LDFLAGS=-mz80 --no-std-crt0 --data-loc 0xC000
 
 PROGNAME=hello
 

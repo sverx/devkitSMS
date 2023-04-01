@@ -9,7 +9,7 @@ CRT0=$(DEVKITSMS_BASE)/crt0/crt0_sms.rel
 SMSLIB_LIB=$(SMSLIB_BASE)/src/SMSlib_GG.lib      # Use locally compiled lib
 
 CFLAGS=-mz80 -I$(SMSLIB_INCDIR) --peep-file $(PEEP_RULES) -DTARGET_GG
-LDFLAGS=--no-std-crt0 --data-loc 0xC000
+LDFLAGS=-mz80 --no-std-crt0 --data-loc 0xC000
 
 PROGNAME=first
 
