@@ -211,11 +211,14 @@ void GG_loadBGPalette (const void *palette) __z88dk_fastcall;
 void GG_loadSpritePalette (const void *palette) __z88dk_fastcall;
 #define GG_setNextBGColoratIndex(i)       SMS_setAddr(SMS_CRAMAddress|((i)<<1))
 #define GG_setNextSpriteColoratIndex(i)   SMS_setAddr(SMS_CRAMAddress|0x20|((i)<<1))
-#define GG_setColor(color)       SMS_crt0_RST18(color)
+#define GG_setColor(color)                SMS_crt0_RST18(color)
 /* GG macros for colors */
 #define RGB(r,g,b)        ((r)|((g)<<4)|((b)<<8))
 #define RGB8(r,g,b)       (((r)>>4)|(((g)>>4)<<4)|(((b)>>4)<<8))
 #define RGBHTML(RGB24bit) (((RGB24bit)>>20)|((((RGB24bit)&0xFFFF)>>12)<<4)|((((RGB24bit)&0xFF)>>4)<<8))
+/* advanced functions for palettes */
+void GG_loadBGPaletteafterColorSubtraction (const void *palette, const unsigned int subtraction_color);
+void GG_loadSpritePaletteafterColorSubtraction (const void *palette, const unsigned int subtraction_color);
 #else
 /* SMS functions to set a color / load a palette */
 void SMS_setBGPaletteColor (unsigned char entry, unsigned char color);
@@ -229,6 +232,7 @@ void SMS_setColor (unsigned char color) __z88dk_fastcall __preserves_regs(b,c,d,
 #define RGB(r,g,b)        ((r)|((g)<<2)|((b)<<4))
 #define RGB8(r,g,b)       (((r)>>6)|(((g)>>6)<<2)|(((b)>>6)<<4))
 #define RGBHTML(RGB24bit) (((RGB24bit)>>22)|((((RGB24bit)&0xFFFF)>>14)<<2)|((((RGB24bit)&0xFF)>>6)<<4))
+/* advanced functions for palettes */
 void SMS_loadBGPaletteHalfBrightness (const void *palette) __z88dk_fastcall;
 void SMS_loadSpritePaletteHalfBrightness (const void *palette) __z88dk_fastcall;
 void SMS_zeroBGPalette (void);
