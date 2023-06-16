@@ -69,8 +69,11 @@ void SMS_waitForVBlank (void);
 volatile __at (0xffff) unsigned char ROM_bank_to_be_mapped_on_slot2;
 #define SMS_mapROMBank(n)       ROM_bank_to_be_mapped_on_slot2=(n)
 
-/* macros to preserve and restore the currently mapped ROM bank */
+/* macro to retrieve the currently mapped ROM bank */
+#define SMS_getROMBank()        (ROM_bank_to_be_mapped_on_slot2)
 
+/* macros to preserve and restore the currently mapped ROM bank */
+/* NOTE: they need to be used within the same scope (they use local variables) */
 /* Typical use: In functions using SMS_mapROMBank(), to make sure the mapped bank */
 /* when entering the function is unchanged upon return. */
 /* Use only one SMS_saveROMBank() before the first SMS_mapROMBank() in the function, */

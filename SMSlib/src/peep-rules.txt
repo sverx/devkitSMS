@@ -39,13 +39,13 @@ replace restart {
 replace {
 	call	_SMS_crt0_RST08
 } by {
-	; peephole rule call_SMS_crt0_RST08
+	; devkitSMS peephole rule #1 replaced 'call_SMS_crt0_RST08' with 'rst #0x08'
 	rst	#0x08
 }
 
 replace {
 	call	_SMS_crt0_RST18
 } by {
-	; peephole rule call_SMS_crt0_RST18
+	; devkitSMS peephole rule #2 replaced 'call_SMS_crt0_RST18' with 'rst #0x18'
 	rst	#0x18
 }
