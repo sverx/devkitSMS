@@ -29,8 +29,8 @@ const unsigned char VDPReg_init[11]={
                   0x04, /* reg0: Mode 4 */
                   0x20, /* reg1: display OFF - frame int (vblank) ON */
                   0xFF, /* reg2: PNT at 0x3800 */
-                  0xFF, /* reg3: no effect (when in mode 4) */
-                  0xFF, /* reg4: no effect (when in mode 4) */
+                  0xFF, /* reg3: should always be 0xFF with mode 4 */
+                  0xFF, /* reg4: should always be 0xFF with mode 4 */
                   0xFF, /* reg5: SAT at 0x3F00 */
                   0xFF, /* reg6: Sprite tiles at 0x2000 */
                   0x00, /* reg7: backdrop color (zero) */
