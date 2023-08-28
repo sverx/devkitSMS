@@ -20,12 +20,13 @@ void SMS_loadTileMapAreaatAddr (unsigned int dst, const void *src, unsigned char
     push ix            ; we need to preserve ix
 
                        ; now move height in ixl
-    .db 0xFD           ;   --- SDCC bug workaround
+    .db 0xFD           ;   --- SDCC issues workaround
     ld a,h             ; ld a,iyh
-    .db 0xDD           ;   --- SDCC bug workaround
+    .db 0xDD           ;   --- SDCC issues workaround
     ld l,a             ; ld ixl,a
 
-    ld iyh,iyl         ; preserve width in iyh
+    .db 0xFD           ;   --- SDCC issues workaround
+    ld h,l             ; ld iyh,iyl  ; preserve width in iyh
 
     set 6,h            ; set VRAM address for write
     ld bc,#64          ; preload VRAM offset between lines
@@ -39,21 +40,25 @@ void SMS_loadTileMapAreaatAddr (unsigned int dst, const void *src, unsigned char
     ei
 
 2$:
-    ld a,(de)                                           ; 7
+    ld a,(de)                                                     ; 7
     out (#_VDPDataPort),a
     inc de                    ; 6
     ld a,(de)                 ; 7
     inc de                    ; 6
     out (#_VDPDataPort),a     ; 11
 
-    dec iyl            ; decrement the width counter    ; 8
-    jr nz,2$           ; loop over until zero           ; 12
+    .db 0xFD           ;   --- SDCC issues workaround
+    dec l              ; dec iyl ; decrement the width counter    ; 8
+    jr nz,2$           ; loop over until zero                     ; 12
 
-    dec ixl            ; decrement the height counter
+    .db 0xDD           ;   --- SDCC issues workaround
+    dec l              ; dec ixl ; decrement the height counter
     jr z,3$            ; leave if zero
 
     add hl,bc          ; add offset to dest address
-    ld iyl,iyh         ; reload width
+
+    .db 0xFD           ;   --- SDCC issues workaround
+    ld l,h             ; ld iyl,iyh  ; reload width
     jp 1$
 
 3$:

@@ -35,7 +35,8 @@ void SMS_loadTileMapColumnatAddr (unsigned int dst, const void *src, unsigned in
     inc de                    ; 6
     out (#_VDPDataPort),a     ; 11
 
-    dec iyl            ; decrement the counter
+    .db 0xFD           ;   --- SDCC issues workaround
+    dec l              ; dec iyl   ; decrement the counter
     ret z              ; return if zero
 
     add hl,bc
