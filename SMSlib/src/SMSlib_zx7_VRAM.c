@@ -7,7 +7,7 @@
 
 #pragma save
 #pragma disable_warning 85
-void SMS_loadZX7compressedTilesatAddr (const void *src, unsigned int dst) __naked __sdcccall(1) {
+void SMS_decompressZX7toVRAM (const void *src, unsigned int dst) __naked __sdcccall(1) {
 /* =====================================================================
 * by Einar Saukas, Antonio Villena & Metalbrain
 * modified for sms vram by aralbrec
