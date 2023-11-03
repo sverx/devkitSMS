@@ -1,6 +1,6 @@
 # SMSlib first test example.
 
-For platform(s): SMS
+For platform(s): SMS and GameGear
 
 ## Purpose
 
