@@ -200,6 +200,11 @@ signed char SMS_addSpriteClipping (int x, int y, unsigned char tile);   /* retur
 void SMS_finalizeSprites (void);     // *DEPRECATED* - will be dropped at some point in 2018
 void SMS_copySpritestoSAT (void);
 
+/* metasprites */
+#define METASPRITE_END   -128
+#define SMS_addMetaSprite(x,y,metasprite)               SMS_addMetaSprite_f(((x)&0xff)|(((y)&0xff)<<8),(metasprite))
+void SMS_addMetaSprite_f (unsigned int origin_yx, void *metasprite) __naked __sdcccall(1);                                     /* doesn't return anything */
+
 /* ***************************************************************** */
 /* Colors / palettes handling                                        */
 /* ***************************************************************** */
