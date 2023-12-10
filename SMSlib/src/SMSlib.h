@@ -180,9 +180,9 @@ void SMS_readVRAM(void *dst, unsigned int src, unsigned int size) __naked __z88d
 /* ***************************************************************** */
 
 void SMS_initSprites (void);
-#define SMS_addSprite(x,y,tile)                   SMS_addSprite_f((y),(((x)&0xff)<<8)|(((tile)&0xff)))
-#define SMS_addTwoAdjoiningSprites(x,y,tile)      SMS_addTwoAdjoiningSprites_f((y),(((x)&0xff)<<8)|(((tile)&0xff)))
-#define SMS_addThreeAdjoiningSprites(x,y,tile)    SMS_addThreeAdjoiningSprites_f((y),(((x)&0xff)<<8)|(((tile)&0xff)))
+#define SMS_addSprite(x,y,tile)                   SMS_addSprite_f((y),(((unsigned int)(x)&0xff)<<8)|(((tile)&0xff)))
+#define SMS_addTwoAdjoiningSprites(x,y,tile)      SMS_addTwoAdjoiningSprites_f((y),(((unsigned int)(x)&0xff)<<8)|(((tile)&0xff)))
+#define SMS_addThreeAdjoiningSprites(x,y,tile)    SMS_addThreeAdjoiningSprites_f((y),(((unsigned int)(x)&0xff)<<8)|(((tile)&0xff)))
 #ifdef NO_SPRITE_CHECKS
 void SMS_addSprite_f (unsigned char y, unsigned int x_tile) __naked __preserves_regs(d,e,iyh,iyl) __sdcccall(1);               /* doesn't return anything */
 void SMS_addTwoAdjoiningSprites_f (unsigned char y, unsigned int x_tile) __naked __preserves_regs(d,e,iyh,iyl) __sdcccall(1);  /* doesn't return anything */
@@ -201,8 +201,8 @@ void SMS_finalizeSprites (void);     // *DEPRECATED* - will be dropped at some p
 void SMS_copySpritestoSAT (void);
 
 /* metasprites */
-#define METASPRITE_END   -128
-#define SMS_addMetaSprite(x,y,metasprite)               SMS_addMetaSprite_f(((x)&0xff)|(((y)&0xff)<<8),(metasprite))
+#define METASPRITE_END   0x80
+#define SMS_addMetaSprite(x,y,metasprite)               SMS_addMetaSprite_f(((x)&0xff)|(((unsigned int)(y)&0xff)<<8),(metasprite))
 void SMS_addMetaSprite_f (unsigned int origin_yx, void *metasprite) __naked __sdcccall(1);                                     /* doesn't return anything */
 
 /* ***************************************************************** */
