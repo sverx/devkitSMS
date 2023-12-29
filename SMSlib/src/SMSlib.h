@@ -256,7 +256,7 @@ void SMS_autoSetUpTextRenderer (void);
 void SMS_putchar (unsigned char c);         /* faster than plain putchar() */
 void SMS_print (const unsigned char *str);  /* faster than printf() for unformatted strings */
 /* Macro to print a string at a given location */
-#define SMS_printatXY(x,y,s) do { SMS_setNextTileatXY(x,y); SMS_print(s); } while(0)
+#define SMS_printatXY(x,y,s) do{SMS_setNextTileatXY(x,y);SMS_print(s);}while(0)
 
 /* decompress compressed data to RAM */
 void SMS_decompressZX7 (const void *src, void *dst) __naked __sdcccall(1);
@@ -360,6 +360,10 @@ void SMS_setLineInterruptHandler (void (*theHandlerFunction)(void)) __z88dk_fast
 void SMS_setLineCounter (unsigned char count) __z88dk_fastcall;
 #define SMS_enableLineInterrupt()   SMS_VDPturnOnFeature(0x0010)   /* turns on line IRQ */
 #define SMS_disableLineInterrupt()  SMS_VDPturnOffFeature(0x0010)  /* turns off line IRQ */
+
+__sfr __at 0xBF SMS_VDPControlPort;
+/* alternative version of SMS_setBGScrollX to be used in the line interrupt handler for raster effects */
+#define INLINE_SMS_setBGScrollX(scrollX)      do{SMS_VDPControlPort=(scrollX);SMS_VDPControlPort=0x88;}while(0)
 
 /* Vcount */
 unsigned char SMS_getVCount (void);
