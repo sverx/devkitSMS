@@ -361,7 +361,7 @@ void SMS_setLineCounter (unsigned char count) __z88dk_fastcall;
 #define SMS_enableLineInterrupt()   SMS_VDPturnOnFeature(0x0010)   /* turns on line IRQ */
 #define SMS_disableLineInterrupt()  SMS_VDPturnOffFeature(0x0010)  /* turns off line IRQ */
 
-__sfr __at 0xBF SMS_VDPControlPort;
+__sfr __at (0xbf) SMS_VDPControlPort;
 /* alternative version of SMS_setBGScrollX to be used in the line interrupt handler for raster effects */
 #define INLINE_SMS_setBGScrollX(scrollX)      do{SMS_VDPControlPort=(scrollX);SMS_VDPControlPort=0x88;}while(0)
 
