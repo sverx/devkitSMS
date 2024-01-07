@@ -7,7 +7,6 @@
 #include "SMSlib_common.c"
 
 #ifdef TARGET_GG
-// TBC: Haven't tested this yet
 #define COLOR_ADD(c, r) (((c & 0x00f) + (r & 0x00f) >= 0x00f ? 0x00f : (c & 0x00f) + (r & 0x00f)) | ((c & 0x0f0) + (r & 0x0f0) >= 0x0f0 ? 0x0f0 : (c & 0x0f0) + (r & 0x0f0) | ((c & 0xf00) + (r & 0xf00) >= 0xf00 ? 0xf00 : (c & 0xf00) + (r & 0xf00)))
 void GG_loadBGPaletteafterColorAddition(const void *palette, const unsigned int addition_color)
 {
