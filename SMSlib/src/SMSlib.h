@@ -226,6 +226,8 @@ void GG_loadSpritePalette (const void *palette) __z88dk_fastcall;
 #define RGB8(r,g,b)       (((r)>>4)|(((g)>>4)<<4)|(((b)>>4)<<8))
 #define RGBHTML(RGB24bit) (((RGB24bit)>>20)|((((RGB24bit)&0xFFFF)>>12)<<4)|((((RGB24bit)&0xFF)>>4)<<8))
 /* advanced functions for palettes */
+void GG_loadBGPaletteafterColorAddition (const void *palette, const unsigned int addition_color);
+void GG_loadSpritePaletteafterColorAddition (const void *palette, const unsigned int addition_color);
 void GG_loadBGPaletteafterColorSubtraction (const void *palette, const unsigned int subtraction_color);
 void GG_loadSpritePaletteafterColorSubtraction (const void *palette, const unsigned int subtraction_color);
 #else
@@ -246,6 +248,8 @@ void SMS_loadBGPaletteHalfBrightness (const void *palette) __z88dk_fastcall;
 void SMS_loadSpritePaletteHalfBrightness (const void *palette) __z88dk_fastcall;
 void SMS_zeroBGPalette (void);
 void SMS_zeroSpritePalette (void);
+void SMS_loadBGPaletteafterColorAddition (const void *palette, const unsigned char addition_color);
+void SMS_loadSpritePaletteafterColorAddition (const void *palette, const unsigned char addition_color);
 void SMS_loadBGPaletteafterColorSubtraction (const void *palette, const unsigned char subtraction_color);
 void SMS_loadSpritePaletteafterColorSubtraction (const void *palette, const unsigned char subtraction_color);
 #endif
