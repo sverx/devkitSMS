@@ -2,13 +2,12 @@
 # -*- coding: utf-8 -*-
 
 # Author: sverx
-# Version: 2.7.2 (bugfix)
+# Version: 3.0.0
 
 from __future__ import absolute_import, division, generators, unicode_literals, print_function, nested_scopes
 import sys
 import os.path
 import array
-
 
 class Modify:
     def __init__(self, operator, start, length, values):
@@ -17,12 +16,20 @@ class Modify:
         self.length = length
         self.values = values
 
+class Segment:
+    def __init__(self, length, start):
+        self.length = length
+        self.start = start
+
 class Asset:
-    def __init__(self, name, size):
+    def __init__(self, name, filesize):
         self.name = name
-        self.o_size = size
-        self.size = size
+        self.alias = name
+        self.filesize = filesize
+        self.size = 0
         self.style = 0
+        self.excluded = 0
+        self.segments = []
         self.modifies = []
         self.header = []
         self.footer = []
@@ -31,40 +38,81 @@ class Asset:
     def set_style(self, style):
         self.style = style
 
+    def set_alias(self, alias):
+        self.alias = alias
+
+    def exclude(self):
+        self.excluded = 1
+
+    def add_segment(self, length, start):
+        s = Segment(length, start)
+        self.segments.append(s)
+
     def add_modify(self, modify):
         self.modifies.append(modify)
 
     def add_header(self, header):
-        self.header = header
-        if self.style == 0:
-            self.size += len(self.header)
-            return len(self.header)
-        else:
-            self.size += len(self.header) * 2
-            return len(self.header) *2
+        self.header.extend(header)
 
     def add_footer(self, footer):
-        self.footer = footer
-        if self.style == 0:
-            self.size += len(self.footer)
-            return len(self.footer)
-        else:
-            self.size += len(self.footer) * 2
-            return len(self.footer) *2
+        self.footer.extend(footer)
 
     def process(self):
         # Load the asset from disk
-        in_file = open(os.path.join(assets_path, self.name), 'rb')
         if self.style == 0:
             self.data = array.array('B')
-            self.data.fromfile(in_file, self.o_size)
         else:
-            self.data = array.array('H')                  # 'I' is for 32 bits integers
-            self.data.fromfile(in_file, self.o_size//2)
-            if self.o_size % 2:
-                # odd file size... as this shouldn't happen and last byte won't be read, return a warning
-                print("Warning: asset '{0}' has odd size but declared as 'unsigned int'".format(a.name))
-                print("         so the last byte has been discarded")
+            self.data = array.array('H')                  # 'H' is for 16 bit integers (and 'I' is for 32 bits integers)
+
+        in_file = open(os.path.join(assets_path, self.name), 'rb')
+        if len(self.segments) == 0:
+            if self.style == 0:
+                self.data.fromfile(in_file, self.filesize)
+                self.size = self.filesize
+            else:
+                self.data.fromfile(in_file, self.filesize//2)
+                self.size = (self.filesize//2)*2
+                if self.filesize % 2:
+                    # odd file size... as this shouldn't happen and last byte won't be read, return a warning
+                    print("Warning: asset '{0}' has odd size but declared as 'unsigned int'".format(self.name))
+                    print("         so the last byte has been discarded")
+        else:
+            for s in self.segments:
+                if s.start >= 0:
+                    if s.start >= self.filesize:
+                        print("Fatal: invalid segment start on asset '{0}'".format(self.name))
+                        sys.exit(1)
+                    in_file.seek(s.start)
+                else:
+                    if (self.filesize+s.start) <= 0:
+                        print("Fatal: invalid segment start on asset '{0}'".format(self.name))
+                        sys.exit(1)
+                    in_file.seek(self.filesize+s.start)
+
+                if s.length > 0:
+                    l = s.length
+                else:
+                    l = self.filesize+s.length
+                    if s.start >= 0:
+                        l -= s.start
+                    else:
+                        l -= self.filesize+s.start
+
+                # make sure we're going to load a segment whose length is >= 0
+                if l <= 0:
+                    print("Fatal: invalid segment length on asset '{0}'".format(self.name))
+                    sys.exit(1)
+
+                if self.style == 0:
+                    self.data.fromfile(in_file, l)
+                    self.size += l
+                else:
+                    self.data.fromfile(in_file, l//2)
+                    self.size += (l//2)*2
+                    if l % 2:
+                        # odd segment size: print warning
+                        print("Warning: a segment in asset '{0}' has odd size but declared as 'unsigned int'".format(self.name))
+                        print("         so the last byte has been discarded")
         in_file.close()
 
         # do the requested modifies to the data
@@ -72,47 +120,76 @@ class Asset:
             if m.operator == 'add':
                 for cnt in range(m.length):
                     if (m.start+cnt)<len(self.data):
-                        self.data[m.start+cnt] += int(m.values[cnt % len(m.values)], 0)
+                        try:
+                            self.data[m.start+cnt] += int(m.values[cnt % len(m.values)], 0)
+                        except OverflowError:
+                            print("Fatal: invalid result value for 'add' operation on asset '{0}'".format(self.name))
+                            sys.exit(1)
                     else:
-                        print("Fatal: trying to modify data from asset '{0}' past its end".format(a.name))
+                        print("Fatal: trying to modify data from asset '{0}' past its end".format(self.name))
                         sys.exit(1)
             elif m.operator == 'and':
                 for cnt in range(m.length):
                     if (m.start+cnt)<len(self.data):
-                        self.data[m.start+cnt] &= int(m.values[cnt % len(m.values)], 0)
+                        try:
+                            self.data[m.start+cnt] &= int(m.values[cnt % len(m.values)], 0)
+                        except OverflowError:
+                            print("Fatal: invalid result value for 'and' operation on asset '{0}'".format(self.name))
+                            sys.exit(1)
                     else:
-                        print("Fatal: trying to modify data from asset '{0}' past its end".format(a.name))
+                        print("Fatal: trying to modify data from asset '{0}' past its end".format(self.name))
                         sys.exit(1)
             elif m.operator == 'or':
                 for cnt in range(m.length):
                     if (m.start+cnt)<len(self.data):
-                        self.data[m.start+cnt] |= int(m.values[cnt % len(m.values)], 0)
+                        try:
+                            self.data[m.start+cnt] |= int(m.values[cnt % len(m.values)], 0)
+                        except OverflowError:
+                            print("Fatal: invalid result value for 'or' operation on asset '{0}'".format(self.name))
+                            sys.exit(1)
                     else:
-                        print("Fatal: trying to modify data from asset '{0}' past its end".format(a.name))
+                        print("Fatal: trying to modify data from asset '{0}' past its end".format(self.name))
                         sys.exit(1)
             elif m.operator == 'xor':
                 for cnt in range(m.length):
                     if (m.start+cnt)<len(self.data):
-                        self.data[m.start+cnt] ^= int(m.values[cnt % len(m.values)], 0)
+                        try:
+                            self.data[m.start+cnt] ^= int(m.values[cnt % len(m.values)], 0)
+                        except OverflowError:
+                            print("Fatal: invalid result value for 'xor' operation on asset '{0}'".format(self.name))
+                            sys.exit(1)
                     else:
-                        print("Fatal: trying to modify data from asset '{0}' past its end".format(a.name))
+                        print("Fatal: trying to modify data from asset '{0}' past its end".format(self.name))
                         sys.exit(1)
             elif m.operator == 'set':
                 for cnt in range(m.length):
                     if (m.start+cnt)<len(self.data):
-                        self.data[m.start+cnt] = int(m.values[cnt % len(m.values)], 0)   # overwrites the original data with data in m.values list
+                        try:
+                            self.data[m.start+cnt] = int(m.values[cnt % len(m.values)], 0)   # overwrites the original data with data in m.values list
+                        except OverflowError:
+                            print("Fatal: invalid value for overwrite operation on asset '{0}'".format(self.name))
+                            sys.exit(1)
                     else:
-                        print("Fatal: trying to overwrite asset '{0}' past its end".format(a.name))
+                        print("Fatal: trying to overwrite asset '{0}' past its end".format(self.name))
                         sys.exit(1)
 
         # now prepend the header
-        for cnt in range(len(a.header)):
-            self.data.insert(cnt, int(self.header[cnt], 0))
+        for cnt in range(len(self.header)):
+            try:
+                self.data.insert(cnt, int(self.header[cnt], 0))
+            except OverflowError:
+                print("Fatal: invalid header/prepend value for asset '{0}'".format(self.name))
+                sys.exit(1)
+        self.size += len(self.header) * (self.style + 1)
 
         # then append the footer
-        for cnt in range(len(a.footer)):
-            self.data.append(int(self.footer[cnt], 0))
-
+        for cnt in range(len(self.footer)):
+            try:
+                self.data.append(int(self.footer[cnt], 0))
+            except OverflowError:
+                print("Fatal: invalid append/footer value for asset '{0}'".format(self.name))
+                sys.exit(1)
+        self.size += len(self.footer) * (self.style + 1)
 
 class AssetGroup:
     def __init__(self):
@@ -121,11 +198,10 @@ class AssetGroup:
 
     def add_asset(self, asset):
         self.assets.append(asset)
-        self.size += asset.size
 
-    def grow(self, size):
-        self.size += size
-
+    def calculate_size(self):
+        for a in self.assets:
+            self.size += a.size
 
 class Bank:
     def __init__(self, size):
@@ -222,8 +298,7 @@ for n, arg in enumerate(sys.argv):
             print("Fatal: invalid '{0!s}' parameter".format(arg))
             print_usage()
 
-
-# read cfg file (if present) and create assets and assets group accordingly
+###### PHASE 1: read cfg file (if present) and create assets and assets group accordingly ######
 in_a_group = False
 try:
     config_file = open(os.path.join(assets_path, "assets2banks.cfg"), "r").readlines()
@@ -241,9 +316,6 @@ try:
             in_a_group = False
         elif ls[0] == ":":                               # if line starts with : it means we have an attribute
             if ls == ":format unsigned int":
-                if len(a.modifies) != 0 or len(a.header) != 0 or len(a.footer) != 0:
-                    print("Fatal: format attribute should be specified before any other asset attribute")
-                    sys.exit(1)
                 a.set_style(1)
             elif ls[:11] == ":overwrite ":
                 ovp = ls[11:].split()
@@ -256,6 +328,29 @@ try:
                     print("Fatal: invalid overwrite attribute parameter(s)")
                     sys.exit(1)
                 a.add_modify(md)
+            elif ls[:9] == ":segment ":
+                sgm = ls[9:].split()
+                if len(sgm) == 1:                                  # if there is only one value, it's the length
+                    try:
+                        a.add_segment(int(sgm[0], 0),0)
+                    except ValueError:
+                        print("Fatal: invalid segment attribute parameter(s)")
+                        sys.exit(1)
+                elif len(sgm) == 2 and sgm[0].lower() == 'skip':   # if there are two values, first is 'skip', then it's the start
+                    try:
+                        a.add_segment(0, int(sgm[1], 0))
+                    except ValueError:
+                        print("Fatal: invalid segment attribute parameter(s)")
+                        sys.exit(1)
+                elif len(sgm) == 3 and sgm[1].lower() == 'skip':   # if there are three values, first is the length, second is 'skip', then it's the start
+                    try:
+                        a.add_segment(int(sgm[0], 0), int(sgm[2], 0))
+                    except ValueError:
+                        print("Fatal: invalid segment attribute parameter(s)")
+                        sys.exit(1)
+                else:
+                    print("Fatal: invalid segment attribute parameter(s).")
+                    sys.exit(1)
             elif ls[:8] == ":modify ":
                 mdf = ls[8:].split()
                 if mdf[0].lower() == 'add' or mdf[0].lower() == 'and' or mdf[0].lower() == 'or' or mdf[0].lower() == 'xor':
@@ -273,12 +368,16 @@ try:
                 else:
                     print("Fatal: invalid modify attribute action parameter. Only 'add', 'and', 'or' and 'xor' are valid actions")
                     sys.exit(1)
-            elif ls[:8] == ":header ":
+            elif ls[:8] == ":header " or ls[:9] == ":prepend ":
                 hdp = ls[8:].split()
-                ag.grow(a.add_header(hdp))
-            elif ls[:8] == ":append ":
+                a.add_header(hdp)
+            elif ls[:8] == ":append " or ls[:8] == ":footer ":
                 ftp = ls[8:].split()
-                ag.grow(a.add_footer(ftp))
+                a.add_footer(ftp)
+            elif ls[:8] == ":exclude" or ls[:7] == ":ignore":
+                a.exclude()
+            elif ls[:7] == ":alias ":
+                a.set_alias(ls[7:].strip())
             else:
                 print("Fatal: unknown attribute '{0}'".format(ls))
                 sys.exit(1)
@@ -298,39 +397,40 @@ except (IOError, OSError):
     pass
 
 try:
-    st = os.stat(os.path.join(assets_path, "assets2banks.cfg"))  # fake asset, to skip config file, if present in folder
+    st = os.stat(os.path.join(assets_path, "assets2banks.cfg"))  # 'fake' asset to skip config file when present in folder
     a = Asset("assets2banks.cfg", st.st_size)
     AssetList.append(a)
 except (IOError, OSError):
     pass
 
+###### PHASE 2: read directory content and create missing assets and assetgroup (one per asset) ######
 try:
-    for f in os.listdir(assets_path):  # read directory content and create missing assets and assetgroup (one per asset)
+    for f in os.listdir(assets_path):
         if f in ExcludeList:
             continue
         if os.path.isfile(os.path.join(assets_path, f)):
             st = os.stat(os.path.join(assets_path, f))
+            if st.st_size == 0:
+                print("Warning: {0!s} is an empty file".format(str(f)))
             a = Asset(str(f), st.st_size)
             if not find(lambda asset: asset.name == str(f), AssetList):
                 AssetList.append(a)
                 ag = AssetGroup()
                 ag.add_asset(a)
                 AssetGroupList.append(ag)
-            if st.st_size == 0:
-                print("Warning: {0!s} is an empty file".format(str(f)))
 except (IOError, OSError):
     print("Fatal: can't access '{0}' folder".format(assets_path))
     sys.exit(1)
 
-# At this point, all assets and groups have been created. Read the source
-# data from disk and process transformations (add header/footer, etc)
+###### PHASE 3: at this point, all assets and groups have been created. Read the source data from disk and process modifications, add header/footer, etc ######
 for ag in AssetGroupList:
     for a in ag.assets:
-        a.process()
-        if (a.style == 0 and len(a.data) != a.size) or (a.style == 1 and len(a.data) != a.size/2):
-            print("Fatal: Internal error")
-            sys.exit(1)
-
+        if a.excluded == 0:
+            a.process()
+            if (a.style == 0 and len(a.data) != a.size) or (a.style == 1 and len(a.data) != a.size/2):
+                print("Fatal: Internal error processing asset '{0}')".format(a.name))
+                sys.exit(1)
+    ag.calculate_size()
 
 AssetGroupList.sort(key=lambda g: g.size, reverse=True)    # sort the AssetGroupList by size, descending
 
@@ -390,8 +490,7 @@ for ag in AssetGroupList:                                  # now find a place fo
                 b.add_assetgroup(apartgrp)
                 BankList.append(b)
 
-# Output stage
-
+###### PHASE 4: create output ######
 if single_h == 1 and len(BankList)>0:
     out_file_h = open(single_h_filename, 'w')
 
@@ -409,7 +508,8 @@ for bank_n, b in enumerate(BankList):
         global_symbols = 1                              # there's already one global symbol in the header
         for ag in b.assetgroups:
             for a in ag.assets:
-                global_symbols += 1
+                if a.excluded == 0:
+                    global_symbols += 1
 
         out_file_rel.write("H A areas {0!s} global symbols\n".format(format(global_symbols, "X")))
         out_file_rel.write("M bank{0!s}\n".format(bank_n + first_bank))
@@ -428,8 +528,9 @@ for bank_n, b in enumerate(BankList):
         asset_addr = 0
         for ag in b.assetgroups:
             for a in ag.assets:
-                out_file_rel.write("S _{0!s} Def{1!s}\n".format(fix_name(a.name), format(asset_addr, "06X")))
-                asset_addr += a.size
+                if a.excluded == 0:
+                    out_file_rel.write("S _{0!s} Def{1!s}\n".format(fix_name(a.alias), format(asset_addr, "06X")))
+                    asset_addr += a.size
 
         out_file_rel.write("A _INITIALIZER size 0 flags 0 addr 0\n")
         out_file_rel.write("A _CABS size 0 flags 8 addr 0\n")
@@ -437,69 +538,69 @@ for bank_n, b in enumerate(BankList):
     asset_addr = 0
     for ag in b.assetgroups:
         for a in ag.assets:
-
-            if a.style == 0:
-                out_file_h.write("extern const unsigned char\t{0}[{1!s}];\n".format(fix_name(a.name), a.size))
-                if compile_rel == 0:
-                    out_file_c.write("const unsigned char {0}[{1!s}]={{\n".format(fix_name(a.name), a.size))
-            else:
-                out_file_h.write("extern const unsigned int\t{0}[{1!s}];\n".format(fix_name(a.name), a.size//2))
-                if compile_rel == 0:
-                    out_file_c.write("const unsigned int {0}[{1!s}]={{\n".format(fix_name(a.name), a.size // 2))
-
-            out_file_h.write("#define\t\t\t\t{0}_size {1!s}\n".format(fix_name(a.name), a.size))
-            out_file_h.write("#define\t\t\t\t{0}_bank {1!s}\n".format(fix_name(a.name), bank_n + first_bank))
-
-            if compile_rel == 1:
-                out_file_rel.write("T {0!s} {1!s} 00\n".format(format(asset_addr % 256, "02X"),
-                                                               format(asset_addr // 256, "02X")))
-                out_file_rel.write("R 00 00 07 00\n")     # this is because we mapped assets in area number 7
-
-            ar = a.data;
-
-            if compile_rel == 1:
-                out_file_rel.write("T {0!s} {1!s} 00".format(format(asset_addr % 256, "02X"),
-                                                             format(asset_addr // 256, "02X")))
-
-            cnt = 0
-            for i in range(len(ar)):
-                if compile_rel == 0:
-                    if a.style == 0:
-                        out_file_c.write("0x{0}".format(format(ar[i], "02x")))
-                    else:
-                        out_file_c.write("0x{0}".format(format(ar[i], '04x')))
+            if a.excluded == 0:
+                if a.style == 0:
+                    out_file_h.write("extern const unsigned char\t{0}[{1!s}];\n".format(fix_name(a.alias), a.size))
+                    if compile_rel == 0:
+                        out_file_c.write("const unsigned char {0}[{1!s}]={{\n".format(fix_name(a.alias), a.size))
                 else:
-                    if a.style == 0:
-                        out_file_rel.write(" {0!s}".format(format(ar[i], "02X")))
-                        asset_addr += 1
+                    out_file_h.write("extern const unsigned int\t{0}[{1!s}];\n".format(fix_name(a.alias), a.size//2))
+                    if compile_rel == 0:
+                        out_file_c.write("const unsigned int {0}[{1!s}]={{\n".format(fix_name(a.alias), a.size // 2))
+
+                out_file_h.write("#define\t\t\t\t{0}_size {1!s}\n".format(fix_name(a.alias), a.size))
+                out_file_h.write("#define\t\t\t\t{0}_bank {1!s}\n".format(fix_name(a.alias), bank_n + first_bank))
+
+                if compile_rel == 1:
+                    out_file_rel.write("T {0!s} {1!s} 00\n".format(format(asset_addr % 256, "02X"),
+                                                                   format(asset_addr // 256, "02X")))
+                    out_file_rel.write("R 00 00 07 00\n")     # this is because we mapped assets in area number 7
+
+                ar = a.data;
+
+                if compile_rel == 1:
+                    out_file_rel.write("T {0!s} {1!s} 00".format(format(asset_addr % 256, "02X"),
+                                                                 format(asset_addr // 256, "02X")))
+
+                cnt = 0
+                for i in range(len(ar)):
+                    if compile_rel == 0:
+                        if a.style == 0:
+                            out_file_c.write("0x{0}".format(format(ar[i], "02x")))
+                        else:
+                            out_file_c.write("0x{0}".format(format(ar[i], '04x')))
                     else:
-                        out_file_rel.write(" {0!s} {1!s}".format(format(ar[i] % 256, "02X"),
-                                                                 format(ar[i] // 256, "02X")))
-                        asset_addr += 2
+                        if a.style == 0:
+                            out_file_rel.write(" {0!s}".format(format(ar[i], "02X")))
+                            asset_addr += 1
+                        else:
+                            out_file_rel.write(" {0!s} {1!s}".format(format(ar[i] % 256, "02X"),
+                                                                     format(ar[i] // 256, "02X")))
+                            asset_addr += 2
 
+                    if compile_rel == 0:
+                        cnt += 1
+                        if i < len(ar)-1:
+                            out_file_c.write(",")
+                            if a.style == 0 and cnt == 16:
+                                out_file_c.write("\n")
+                                cnt = 0
+                            elif a.style != 0 and cnt == 8:
+                                out_file_c.write("\n")
+                                cnt = 0
+                    else:
+                        cnt += 1
+                        if (a.style == 0 and cnt == 13) or (a.style != 0 and cnt == 6):   # wrap every 13 bytes (or 6 words)
+                            cnt = 0
+
+                        if cnt == 0 or i == (len(ar)-1):
+                            out_file_rel.write("\n")               # EOL
+                            out_file_rel.write("R 00 00 07 00\n")  # this is because we mapped assets in area number 7
+                            if i < (len(ar)-1):
+                                out_file_rel.write("T {0!s} {1!s} 00".format(format(asset_addr % 256, "02X"),
+                                                                             format(asset_addr // 256, "02X")))
                 if compile_rel == 0:
-                    cnt += 1
-                    if i < len(ar)-1:
-                        out_file_c.write(",")
-                        if a.style == 0 and cnt == 16:
-                            out_file_c.write("\n")
-                            cnt = 0
-                        elif a.style != 0 and cnt == 8:
-                            out_file_c.write("\n")
-                            cnt = 0
-                else:
-                    cnt += 1
-                    if (a.style == 0 and cnt == 13) or (a.style != 0 and cnt == 6):   # wrap every 13 bytes (or 6 words)
-                        cnt = 0
-
-                    if cnt == 0 or i == (len(ar)-1):
-                        out_file_rel.write("\n")               # EOL
-                        out_file_rel.write("R 00 00 07 00\n")  # this is because we mapped assets in area number 7
-                        if i < (len(ar)-1):
-                            out_file_rel.write("T {0!s} {1!s} 00".format(format(asset_addr % 256, "02X"),
-                                                                         format(asset_addr // 256, "02X")))
-            if compile_rel == 0:
-                out_file_c.write("};\n\n")
+                    out_file_c.write("};\n\n")
 
     if single_h == 0:
         out_file_h.close()

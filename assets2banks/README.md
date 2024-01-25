@@ -1,6 +1,6 @@
-## assets2banks
+# How to use assets2banks
 
-### How to use assets2banks
+## assets2banks command line options
 
 ```
 assets2banks <asset folder> [--firstbank=<number>[,<size>]][--compile][--singleheader[=<filename>]][--exclude=<filename>][--allowsplitting]
@@ -84,40 +84,69 @@ assets2banks assets --singleheader=assets.h --compile --allowsplitting
 
 if the size of the 'bigfile' asset found in the assets folder is more than 16 kB, the program will split it into multiple parts called `bigfile_PART0`, `bigfile_PART1`, etc. and fit the parts in successive banks.
 
-Beside that, assets2banks behavior regarding specific assets can optionally be configured using a config file that should be placed in the very same asset folder.
+## assets2banks config file options
 
-This **must** be named *assets2banks.cfg* and it can define/contain:
- * grouping of assets
+assets2banks' behavior regarding specific assets can optionally be configured using a config file that should be placed in the very same asset folder.
 
-Listed assets will be allocated in the same bank (groups are defined using open and close curly braces "{" and "}")
+This **must** be named *assets2banks.cfg* and it can define/contain what follows:
 
- * asset format attribute
+ * line comments (using the # as first char on the line)
+ * empty lines (will be ignored)
 
-(all asset attributes starts with ':' and there's at most one attribute for each new line. They always refer to the last previously listed asset)
+### assets grouping
+
+You can create a group of assets. Listed assets will be allocated in the same bank (groups are defined using open and close curly braces "{" and "}")
 
 For instance:
 ```
+{
+some_file.bin
+some_other_file.bin
+}
+```
+will make sure that the two listed files will be kept together.
+
+### asset attribute :format
+
+Note: all asset attributes starts with ':' and there's at most one attribute for each new line. They always refer to the last previously listed asset
+
+The :format attribute makes it possible to define the asset data as an array of unsigned int instead of the regular unsigned char.
+
+Example:
+```
+background_tilemap.bin
 :format unsigned int
 ```
-will create a **const unsigned int** array instead of a **const unsigned char** array. Note that the format attribute, when present, should always be the **first** attribute of an asset.
+will create a background_tilemap_bin[] **const unsigned int** array instead of a **const unsigned char** array.
 
- * overwrite array elements
+### asset attribute :overwrite
+
+The :overwrite attribute can be used to replace elements in the asset.
 
 By using:
 ```
 :overwrite <start> <length> <value> [<value>[...]]
 ```
-*length* array elements from *start* will be replaced with the listed value(s), repeating them if needed.
-Accept decimal values, or 0x-prefixed hex values.
-There's also a shorter form. By using:
+*length* array elements from *start* will be replaced with the listed value(s), repeating them if needed. Accept decimal values, or 0x-prefixed hex values.
+
+There's also a shorter form to replace a single element.
 ```
 :overwrite <index> <value>
 ```
 the element at *index* will be replaced with the provided value.
 
-Is it also possible to specify more than one overwrite for a single asset, of course they are relative to the last previously listed asset.
+Is it also possible to specify more than one overwrite for a single asset, of course they are always relative to the last previously listed asset.
 
- * modify array elements
+Example usage:
+```
+sprite_palette.bin
+:overwrite 0 0x00
+```
+The first value in the sprite_palette_bin array will be replaced by _0x00_.
+
+### asset attribute :modify
+
+The :modify attribute can be used to update elements in the asset.
 
 By using:
 ```
@@ -125,6 +154,7 @@ By using:
 ```
 *length* array elements from *start* will be modified using the listed action and value(s), repeating them if needed.
 Accept decimal values, or 0x-prefixed hex values. Valid actions are 'add', 'and', 'or' and 'xor'.
+
 There are also two shorter forms. By using:
 ```
 :modify <action> <index> <value>
@@ -139,15 +169,33 @@ all the array elements will be modified using the provided action and value.
 
 Is it also possible to specify more than one modify attribute for a single asset.
 
- * add leading values (an header) to your asset
+Example usage:
+```
+my_tilemap.bin
+:format unsigned int
+:modify OR 20 4 0x1000
+```
+The 20th, 21th, 22th, 23th value in the my_tilemap_bin **const unsigned int** array will be ORed with _0x1000_.
+
+### asset attribute :header (or :prepend)
+
+The :header attribute can be used to prepend (add leading values) to an array.
 
 By using:
 ```
 :header <value> [<value>[...]]
 ```
-the provided value(s) will be placed *before* the asset's data.
+the provided value(s) will be placed *before* the asset's own data. Accept decimal values, or 0x-prefixed hex values.
 
- * add trailing values (append data) to your asset
+Example usage:
+```
+headerless_data.bin
+:header 0x38 0x21 0x00 0x11
+```
+
+### asset attribute :append (or :footer)
+
+The :append attribute can be used to append (add trailing values) to an array.
 
 By using:
 ```
@@ -155,13 +203,69 @@ By using:
 ```
 the provided value(s) will be placed *after* the asset's data.
 
- * line comments (using the # as first char on the line)
- * (empty lines are ignored)
+### asset attribute :alias
+
+The :alias attribute can be used to give a different name to the array created from the data of an asset.
+
+By using:
+```
+:alias <new name>
+```
+the provided name will be used instead.
+
+Example usage:
+```
+sprites_final_Final_FINAL.bin
+:alias sprites
+```
+will generate an array named _sprites_ even if the asset name is something else.
+
+### asset attribute :exclude (or :ignore)
+
+The :exclude attribute can be used to skip importing some file that's in the asset folder
+
+Example usage:
+```
+debug_data_test.bin
+:ignore
+```
+no array will be generated for the file *debug_data_test.bin*.
+
+### asset attribute :segment
+
+The :segment attribute can be used to import part(s) of an asset only, instead of importing the whole file (which is the default behavior when no :segment attribute is present).
+More than one :segment attribute can be used on a single assets, if needed.
+
+By using:
+```
+:segment <length>
+```
+you can import only _length_ bytes from the file. A negative value means file_size-length.
+
+By using:
+```
+:segment <length> skip <count>
+```
+you can import only _length_ bytes from the file, skipping the first _count_ bytes. If _length_ is omitted, the whole file is imported after skipping the first _count_ bytes.
+
+
+Example usage:
+```
+blob1.bin
+:segment 1024
+
+blob2.bin
+:segment 128 skip 256
+```
+will import only the first 1024 bytes from _blob1.bin_ and 128 bytes from _blob2.bin_ after skipping the first 256 bytes.
+
+### short but complete example of all the features
 
 Here's an example of a short (but feature complete) configuration file:
 
 ```
-# line comment and an empty line next
+# assets2banks.cfg example file
+# this is a line comment
 
 # next line starts an asset group:
 { 
@@ -175,13 +279,18 @@ asset1 (tilemap).bin
 # other assets (ungrouped) 
 asset2 (palette).bin
 :overwrite 0 0x00
-# 'asset2 (palette).bin' the zero-indexed element of the array will be set to 0x00
+:alias BGpalette
+# the zero-indexed element of the array will be set to 0x00, and the array will be called BGpalette instead of asset2__palette__bin
 
 asset2 (tiles).psgcompr
 asset3 (tilemap).bin 
 :format unsigned int
 :modify OR 0 16 0x1000
 # 'asset3 (tilemap).bin' first 16 elements (starting from 0) will be ORed with 0x1000 bit mask
+
+useless_file.bin
+:ignore
+# 'useless_file.bin' will be ignored
 
 asset4.bin
 :format unsigned int
@@ -190,11 +299,13 @@ asset4.bin
 # (values list will be reitered until 128 array elements are replaced)
 
 somedata.bin
+:segment skip 32
 :modify AND 0xFE
 :header 0xF5 0xC9
 :append 0x00
-# clears last bit of each element, prepends a 2 bytes header to your 'somedata.bin' asset, then append one final byte to it
+# takes 'somedata.bin' skipping the first 32 bytes from it, clears the last bit of each element, prepends a 2 bytes header 0xF5 0xC9 and then appends one 0x00 byte to it
 ```
 
 Of course all the assets in the asset folder which are not mentioned in the config file will be handled as ungrouped and without special attributes.
 A config file is absolutely not mandatory, and if you don't need grouping and/or special attributes there's no advantage in having one.
+
