@@ -77,7 +77,7 @@ void SMS_loadSTMcompressedTileMap (unsigned char x, unsigned char y, unsigned ch
 ```
 void SMS_setNextTileatXY (unsigned char x, unsigned char y);
 void SMS_setTile (unsigned int tile);
-SMS_setTileatXY (unsigned char x, unsigned char y, unsigned int tile);    /* macro - puts a tile at X/Y */
+SMS_setTileatXY (unsigned char x, unsigned char y, unsigned int tile);    /* macro - puts a tile at X,Y */
 ```
 
  - Functions to decompress compressed data (to RAM)
@@ -90,7 +90,7 @@ void SMS_decompressaPLib (const void *src, void *dst);
 ```
 SMS_readNextTilefromXY(x,y)
 unsigned short SMS_getTile(void);
-SMS_getTileatXY(x,y)                   /* macro - returns the tile at X/Y (unsigned int) */
+SMS_getTileatXY(x,y)                   /* macro - returns the tile at X,Y (unsigned int) */
 
 void SMS_saveTileMapArea(unsigned char x, unsigned char y, void *dst, unsigned char width, unsigned char height);
 void SMS_readVRAM(void *dst, unsigned int src, unsigned int size);
@@ -102,6 +102,8 @@ void SMS_initSprites (void);                /* we're going to start declaring sp
 signed char SMS_addSprite (unsigned char x, unsigned char y, unsigned char tile);  /* declare a sprite - returns handle or -1 if no more sprites are available */
 void SMS_addTwoAdjoiningSprites (unsigned char x, unsigned char y, unsigned char tile);   /* doesn't return anything */
 void SMS_addThreeAdjoiningSprites (unsigned char x, unsigned char y, unsigned char tile); /* doesn't return anything */
+void SMS_addFourAdjoiningSprites (unsigned char x, unsigned char y, unsigned char tile);  /* doesn't return anything */
+SMS_addMetaSprite(x,y,metasprite)           /* macro - puts a metasprite at X,Y */
 signed char SMS_reserveSprite (void);
 void SMS_updateSpritePosition (signed char sprite, unsigned char x, unsigned char y);
 void SMS_updateSpriteImage (signed char sprite, unsigned char tile);
