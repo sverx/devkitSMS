@@ -52,15 +52,23 @@ unsigned char PSGChan0Volume;              // the volume for channel 0
 unsigned char PSGChan1Volume;              // the volume for channel 1
 unsigned char PSGChan2Volume;              // the volume for channel 2
 unsigned char PSGChan3Volume;              // the volume for channel 3
-unsigned char PSGChan2LowTone;             // the low tone bits for channels 2
+unsigned char PSGChan0LowTone;             // the low tone bits for channel 0
+unsigned char PSGChan0HighTone;            // the high tone bits for channel 0
+unsigned char PSGChan1LowTone;             // the low tone bits for channel 1
+unsigned char PSGChan1HighTone;            // the high tone bits for channel 1
+unsigned char PSGChan2LowTone;             // the low tone bits for channel 2
 unsigned char PSGChan2HighTone;            // the high tone bits for channel 2
-unsigned char PSGChan3LowTone;             // the tone bits for channels 3
+unsigned char PSGChan3LowTone;             // the tone bits for channel 3
 
-// flags for channels 2-3 access
+// flags for channels SFX access
+unsigned char PSGChannel0SFX;              // !0 means channel 0 is allocated to SFX
+unsigned char PSGChannel1SFX;              // !0 means channel 1 is allocated to SFX
 unsigned char PSGChannel2SFX;              // !0 means channel 2 is allocated to SFX
 unsigned char PSGChannel3SFX;              // !0 means channel 3 is allocated to SFX
 
-// volume/frequence buffering for SFX
+// volume buffering for SFX
+unsigned char PSGSFXChan0Volume;           // the volume for SFX channel 0
+unsigned char PSGSFXChan1Volume;           // the volume for SFX channel 1
 unsigned char PSGSFXChan2Volume;           // the volume for SFX channel 2
 unsigned char PSGSFXChan3Volume;           // the volume for SFX channel 3
 
@@ -81,8 +89,10 @@ void PSGStop (void) {
   stops the music (leaving the SFX on, if it's playing)
 */
   if (PSGMusicStatus) {
-    PSGPort=PSGLatch|PSGChannel0|PSGVolumeData|0x0F;   // latch channel 0, volume=0xF (silent)
-    PSGPort=PSGLatch|PSGChannel1|PSGVolumeData|0x0F;   // latch channel 1, volume=0xF (silent)
+    if (!PSGChannel0SFX)
+      PSGPort=PSGLatch|PSGChannel0|PSGVolumeData|0x0F;   // latch channel 0, volume=0xF (silent)
+    if (!PSGChannel1SFX)
+      PSGPort=PSGLatch|PSGChannel1|PSGVolumeData|0x0F;   // latch channel 1, volume=0xF (silent)
     if (!PSGChannel2SFX)
       PSGPort=PSGLatch|PSGChannel2|PSGVolumeData|0x0F;   // latch channel 2, volume=0xF (silent)
     if (!PSGChannel3SFX)
@@ -93,22 +103,30 @@ void PSGStop (void) {
 
 void PSGResume (void) {
 /* *********************************************************************
-  resume the previously playing music
+  resume the previously playing music (also using current attenuation)
 */
- if (!PSGMusicStatus) {
-    PSGPort=PSGLatch|PSGChannel0|PSGVolumeData|PSGChan0Volume;   // restore channel 0 volume
-    PSGPort=PSGLatch|PSGChannel1|PSGVolumeData|PSGChan1Volume;   // restore channel 1 volume
+  if (!PSGMusicStatus) {
+    if (!PSGChannel0SFX) {
+      PSGPort=PSGLatch|PSGChannel0|(PSGChan0LowTone&0x0F);       // restore channel 0 frequency
+      PSGPort=PSGChan0HighTone&0x3F;
+      PSGPort=PSGLatch|PSGChannel0|PSGVolumeData|(((PSGChan0Volume&0x0F)+PSGMusicVolumeAttenuation>15)?15:(PSGChan0Volume&0x0F)+PSGMusicVolumeAttenuation); // restore channel 0 volume
+    }
+    if (!PSGChannel1SFX) {
+      PSGPort=PSGLatch|PSGChannel1|(PSGChan1LowTone&0x0F);       // restore channel 1 frequency
+      PSGPort=PSGChan1HighTone&0x3F;
+      PSGPort=PSGLatch|PSGChannel1|PSGVolumeData|(((PSGChan1Volume&0x0F)+PSGMusicVolumeAttenuation>15)?15:(PSGChan1Volume&0x0F)+PSGMusicVolumeAttenuation); // restore channel 1 volume
+    }
     if (!PSGChannel2SFX) {
       PSGPort=PSGLatch|PSGChannel2|(PSGChan2LowTone&0x0F);       // restore channel 2 frequency
       PSGPort=PSGChan2HighTone&0x3F;
-      PSGPort=PSGLatch|PSGChannel2|PSGVolumeData|PSGChan2Volume; // restore channel 2 volume
+      PSGPort=PSGLatch|PSGChannel2|PSGVolumeData|(((PSGChan2Volume&0x0F)+PSGMusicVolumeAttenuation>15)?15:(PSGChan2Volume&0x0F)+PSGMusicVolumeAttenuation); // restore channel 2 volume
     }
     if (!PSGChannel3SFX) {
       PSGPort=PSGLatch|PSGChannel3|(PSGChan3LowTone&0x0F);       // restore channel 3 frequency
-      PSGPort=PSGLatch|PSGChannel3|PSGVolumeData|PSGChan3Volume; // restore channel 3 volume
+      PSGPort=PSGLatch|PSGChannel3|PSGVolumeData|(((PSGChan3Volume&0x0F)+PSGMusicVolumeAttenuation>15)?15:(PSGChan3Volume&0x0F)+PSGMusicVolumeAttenuation); // restore channel 3 volume
     }
     PSGMusicStatus=PSG_PLAYING;
- }
+  }
 }
 
 #ifdef PSGLIB_MULTIBANK
@@ -201,10 +219,14 @@ void PSGRestoreVolumes (void) {
 /* *********************************************************************
   restore the PSG channels volumes (if a tune or an SFX uses them!)
 */
-  if (PSGMusicStatus) {
+  if (PSGChannel0SFX)
+    PSGPort=PSGLatch|PSGChannel0|PSGVolumeData|PSGSFXChan0Volume;
+  else if (PSGMusicStatus)
     PSGPort=PSGLatch|PSGChannel0|PSGVolumeData|(((PSGChan0Volume&0x0F)+PSGMusicVolumeAttenuation>15)?15:(PSGChan0Volume&0x0F)+PSGMusicVolumeAttenuation);
+  if (PSGChannel1SFX)
+    PSGPort=PSGLatch|PSGChannel1|PSGVolumeData|PSGSFXChan1Volume;
+  else if (PSGMusicStatus)
     PSGPort=PSGLatch|PSGChannel1|PSGVolumeData|(((PSGChan1Volume&0x0F)+PSGMusicVolumeAttenuation>15)?15:(PSGChan1Volume&0x0F)+PSGMusicVolumeAttenuation);
-  }
   if (PSGChannel2SFX)
     PSGPort=PSGLatch|PSGChannel2|PSGVolumeData|PSGSFXChan2Volume;
   else if (PSGMusicStatus)
@@ -221,8 +243,10 @@ void PSGSetMusicVolumeAttenuation (unsigned char attenuation) {
 */
   PSGMusicVolumeAttenuation=attenuation;
   if (PSGMusicStatus) {
-    PSGPort=PSGLatch|PSGChannel0|PSGVolumeData|(((PSGChan0Volume&0x0F)+PSGMusicVolumeAttenuation>15)?15:(PSGChan0Volume&0x0F)+PSGMusicVolumeAttenuation);
-    PSGPort=PSGLatch|PSGChannel1|PSGVolumeData|(((PSGChan1Volume&0x0F)+PSGMusicVolumeAttenuation>15)?15:(PSGChan1Volume&0x0F)+PSGMusicVolumeAttenuation);
+    if (!PSGChannel0SFX)
+      PSGPort=PSGLatch|PSGChannel0|PSGVolumeData|(((PSGChan0Volume&0x0F)+PSGMusicVolumeAttenuation>15)?15:(PSGChan0Volume&0x0F)+PSGMusicVolumeAttenuation);
+    if (!PSGChannel1SFX)
+      PSGPort=PSGLatch|PSGChannel1|PSGVolumeData|(((PSGChan1Volume&0x0F)+PSGMusicVolumeAttenuation>15)?15:(PSGChan1Volume&0x0F)+PSGMusicVolumeAttenuation);
     if (!PSGChannel2SFX)
       PSGPort=PSGLatch|PSGChannel2|PSGVolumeData|(((PSGChan2Volume&0x0F)+PSGMusicVolumeAttenuation>15)?15:(PSGChan2Volume&0x0F)+PSGMusicVolumeAttenuation);
     if (!PSGChannel3SFX)
@@ -235,6 +259,28 @@ void PSGSFXStop (void) {
   stops the SFX (leaving the music on, if it's playing)
 */
   if (PSGSFXStatus) {
+    if (PSGChannel0SFX) {
+      if (PSGMusicStatus) {
+        PSGPort=PSGLatch|PSGChannel0|(PSGChan0LowTone&0x0F);
+        PSGPort=PSGChan0HighTone&0x3F;
+        PSGPort=PSGLatch|PSGChannel0|PSGVolumeData|(((PSGChan0Volume&0x0F)+PSGMusicVolumeAttenuation>15)?15:(PSGChan0Volume&0x0F)+PSGMusicVolumeAttenuation);
+      } else {
+        PSGPort=PSGLatch|PSGChannel0|PSGVolumeData|0x0F;
+      }
+      PSGChannel0SFX=PSG_STOPPED;
+    }
+
+    if (PSGChannel1SFX) {
+      if (PSGMusicStatus) {
+        PSGPort=PSGLatch|PSGChannel1|(PSGChan1LowTone&0x0F);
+        PSGPort=PSGChan1HighTone&0x3F;
+        PSGPort=PSGLatch|PSGChannel1|PSGVolumeData|(((PSGChan1Volume&0x0F)+PSGMusicVolumeAttenuation>15)?15:(PSGChan1Volume&0x0F)+PSGMusicVolumeAttenuation);
+      } else {
+        PSGPort=PSGLatch|PSGChannel1|PSGVolumeData|0x0F;
+      }
+      PSGChannel1SFX=PSG_STOPPED;
+    }
+
     if (PSGChannel2SFX) {
       if (PSGMusicStatus) {
         PSGPort=PSGLatch|PSGChannel2|(PSGChan2LowTone&0x0F);
@@ -271,6 +317,8 @@ void PSGSFXPlay (void *sfx, unsigned char channels) {
   PSGSFXLoopPoint=sfx;          // looppointer points to begin too
   PSGSFXSkipFrames=0;           // reset the skip frames
   PSGSFXSubstringLen=0;         // reset the substring len
+  PSGChannel0SFX=(channels&SFX_CHANNEL0)?PSG_PLAYING:PSG_STOPPED;
+  PSGChannel1SFX=(channels&SFX_CHANNEL1)?PSG_PLAYING:PSG_STOPPED;
   PSGChannel2SFX=(channels&SFX_CHANNEL2)?PSG_PLAYING:PSG_STOPPED;
   PSGChannel3SFX=(channels&SFX_CHANNEL3)?PSG_PLAYING:PSG_STOPPED;
   PSGSFXStatus=PSG_PLAYING;
@@ -345,14 +393,31 @@ _continue:
   bit 4,a                        ; test if it is a volume
   jr nz,_latch_Volume            ; jump if volume data
   bit 6,a                        ; test if the latch it is for channels 0-1 or for 2-3
-  jp z,_send2PSG_A               ; send data to PSG if it is for channels 0-1
+  jp nz,_latch_chn23             ; jump if it is for channels 2-3
 
+  ; we have got the latch (tone, chn 0 or 1) PSG byte both in A and in B
+  ; and we have to check if the value should be passed to PSG or not
+  bit 5,a                        ; test if tone it is for channel 0 or 1
+  jr z,_ifchn0                   ; jump if channel 0
+  ld (_PSGChan1LowTone),a        ; save tone LOW data
+  ld a,(_PSGChannel1SFX)         ; channel 1 available for music?
+  or a
+  jr z,_send2PSG_B               ; then send data
+  jp _intLoop
+_ifchn0:
+  ld (_PSGChan0LowTone),a        ; save tone LOW data
+  ld a,(_PSGChannel0SFX)         ; channel 0 available for music?
+  or a
+  jr z,_send2PSG_B               ; then send data
+  jp _intLoop
+
+_latch_chn23:
   ; we have got the latch (tone, chn 2 or 3) PSG byte both in A and in B
   ; and we have to check if the value should be passed to PSG or not
   bit 5,a                        ; test if tone it is for channel 2 or 3
   jr z,_ifchn2                   ; jump if channel 2
   ld (_PSGChan3LowTone),a        ; save tone LOW data
-  ld a,(_PSGChannel3SFX)         ; channel 3 free?
+  ld a,(_PSGChannel3SFX)         ; channel 3 available for music?
   or a
   jp nz,_intLoop
   ld a,(_PSGChan3LowTone)
@@ -368,33 +433,53 @@ _continue:
   jp _intLoop
 _ifchn2:
   ld (_PSGChan2LowTone),a        ; save tone LOW data
-  ld a,(_PSGChannel2SFX)         ; channel 2 free?
+  ld a,(_PSGChannel2SFX)         ; channel 2 available for music?
   or a
   jr z,_send2PSG_B
   jp _intLoop
+
+_noLatch:
+  cp PSGData
+  jr c,_command                  ; if < $40 then it is a command
+  ; it is a data
+  ld a,(_PSGMusicLastLatch)      ; retrieve last latch
+  jp _output_NoLatch
 
 _latch_Volume:
   bit 6,a                        ; test if the latch it is for channels 0-1 or for 2-3
   jr nz,_latch_Volume_23         ; volume is for channel 2 or 3
   bit 5,a                        ; test if volume it is for channel 0 or 1
-  jr z,_chn0                     ; jump for channel 0
+  jr z,_ifchn0v                  ; jump for channel 0
   ld (_PSGChan1Volume),a         ; save volume data
-  jp _sendVolume2PSG_A
-_chn0:
+  ld a,(_PSGChannel1SFX)         ; channel 1 available for music?
+  or a
+  jr z,_sendVolume2PSG_B
+  jp _intLoop
+
+_ifchn0v:
   ld (_PSGChan0Volume),a         ; save volume data
-  jp _sendVolume2PSG_A
+  ld a,(_PSGChannel0SFX)         ; channel 0 available for music?
+  or a
+  jr z,_sendVolume2PSG_B
+  jp _intLoop
+
+_send2PSG_B:
+  ld a,b
+_send2PSG_A:
+  out (PSGDataPort),a              ; output the byte
+  jp _intLoop
 
 _latch_Volume_23:
   bit 5,a                        ; test if volume it is for channel 2 or 3
   jr z,_chn2                     ; jump for channel 2
   ld (_PSGChan3Volume),a         ; save volume data
-  ld a,(_PSGChannel3SFX)         ; channel 3 free?
+  ld a,(_PSGChannel3SFX)         ; channel 3 available for music?
   or a
   jr z,_sendVolume2PSG_B
   jp _intLoop
 _chn2:
   ld (_PSGChan2Volume),a         ; save volume data
-  ld a,(_PSGChannel2SFX)         ; channel 2 free?
+  ld a,(_PSGChannel2SFX)         ; channel 2 available for music?
   or a
   jr z,_sendVolume2PSG_B
   jp _intLoop
@@ -403,13 +488,6 @@ _skipFrame:
   dec a
   ld (_PSGMusicSkipFrames),a
   ret
-
-_noLatch:
-  cp PSGData
-  jr c,_command                  ; if < $40 then it is a command
-  ; it is a data
-  ld a,(_PSGMusicLastLatch)      ; retrieve last latch
-  jp _output_NoLatch
 
 _command:
   cp PSGWait
@@ -436,12 +514,6 @@ _otherCommands:
 
   ret
 
-_send2PSG_B:
-  ld a,b
-_send2PSG_A:
-  out (PSGDataPort),a              ; output the byte
-  jp _intLoop
-
 _sendVolume2PSG_B:
   ld a,b
 _sendVolume2PSG_A:
@@ -467,8 +539,40 @@ _output_NoLatch:
   ; note that non-latch commands can be only contain frequencies (no volumes)
   ; for channels 0,1,2 only (no noise)
   bit 6,a                        ; test if the latch it is for channels 0-1 or for chn 2
-  jr nz,_high_part_Tone          ;  it is tone data for channel 2
-  jp _send2PSG_B                 ; otherwise, it is for chn 0 or 1 so we have done!
+  jr nz,_high_part_Tone_ch2      ; it is tone data for channel 2
+
+  bit 5,a                        ; test if latch is for channel 0 or 1
+  jr nz,_high_part_Tone_ch1      ; it is tone data for channel 1
+
+  ; we got the last latch in A and the PSG data in B
+  ; and we have to check if the value should pass to PSG or not
+  ld a,b                         ; move PSG data in A
+  ld (_PSGChan0HighTone),a       ; save channel 0 tone HIGH data
+  ld a,(_PSGChannel0SFX)         ; channel 0 available for music?
+  or a
+  jr z,_send2PSG_B
+  jp _intLoop
+
+_high_part_Tone_ch1:
+  ; we got the last latch in A and the PSG data in B
+  ; and we have to check if the value should pass to PSG or not
+  ld a,b                         ; move PSG data in A
+  ld (_PSGChan1HighTone),a       ; save channel 1 tone HIGH data
+  ld a,(_PSGChannel1SFX)         ; channel 1 available for music?
+  or a
+  jr z,_send2PSG_B
+  jp _intLoop
+
+_high_part_Tone_ch2:
+  ; we got the last latch in A and the PSG data in B
+  ; and we have to check if the value should pass to PSG or not
+  ; PSG data can only be for channel 2, here
+  ld a,b                         ; move PSG data in A
+  ld (_PSGChan2HighTone),a       ; save channel 2 tone HIGH data
+  ld a,(_PSGChannel2SFX)         ; channel 2 available for music
+  or a
+  jp z,_send2PSG_B               ; TOO FAR for JR here :|
+  jp _intLoop
 
 _setLoopPoint:
   ld (_PSGMusicLoopPoint),hl
@@ -531,21 +635,6 @@ _substring:
 #endif
   jp _intLoop
 
-_high_part_Tone:
-  ; we got the last latch in A and the PSG data in B
-  ; and we have to check if the value should pass to PSG or not
-  ; PSG data can only be for channel 2, here
-  ld a,b                              ; move PSG data in A
-  ld (_PSGChan2HighTone),a            ; save channel 2 tone HIGH data
-  ld a,(_PSGChannel2SFX)              ; channel 2 free?
-  or a
-#ifdef PSGLIB_MULTIBANK
-  jp z,_send2PSG_B
-#else
-  jr z,_send2PSG_B
-#endif
-  jp _intLoop
-
 #ifdef PSGLIB_MULTIBANK
  // Reads a byte from HL, increment HL and take care of
  // bank overflow.
@@ -577,10 +666,7 @@ _PSG_ReadByte_C:
   inc a                          ; And advance to next bank
   ld (_PSGMusicPointerBank), a   ; Save new bank
   ret
-
-
 #endif
-
 __endasm;
 }
 
@@ -615,7 +701,21 @@ _SFXcontinue:
   cp PSGData
   jp c,_SFXcommand               ; if less than $40 then it is a command
   bit 4,a                        ; check if it is a volume byte
-  jr z,_SFXoutbyte               ; if not, output it
+  jr z,_SFXoutbyte               ; if not, output it directly
+
+  bit 6,a                        ; check if it is volume for channels 0-1 or for 2-3
+  jr nz,_SFXchn23
+
+  bit 5,a                        ; check if it is volume for channel 0 or channel 1
+  jr nz,_SFXvolumechn1
+  ld (_PSGSFXChan0Volume),a
+  jr _SFXoutbyte
+
+_SFXvolumechn1:
+  ld (_PSGSFXChan1Volume),a
+  jr _SFXoutbyte
+
+_SFXchn23:
   bit 5,a                        ; check if it is volume for channel 2 or channel 3
   jr nz,_SFXvolumechn3
   ld (_PSGSFXChan2Volume),a
