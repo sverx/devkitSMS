@@ -92,8 +92,12 @@ void SMS_addTwoAdjoiningSprites_f (unsigned char y, unsigned int x_tile) __naked
     inc hl
     ld (hl),e                        ; write tile number
 
+#ifdef NO_SPRITE_ZOOM
+    ld a,#8
+#else
     ld a,(#_spritesWidth)            ; load current sprite width
-    add a,d
+#endif
+    add a,d                          ; add to X
     ret c                            ; if new X is overflowing, do not place second sprite
     inc hl
     ld (hl),a                        ; write X + spritesWidth
@@ -119,13 +123,13 @@ void SMS_addTwoAdjoiningSprites_f (unsigned int y, unsigned int x_tile) __naked 
     cp  a,#MAXSPRITES-1
     ret nc                           ; we do not have 2 sprites left, leave!
     ld  c,a                          ; save SpriteNextFree value in c
-    ld  b,#0x00
 
     ld  a,l
     cp  a,#0xd1
     ret z                            ; invalid Y, leave!
 
     ld  hl,#_SpriteTableY
+    ld  b,#0x00
     add hl,bc
     dec a
     ld (hl),a                        ; write Y  (as Y-1)
@@ -139,8 +143,12 @@ void SMS_addTwoAdjoiningSprites_f (unsigned int y, unsigned int x_tile) __naked 
     inc hl
     ld (hl),e                        ; write tile number
 
+#ifdef NO_SPRITE_ZOOM
+    ld a,#8                          ; each sprite is 8 pixels wide
+#else
     ld a,(#_spritesWidth)            ; load current sprite width
-    add a,d
+#endif
+    add a,d                          ; add to X
     jr c,_secondSpriteClipped        ; if new X is overflowing, do not place second sprite
     inc hl
     ld (hl),a                        ; write X + spritesWidth

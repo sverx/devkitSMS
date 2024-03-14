@@ -166,6 +166,7 @@ void SMS_setSpriteMode (unsigned char mode) __z88dk_fastcall {
     spritesHeight=8;
     spritesTileOffset=1;
   }
+#ifndef NO_SPRITE_ZOOM
   if (mode & SPRITEMODE_ZOOMED) {
     SMS_VDPturnOnFeature(VDPFEATURE_ZOOMSPRITES);
     spritesWidth=16;
@@ -174,6 +175,7 @@ void SMS_setSpriteMode (unsigned char mode) __z88dk_fastcall {
     SMS_VDPturnOffFeature(VDPFEATURE_ZOOMSPRITES);
     spritesWidth=8;
   }
+#endif
 }
 
 #ifdef TARGET_GG
@@ -379,7 +381,7 @@ void SMS_isr (void) __naked {
     in a,(_VDPStatusPort)                   /* also aknowledge interrupt at VDP */
     ld (_SMS_VDPFlags),a                    /* write flags to SMS_VDPFlags variable */
     rlca
-    jr nc,1$
+    jp nc,1$
     ld hl,#_VDPBlank                        /* frame interrupt */
     ld (hl),#0x01
     ld hl,(_KeysStatus)
@@ -408,20 +410,16 @@ void SMS_isr (void) __naked {
     ld a,h
     or a,l
     jr z,2$                                 /* NULL? Do not call it */
-    push bc
-    push de
-    push iy
-    call ___sdcc_call_hl                    /* Call the function */
-    pop iy
-    pop de
-    pop bc
+    jp 3$                                   /* Call the function */
+#else
+    jp 2$
 #endif
-    jr 2$
 1$:                                         /* line interrupt */
+    ld hl,(_SMS_theLineInterruptHandler)
+3$:
     push bc
     push de
     push iy
-    ld hl,(_SMS_theLineInterruptHandler)
     call ___sdcc_call_hl
     pop iy
     pop de
