@@ -94,8 +94,8 @@ void SMS_addFourAdjoiningSprites_f (unsigned int y, unsigned int x_tile) __naked
     inc hl
     ld (hl),a                        ; write tile number + spritesTileOffset*3
 
-    ld  a,(#_SpriteNextFree)         ; three sprite has been placed, then SpriteNextFree+=3
-    add a,#3
+    ld a,(#_SpriteNextFree)          ; four sprites have been placed, then SpriteNextFree+=4
+    add a,#4
     ld (#_SpriteNextFree),a          ; save SpriteNextFree new value
     ret
 
