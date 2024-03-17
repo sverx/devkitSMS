@@ -185,14 +185,16 @@ void SMS_initSprites (void);
 #define SMS_addThreeAdjoiningSprites(x,y,tile)    SMS_addThreeAdjoiningSprites_f((y),(((unsigned int)(x)&0xff)<<8)|(((tile)&0xff)))
 #define SMS_addFourAdjoiningSprites(x,y,tile)     SMS_addFourAdjoiningSprites_f((y),(((unsigned int)(x)&0xff)<<8)|(((tile)&0xff)))
 #ifdef NO_SPRITE_CHECKS
-void SMS_addSprite_f (unsigned char y, unsigned int x_tile) __naked __preserves_regs(d,e,iyh,iyl) __sdcccall(1);               /* doesn't return anything */
-void SMS_addTwoAdjoiningSprites_f (unsigned char y, unsigned int x_tile) __naked __preserves_regs(d,e,iyh,iyl) __sdcccall(1);  /* doesn't return anything */
+void SMS_addSprite_f (unsigned char y, unsigned int x_tile) __naked __preserves_regs(d,e,iyh,iyl) __sdcccall(1);                /* doesn't return anything */
+void SMS_addTwoAdjoiningSprites_f (unsigned char y, unsigned int x_tile) __naked __preserves_regs(d,e,iyh,iyl) __sdcccall(1);   /* doesn't return anything */
+void SMS_addThreeAdjoiningSprites_f (unsigned char y, unsigned int x_tile) __naked __preserves_regs(d,e,iyh,iyl) __sdcccall(1); /* doesn't return anything */
+void SMS_addFourAdjoiningSprites_f (unsigned char y, unsigned int x_tile) __naked __preserves_regs(d,e,iyh,iyl) __sdcccall(1);  /* doesn't return anything */
 #else
-signed char SMS_addSprite_f (unsigned int y, unsigned int x_tile) __naked __preserves_regs(d,e,iyh,iyl) __sdcccall(1);         /* returns -1 if no more sprites are available, -2 if invalid Y coord */
-void SMS_addTwoAdjoiningSprites_f (unsigned int y, unsigned int x_tile) __naked __preserves_regs(d,e,iyh,iyl) __sdcccall(1);   /* doesn't return anything */
+signed char SMS_addSprite_f (unsigned int y, unsigned int x_tile) __naked __preserves_regs(d,e,iyh,iyl) __sdcccall(1);          /* returns -1 if no more sprites are available, -2 if invalid Y coord */
+void SMS_addTwoAdjoiningSprites_f (unsigned int y, unsigned int x_tile) __naked __preserves_regs(d,e,iyh,iyl) __sdcccall(1);    /* doesn't return anything */
+void SMS_addThreeAdjoiningSprites_f (unsigned int y, unsigned int x_tile) __naked __preserves_regs(d,e,iyh,iyl) __sdcccall(1);  /* doesn't return anything */
+void SMS_addFourAdjoiningSprites_f (unsigned int y, unsigned int x_tile) __naked __preserves_regs(d,e,iyh,iyl) __sdcccall(1);   /* doesn't return anything */
 #endif
-void SMS_addThreeAdjoiningSprites_f (unsigned int y, unsigned int x_tile) __naked __preserves_regs(d,e,iyh,iyl) __sdcccall(1); /* doesn't return anything */
-void SMS_addFourAdjoiningSprites_f (unsigned int y, unsigned int x_tile) __naked __preserves_regs(d,e,iyh,iyl) __sdcccall(1);  /* doesn't return anything */
 signed char SMS_reserveSprite (void);
 void SMS_updateSpritePosition (signed char sprite, unsigned char x, unsigned char y);
 void SMS_updateSpriteImage (signed char sprite, unsigned char tile);
