@@ -3,10 +3,14 @@ AR=sdar
 
 ########### BUILD CONFIGURATION ##############
 
-# Enables a faster version of SMS_addSprite, which does not return
-# a handle and does not check for sprite terminator and sprite
-# availability
+# Enables a faster version of SMS_addSprite (and SMS_add*AdjoiningSprites)
+# which does not return a handle and does not check for sprite terminator
+# and sprite availability
 #CONFIG+=-DNO_SPRITE_CHECKS
+
+# Enables a faster version of SMS_add*AdjoiningSprites through disabling
+# support for zoomed sprites
+#CONFIG+=-DNO_SPRITE_ZOOM
 
 # Enable support for Megadrive controllers
 #CONFIG+=-DMD_PAD_SUPPORT
@@ -14,7 +18,7 @@ AR=sdar
 # Enable support for VDP type detection
 #CONFIG+=-DVDPTYPE_DETECTION
 
-# Build a lib supporting less sprites to save memory. Default 64 (all).
+# Build a lib supporting less sprites to save memory. Max is 64 (all).
 #CONFIG+=-DMAXSPRITES=64
 
 # Omit support for a frame interrupt hook to save a few bytes
