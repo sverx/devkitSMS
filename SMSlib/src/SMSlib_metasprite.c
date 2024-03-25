@@ -8,7 +8,9 @@
 
 /*  metasprites definition are a sequence of n*3 char values:
  *  (signed) delta_x, (signed) delta_y, (unsigned) tile number
- *  terminated by a METASPRITE_END terminator value (-128)       */
+ *  terminated by a METASPRITE_END terminator value (-128)
+ *  if METASPRITE_DELTA_TILES is defined, also tile number is
+ *  signed and is relative to MetaSpriteBaseTile variable */
 
 /* pseudo:
  *
@@ -18,11 +20,17 @@
  *   leave if METASPRITE_END
  *   calculate sprite's final X
  *   write final X
+ *   read metasprite's delta Y
  *   calculate sprite's final Y
  *   write final Y
+ *   read metasprite's tile #
  *   write sprite's tile #
  *   loop
  */
+
+#ifdef METASPRITE_DELTA_TILES
+  unsigned char MetaSpriteBaseTile;
+#endif
 
 #pragma save
 #pragma disable_warning 85
@@ -51,53 +59,51 @@ void SMS_addMetaSprite_f (unsigned int origin_yx, void *metasprite) __naked __sd
       add a,a
       ld c,a
       ld hl,#_SpriteTableXN
-      add hl,bc                  ; HL = &SpriteTableXN[SpriteNextFree]
+      add hl,bc
     pop bc                       ; BC = &SpriteTableY[SpriteNextFree]
-                                 ; DE = *metasprite
+    ex de,hl                     ; DE = &SpriteTableXN[SpriteNextFree]
+                                 ; HL = *metasprite
 
-_metasprite_loop:
-    ld a,(de)                    ; read delta_X
+metasprite_loop:
+    ld a,(hl)                    ; read delta_X
     cp #METASPRITE_END
     ret z                        ; leave when metasprite completed
 
-    inc de
+    inc hl
 
     or a                         ; test delta_X sign
-    jp m,_negative_delta_X
+    jp m, negative_delta_X
 
     .db 0xFD                     ;   --- SDCC issues workaround
     add a,l                      ; add a,iyl  ; delta_X + origin_X
-    jr c,_clipped_sprite         ; skip this sprite when clipped
+    jr c, h_clipped              ; skip this sprite when clipped
 
-_not_clipped_sprite:
-    ld (hl),a                    ; write X
+not_h_clipped:
+    ld (de),a                    ; write X
 
-    ld a,(de)                    ; get delta_Y
-    inc de
+    ld a,(hl)                    ; get delta_Y
+    inc hl
 
     .db 0xFD                     ;   --- SDCC issues workaround
     add a,h                      ; add a,iyh   ; delta_Y + origin_Y
     cp #191                      ; should this be clipped?
-    jr c,_continue               ; not when <191               (0 to 190)
+    jr nc, check_v_clipped       ; surely not when <=190 (that is 1 to 191 on screen)
 
-    cp #240                      ; should this be clipped?
-    jr nc,_continue              ; not when >=240            (240 to 255)
-                                 ; this works both with 8 and 16 pixels tall sprites,
-                                 ; and makes sure that $D0 does not get into the Y table
-
-    inc de                       ; skip tile#
-    jp _metasprite_loop
-
-_continue:
+not_v_clipped:
     ld (bc),a                    ; write Y
     inc bc
 
-    ld a,(de)                    ; get tile#
-    inc de
+#ifdef METASPRITE_DELTA_TILES
+    ld a,(#_MetaSpriteBaseTile)  ; get tile # base
+    add a,(hl)                   ; add tile # delta
+#else
+    ld a,(hl)                    ; get tile#
+#endif
 
     inc hl
-    ld (hl),a                    ; write tile#
-    inc hl
+    inc de
+    ld (de),a                    ; write tile#
+    inc de
 
     ld a,(#_SpriteNextFree)
     inc a
@@ -108,17 +114,26 @@ _continue:
     ret nc
 #endif
 
-    jp _metasprite_loop
+    jp metasprite_loop
 
-_negative_delta_X:
+
+check_v_clipped:
+    cp #240                      ; should this be clipped?
+    jr nc, v_clipped             ; not when >=240            (240 to 0 on screen)
+                                 ; this works both with 8 and 16 pixels tall sprites,
+                                 ; and makes sure that $D0 does not get into the Y table
+    jp not_v_clipped
+
+negative_delta_X:
     .db 0xFD                     ;   --- SDCC issues workaround
     add a,l                      ; add a,iyl   ; delta_X + origin_X
-    jr c,_not_clipped_sprite     ; draw this sprite when not clipped
+    jp c, not_h_clipped          ; draw this sprite when not clipped
 
-_clipped_sprite:
-    inc de                       ; skip delta_Y
-    inc de                       ; skip tile#
-    jp _metasprite_loop
+h_clipped:
+    inc hl                       ; skip delta_Y
+v_clipped:
+    inc hl                       ; skip tile#
+    jp metasprite_loop
    __endasm;
 }
 #pragma restore
