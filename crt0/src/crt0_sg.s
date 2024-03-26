@@ -56,7 +56,7 @@ init:
   ldir              ;   do that
 
   ;; ensure this runs fine on SC-3000 too
-  ld a,#0x9F
+  ld a,#0x92
   out (0xDF),a      ; Config PPI (no effect on SG-1000)
   ld a,#7
   out (0xDE),a      ; Select ROW 7 (row 7 of PPI is joypad = default - no effect on SG-1000)
