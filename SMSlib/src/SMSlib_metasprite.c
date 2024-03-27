@@ -45,7 +45,7 @@ void SMS_addMetaSprite_f (unsigned int origin_yx, void *metasprite) __naked __sd
 
     ld a,(#_SpriteNextFree)
 
-#ifdef NO_SPRITE_CHECKS
+#ifndef NO_SPRITE_CHECKS
     cp #MAXSPRITES               ; ensure that we are not using too many sprites
     ret nc
 #endif
@@ -109,13 +109,12 @@ not_v_clipped:
     inc a
     ld (#_SpriteNextFree),a
 
-#ifdef NO_SPRITE_CHECKS
+#ifndef NO_SPRITE_CHECKS
     cp #MAXSPRITES               ; ensure that we are not using too many sprites
     ret nc
 #endif
 
     jp metasprite_loop
-
 
 check_v_clipped:
     cp #240                      ; should this be clipped?
