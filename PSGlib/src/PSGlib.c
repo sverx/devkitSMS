@@ -146,6 +146,10 @@ void PSGPlay (void *song) {
   PSGMusicSkipFrames=0;         // reset the skip frames
   PSGMusicSubstringLen=0;       // reset the substring len (for compression)
   PSGMusicLastLatch=PSGLatch|PSGChannel0|PSGVolumeData|0x0F;   // latch channel 0, volume=0xF (silent)
+  PSGChan0Volume=0x0F;          // ensure unused channels remain silent
+  PSGChan1Volume=0x0F;
+  PSGChan2Volume=0x0F;
+  PSGChan3Volume=0x0F;
   PSGMusicStatus=PSG_PLAYING;
 #ifdef PSGLIB_MULTIBANK
   PSGMusicStartBank = bank;
@@ -181,8 +185,7 @@ void PSGCancelLoop (void) {
 }
 
 #ifdef PSGLIB_MULTIBANK
-void PSGPlayNoRepeat (void *song,
-   unsigned char bank) {
+void PSGPlayNoRepeat (void *song, unsigned char bank) {
 #else
 void PSGPlayNoRepeat (void *song) {
 #endif
