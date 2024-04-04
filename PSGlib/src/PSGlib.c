@@ -79,6 +79,7 @@ void *PSGSFXPointer;                       // the pointer to the current address
 void *PSGSFXLoopPoint;                     // the pointer to the loop begin
 unsigned char PSGSFXSkipFrames;            // the frames we need to skip
 unsigned char PSGSFXLoopFlag;              // the SFX should loop or not (flag)
+unsigned char PSGSFXVolumeAttenuation;     // the volume attenuation applied to the SFX (0-15)
 
 // decompression vars for SFX
 unsigned char PSGSFXSubstringLen;          // lenght of the substring we are playing
@@ -223,19 +224,19 @@ void PSGRestoreVolumes (void) {
   restore the PSG channels volumes (if a tune or an SFX uses them!)
 */
   if (PSGChannel0SFX)
-    PSGPort=PSGLatch|PSGChannel0|PSGVolumeData|PSGSFXChan0Volume;
+    PSGPort=PSGLatch|PSGChannel0|PSGVolumeData|(((PSGSFXChan0Volume&0x0F)+PSGSFXVolumeAttenuation>15)?15:(PSGSFXChan0Volume&0x0F)+PSGSFXVolumeAttenuation);
   else if (PSGMusicStatus)
     PSGPort=PSGLatch|PSGChannel0|PSGVolumeData|(((PSGChan0Volume&0x0F)+PSGMusicVolumeAttenuation>15)?15:(PSGChan0Volume&0x0F)+PSGMusicVolumeAttenuation);
   if (PSGChannel1SFX)
-    PSGPort=PSGLatch|PSGChannel1|PSGVolumeData|PSGSFXChan1Volume;
+    PSGPort=PSGLatch|PSGChannel1|PSGVolumeData|(((PSGSFXChan1Volume&0x0F)+PSGSFXVolumeAttenuation>15)?15:(PSGSFXChan1Volume&0x0F)+PSGSFXVolumeAttenuation);
   else if (PSGMusicStatus)
     PSGPort=PSGLatch|PSGChannel1|PSGVolumeData|(((PSGChan1Volume&0x0F)+PSGMusicVolumeAttenuation>15)?15:(PSGChan1Volume&0x0F)+PSGMusicVolumeAttenuation);
   if (PSGChannel2SFX)
-    PSGPort=PSGLatch|PSGChannel2|PSGVolumeData|PSGSFXChan2Volume;
+    PSGPort=PSGLatch|PSGChannel2|PSGVolumeData|(((PSGSFXChan2Volume&0x0F)+PSGSFXVolumeAttenuation>15)?15:(PSGSFXChan2Volume&0x0F)+PSGSFXVolumeAttenuation);
   else if (PSGMusicStatus)
     PSGPort=PSGLatch|PSGChannel2|PSGVolumeData|(((PSGChan2Volume&0x0F)+PSGMusicVolumeAttenuation>15)?15:(PSGChan2Volume&0x0F)+PSGMusicVolumeAttenuation);
   if (PSGChannel3SFX)
-    PSGPort=PSGLatch|PSGChannel3|PSGVolumeData|PSGSFXChan3Volume;
+    PSGPort=PSGLatch|PSGChannel3|PSGVolumeData|(((PSGSFXChan3Volume&0x0F)+PSGSFXVolumeAttenuation>15)?15:(PSGSFXChan3Volume&0x0F)+PSGSFXVolumeAttenuation);
   else if (PSGMusicStatus)
     PSGPort=PSGLatch|PSGChannel3|PSGVolumeData|(((PSGChan3Volume&0x0F)+PSGMusicVolumeAttenuation>15)?15:(PSGChan3Volume&0x0F)+PSGMusicVolumeAttenuation);
 }
@@ -254,6 +255,23 @@ void PSGSetMusicVolumeAttenuation (unsigned char attenuation) {
       PSGPort=PSGLatch|PSGChannel2|PSGVolumeData|(((PSGChan2Volume&0x0F)+PSGMusicVolumeAttenuation>15)?15:(PSGChan2Volume&0x0F)+PSGMusicVolumeAttenuation);
     if (!PSGChannel3SFX)
       PSGPort=PSGLatch|PSGChannel3|PSGVolumeData|(((PSGChan3Volume&0x0F)+PSGMusicVolumeAttenuation>15)?15:(PSGChan3Volume&0x0F)+PSGMusicVolumeAttenuation);
+  }
+}
+
+void PSGSetSFXVolumeAttenuation (unsigned char attenuation) {
+/* *********************************************************************
+  sets the volume attenuation for the SFXs (0-15)
+*/
+  PSGSFXVolumeAttenuation=attenuation;
+  if (PSGMusicStatus) {
+    if (PSGChannel0SFX)
+      PSGPort=PSGLatch|PSGChannel0|PSGVolumeData|(((PSGSFXChan0Volume&0x0F)+PSGSFXVolumeAttenuation>15)?15:(PSGSFXChan0Volume&0x0F)+PSGSFXVolumeAttenuation);
+    if (PSGChannel1SFX)
+      PSGPort=PSGLatch|PSGChannel1|PSGVolumeData|(((PSGSFXChan1Volume&0x0F)+PSGSFXVolumeAttenuation>15)?15:(PSGSFXChan1Volume&0x0F)+PSGSFXVolumeAttenuation);
+    if (PSGChannel2SFX)
+      PSGPort=PSGLatch|PSGChannel2|PSGVolumeData|(((PSGSFXChan2Volume&0x0F)+PSGSFXVolumeAttenuation>15)?15:(PSGSFXChan2Volume&0x0F)+PSGSFXVolumeAttenuation);
+    if (PSGChannel3SFX)
+      PSGPort=PSGLatch|PSGChannel3|PSGVolumeData|(((PSGSFXChan3Volume&0x0F)+PSGSFXVolumeAttenuation>15)?15:(PSGSFXChan3Volume&0x0F)+PSGSFXVolumeAttenuation);
   }
 }
 
@@ -703,6 +721,8 @@ _SFXcontinue:
   ld a,b                         ; restore byte
   cp PSGData
   jp c,_SFXcommand               ; if less than $40 then it is a command
+  bit 7,a                        ; check if it is a latch
+  jr z,_SFXoutbyte               ; if not, output it directly
   bit 4,a                        ; check if it is a volume byte
   jr z,_SFXoutbyte               ; if not, output it directly
 
@@ -712,21 +732,34 @@ _SFXcontinue:
   bit 5,a                        ; check if it is volume for channel 0 or channel 1
   jr nz,_SFXvolumechn1
   ld (_PSGSFXChan0Volume),a
-  jr _SFXoutbyte
+  jp _SFXoutvolume
 
 _SFXvolumechn1:
   ld (_PSGSFXChan1Volume),a
-  jr _SFXoutbyte
+  jp _SFXoutvolume
 
 _SFXchn23:
   bit 5,a                        ; check if it is volume for channel 2 or channel 3
   jr nz,_SFXvolumechn3
   ld (_PSGSFXChan2Volume),a
-  jr _SFXoutbyte
+  jp _SFXoutvolume
 
 _SFXvolumechn3:
   ld (_PSGSFXChan3Volume),a
 
+_SFXoutvolume:
+  and #0x0F                       ; keep lower nibble
+  ld c,a                          ; save value
+  ld a,(_PSGSFXVolumeAttenuation) ; load volume attenuation
+  add a,c                         ; add value
+  cp #0x0F                        ; check overflow
+  jr c,_no_overflow_SFX           ; if it is <=15 then ok
+  ld a,#0x0F                      ; else, reset to 15
+_no_overflow_SFX:
+  ld c,a                          ; save new attenuated volume value
+  ld a,b                          ; retrieve original PSG command
+  and #0xF0                       ; keep upper nibble (channel+volume bits)
+  or c                            ; set attenuated SFX volume
 _SFXoutbyte:
   out (PSGDataPort),a            ; output the byte
   jp _intSFXLoop

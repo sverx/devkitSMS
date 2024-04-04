@@ -42,11 +42,14 @@ void PSGPlay (void *song);
 void PSGPlayLoops (void *song, unsigned char loops);
 void PSGPlayNoRepeat (void *song);
 #endif
+
 void PSGCancelLoop (void);
 void PSGStop (void);
 void PSGResume (void);
 unsigned char PSGGetStatus (void);
+
 void PSGSetMusicVolumeAttenuation (unsigned char attenuation);
+void PSGSetSFXVolumeAttenuation (unsigned char attenuation);
 
 void PSGSFXPlay (void *sfx, unsigned char channels);
 void PSGSFXPlayLoop (void *sfx, unsigned char channels);
