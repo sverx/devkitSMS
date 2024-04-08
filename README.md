@@ -50,6 +50,23 @@ note: if you're on Linux or on Windows, all binaries are supplied in the Linux o
 ```
   note that you should put `crt0_sg.rel` *first*, and you should put `SGlib.rel` *after* your code.
   
+### How to load your devkitSMS/SGlib code onto a BASIC IIIa/IIIb cartridge:
+
+Software written with SGlib can be loaded to a BASIC cartridge on the SC-3000.
+The BASIC `LOAD` command loads the program over the cassette interface to address 0x9800.
+Once loaded, the program can be run with the `CALL &H9800` command.
+
+* Link with `crt0_BASIC.rel` instead of `crt0_sg.rel`, and used `--code-loc 0x90a0` to place the code after the interrupt handler.
+```
+  sdcc -o your_program.ihx -mz80 --no-std-crt0 --code-loc 0x98a0 --data-loc 0xC000 crt0_BASIC.rel your_program.rel SGlib.rel
+```
+* Convert the compiler's hex output to binary
+```
+  objcopy -Iihex -Obinary your_program.ihx your_program.bin
+```
+* Convert the binary into an SC-3000 formatted audio file using a tool such as [SC-TapeWave](https://github.com/JoppyFurr/SC-TapeWave)
+* Note that the program size is limited. BASIC IIIa has 12 KiB of RAM following the load address. BASIC IIIb has 26 KiB.
+
 ### How to use devkitSMS/PSGlib to use PSG audio/SFX in your SMS/GG/SG/SC program:
 
 * include `PSGlib.h` in your sources
