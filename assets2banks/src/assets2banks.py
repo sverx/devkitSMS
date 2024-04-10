@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 # Author: sverx
-# Version: 3.0.1
+# Version: 3.0.2
 
 from __future__ import absolute_import, division, generators, unicode_literals, print_function, nested_scopes
 import sys
@@ -483,7 +483,8 @@ for ag in AssetGroupList:                                  # now find a place fo
                         part.data = a.data[offset:offset+l];
                         part.size = l;
                         apartgrp.add_asset(part)
-                        apartgrp.calculate_size()
+
+                    apartgrp.calculate_size()
 
                     offset += l
                     partno += 1
