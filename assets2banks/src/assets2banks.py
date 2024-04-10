@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 # Author: sverx
-# Version: 3.0.0
+# Version: 3.0.1
 
 from __future__ import absolute_import, division, generators, unicode_literals, print_function, nested_scopes
 import sys
@@ -200,6 +200,7 @@ class AssetGroup:
         self.assets.append(asset)
 
     def calculate_size(self):
+        self.size = 0
         for a in self.assets:
             self.size += a.size
 
@@ -283,7 +284,7 @@ for n, arg in enumerate(sys.argv):
             print("Info: compiled output requested")
         elif arg == "--allowsplitting":
             allowsplitting = 1
-            print("Asset splitting enabled")
+            print("Info: asset splitting enabled")
         elif arg[:15] == "--singleheader=":
             single_h = 1
             single_h_filename = arg[15:]
@@ -446,7 +447,7 @@ for ag in AssetGroupList:                                  # now find a place fo
             BankList.append(b)
         else:
             if not allowsplitting:
-                print("Fatal: asset group too big to fit ({1!s} bytes are needed) and splitting is not enabled.".format(ag.size))
+                print("Fatal: asset group too big to fit ({0!s} bytes are needed) and splitting is not enabled.".format(ag.size))
                 sys.exit(1)
 
             # AssetGroups are added to Banks. We want to split the current group in two or more
@@ -480,7 +481,9 @@ for ag in AssetGroupList:                                  # now find a place fo
                     else:
                         part = Asset(a.name + "_PART" + str(partno), l)
                         part.data = a.data[offset:offset+l];
+                        part.size = l;
                         apartgrp.add_asset(part)
+                        apartgrp.calculate_size()
 
                     offset += l
                     partno += 1
