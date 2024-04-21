@@ -446,6 +446,28 @@ unsigned int SG_getKeyboardJoypadReleased (void) {
   return ((~KBDKeysStatus) & KBDPreviousKeysStatus);
 }
 
+unsigned char SG_GetKeycodes (unsigned int *keys, unsigned char max_keys) {
+    unsigned char count=0;
+    unsigned int keyb_stat, row_no;
+    
+    for(unsigned char keyb_row=0; keyb_row < 8; keyb_row++) {
+        SC_PPI_C = keyb_row;
+        row_no = keyb_row << 12;
+       
+        keyb_stat=(~((SC_PPI_B << 8) | SC_PPI_A)) & 0x0FFF;           
+        for(unsigned int bit_mask=0x800; keyb_stat; bit_mask >>= 1) {
+            if ((keyb_stat & bit_mask)) { 
+                if (count < max_keys) 
+                        keys[count++] = row_no + bit_mask;
+                else
+                    return count;
+                keyb_stat -= bit_mask;
+            } 
+        }   
+    } 
+    return count;
+}
+
 /* low level functions, just to be used for dirty tricks ;) */
 void SG_VRAMmemcpy (unsigned int dst, void *src, unsigned int size) {
   SG_set_address_VRAM(dst);
