@@ -118,7 +118,7 @@ not_v_clipped:
 
 check_v_clipped:
     cp #240                      ; should this be clipped?
-    jr nc, v_clipped             ; not when >=240            (240 to 0 on screen)
+    jr c, v_clipped              ; yes when <240            (240 to 0 on screen)
                                  ; this works both with 8 and 16 pixels tall sprites,
                                  ; and makes sure that $D0 does not get into the Y table
     jp not_v_clipped
