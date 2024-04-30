@@ -87,7 +87,7 @@ not_h_clipped:
     .db 0xFD                     ;   --- SDCC issues workaround
     add a,h                      ; add a,iyh   ; delta_Y + origin_Y
     cp #191                      ; should this be clipped?
-    jr nc, check_v_clipped       ; surely not when <=190 (that is 1 to 191 on screen)
+    jr nc, check_v_clipped       ; surely not when 0<=y<=190 (that is row 1 to row 191 on screen)
 
 not_v_clipped:
     ld (bc),a                    ; write Y
@@ -117,9 +117,12 @@ not_v_clipped:
     jp metasprite_loop
 
 check_v_clipped:
-    cp #240                      ; should this be clipped?
-    jr c, v_clipped              ; yes when <240            (240 to 0 on screen)
-                                 ; this works both with 8 and 16 pixels tall sprites,
+#ifdef NO_SPRITE_ZOOM
+    cp #241                      ; should this be clipped? yes when y<=240 (above row 240 on screen)
+#else
+    cp #225                      ; should this be clipped? yes when y<=224 (above row 224 on screen)
+#endif
+    jr c, v_clipped              ; this works both with 8 and 16 pixels tall sprites (and zoomed ones)
                                  ; and makes sure that $D0 does not get into the Y table
     jp not_v_clipped
 
