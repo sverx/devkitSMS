@@ -56,9 +56,9 @@ _no_sprites:
   __endasm;
 }
 
-void OUTI32(const void *src) __z88dk_fastcall;
-void OUTI64(const void *src) __z88dk_fastcall;
-void OUTI128(const void *src) __z88dk_fastcall;
+void * OUTI32(const void *src) __z88dk_fastcall;
+void * OUTI64(const void *src) __z88dk_fastcall;
+void * OUTI128(const void *src) __z88dk_fastcall;
 
 #define SETVDPDATAPORT  __asm ld c,#_VDPDataPort __endasm
 
