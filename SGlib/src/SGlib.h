@@ -113,7 +113,7 @@ unsigned int SG_getKeyboardJoypadHeld (void);
 unsigned int SG_getKeyboardJoypadReleased (void);
 
 /* read from keyboard max keys and return the keycodes and amount */
-unsigned char SG_GetKeycodes (unsigned int *keys, unsigned char max_keys);
+unsigned char SG_getKeycodes (unsigned int *keys, unsigned char max_keys);
 
 
 /* low level functions */
