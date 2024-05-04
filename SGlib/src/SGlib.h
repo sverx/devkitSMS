@@ -112,6 +112,10 @@ unsigned int SG_getKeyboardJoypadPressed (void);
 unsigned int SG_getKeyboardJoypadHeld (void);
 unsigned int SG_getKeyboardJoypadReleased (void);
 
+/* read from keyboard max keys and return the keycodes and amount */
+unsigned char SG_getKeycodes (unsigned int *keys, unsigned char max_keys);
+
+
 /* low level functions */
 void SG_VRAMmemcpy (unsigned int dst, void *src, unsigned int size);
 void SG_VRAMmemcpy_brief (unsigned int dst, void *src, unsigned char size);
