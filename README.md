@@ -145,6 +145,15 @@ void some_function (void) __banked {
   makesms your_program.ihx your_program.sms
 ```
 
+### Third-party libraries:
+
+A few additional third-party libraries are available and can be used with devkitSMS:
+
+* Raphnet's [inlib](https://github.com/raphnet/inlib) - inlib is an input library for SMS supporting standard controllers, Genesis/MegaDrive controllers (3 and 6 buttons), the Light Phaser, and less common controllers such as the Paddle, the Sports Pad, and even the Mega Mouse (a mouse for megadrive) or the SEGA Graphic Board.
+* Psidum's [GSlib](https://github.com/sverx/GSLib) - GSlib is a general purpose 8 way scrolling engine for background, supporting 16×16 pixel metatiles (Development of this library is abandoned but I aim to fix any bug that is found. The link brings you to my forked repository that already has a few fixes).
+* Joe's [Banjo](https://github.com/joffb/banjo) - a FM+PSG (YM2413+SN76489) sound driver supporting furnace tracker modules.
+
+
 ### Support devkitSMS:
 
 Check [SUPPORT.md](https://github.com/sverx/devkitSMS/blob/master/SUPPORT.md) to see how you can contribute to development.
