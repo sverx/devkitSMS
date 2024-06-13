@@ -203,6 +203,30 @@ By using:
 ```
 the provided value(s) will be placed *after* the asset's data.
 
+### asset attribute :text (or :data)
+
+The :text attribute can be used when the asset file is a text file containing data (instead of a being a binary file) and thus needs to be parsed.
+
+Example usage:
+```
+sin_x_LUT.txt
+:text
+```
+
+Inside the text file the values can be expressed in decimal or hexadecimal form, and negative numbers are accepted down to -128 for char arrays and -32768 for int arrays.
+
+Values can be separated by any number of spaces, tabs, newlines, commas, semicolumns or brakets of any kind. An example of a valid text file could be:
+```
+-6 -5 -0x0004 ( -0x03 -0x2 -1
+{0, 1, 2, 3, 4}
+[5  6  7  8  9]
+10,,,11,,,12,,,13
+[14] 15 [16] 17 ]]
+18; 19; {20}; (21);
+0x16, 0x17, 0x18 0x19
+```
+In this example, the text file is turned into an array containing every value from -6 to 25. Note how there's no specific format requirement.
+
 ### asset attribute :alias
 
 The :alias attribute can be used to give a different name to the array created from the data of an asset.
@@ -233,7 +257,7 @@ no array will be generated for the file *debug_data_test.bin*.
 
 ### asset attribute :segment
 
-The :segment attribute can be used to import part(s) of an asset only, instead of importing the whole file (which is the default behavior when no :segment attribute is present).
+The :segment attribute can be used to import only part(s) of a *binary* asset, instead of importing the whole file (which is the default behavior when no :segment attribute is present).
 More than one :segment attribute can be used on a single assets, if needed.
 
 By using:

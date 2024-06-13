@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 # Author: sverx
-# Version: 3.0.2
+# Version: 3.1.0
 
 from __future__ import absolute_import, division, generators, unicode_literals, print_function, nested_scopes
 import sys
@@ -28,6 +28,7 @@ class Asset:
         self.filesize = filesize
         self.size = 0
         self.style = 0
+        self.text = 0
         self.excluded = 0
         self.segments = []
         self.modifies = []
@@ -37,6 +38,9 @@ class Asset:
 
     def set_style(self, style):
         self.style = style
+
+    def set_text(self, text):
+        self.text = text
 
     def set_alias(self, alias):
         self.alias = alias
@@ -64,55 +68,86 @@ class Asset:
         else:
             self.data = array.array('H')                  # 'H' is for 16 bit integers (and 'I' is for 32 bits integers)
 
-        in_file = open(os.path.join(assets_path, self.name), 'rb')
-        if len(self.segments) == 0:
-            if self.style == 0:
-                self.data.fromfile(in_file, self.filesize)
-                self.size = self.filesize
-            else:
-                self.data.fromfile(in_file, self.filesize//2)
-                self.size = (self.filesize//2)*2
-                if self.filesize % 2:
-                    # odd file size... as this shouldn't happen and last byte won't be read, return a warning
-                    print("Warning: asset '{0}' has odd size but declared as 'unsigned int'".format(self.name))
-                    print("         so the last byte has been discarded")
-        else:
-            for s in self.segments:
-                if s.start >= 0:
-                    if s.start >= self.filesize:
-                        print("Fatal: invalid segment start on asset '{0}'".format(self.name))
-                        sys.exit(1)
-                    in_file.seek(s.start)
-                else:
-                    if (self.filesize+s.start) <= 0:
-                        print("Fatal: invalid segment start on asset '{0}'".format(self.name))
-                        sys.exit(1)
-                    in_file.seek(self.filesize+s.start)
-
-                if s.length > 0:
-                    l = s.length
-                else:
-                    l = self.filesize+s.length
-                    if s.start >= 0:
-                        l -= s.start
-                    else:
-                        l -= self.filesize+s.start
-
-                # make sure we're going to load a segment whose length is >= 0
-                if l <= 0:
-                    print("Fatal: invalid segment length on asset '{0}'".format(self.name))
-                    sys.exit(1)
-
+        if self.text == 0:
+            in_file = open(os.path.join(assets_path, self.name), 'rb')
+            if len(self.segments) == 0:
                 if self.style == 0:
-                    self.data.fromfile(in_file, l)
-                    self.size += l
+                    self.data.fromfile(in_file, self.filesize)
+                    self.size = self.filesize
                 else:
-                    self.data.fromfile(in_file, l//2)
-                    self.size += (l//2)*2
-                    if l % 2:
-                        # odd segment size: print warning
-                        print("Warning: a segment in asset '{0}' has odd size but declared as 'unsigned int'".format(self.name))
+                    self.data.fromfile(in_file, self.filesize//2)
+                    self.size = (self.filesize//2)*2
+                    if self.filesize % 2:
+                        # odd file size... as this shouldn't happen and last byte won't be read, return a warning
+                        print("Warning: asset '{0}' has odd size but declared as 'unsigned int'".format(self.name))
                         print("         so the last byte has been discarded")
+            else:
+                for s in self.segments:
+                    if s.start >= 0:
+                        if s.start >= self.filesize:
+                            print("Fatal: invalid segment start on asset '{0}'".format(self.name))
+                            sys.exit(1)
+                        in_file.seek(s.start)
+                    else:
+                        if (self.filesize+s.start) <= 0:
+                            print("Fatal: invalid segment start on asset '{0}'".format(self.name))
+                            sys.exit(1)
+                        in_file.seek(self.filesize+s.start)
+
+                    if s.length > 0:
+                        l = s.length
+                    else:
+                        l = self.filesize+s.length
+                        if s.start >= 0:
+                            l -= s.start
+                        else:
+                            l -= self.filesize+s.start
+
+                    # make sure we're going to load a segment whose length is >= 0
+                    if l <= 0:
+                        print("Fatal: invalid segment length on asset '{0}'".format(self.name))
+                        sys.exit(1)
+
+                    if self.style == 0:
+                        self.data.fromfile(in_file, l)
+                        self.size += l
+                    else:
+                        self.data.fromfile(in_file, l//2)
+                        self.size += (l//2)*2
+                        if l % 2:
+                            # odd segment size: print warning
+                            print("Warning: a segment in asset '{0}' has odd size but declared as 'unsigned int'".format(self.name))
+                            print("         so the last byte has been discarded")
+        else:
+            if len(self.segments) != 0:
+                print("Fatal: segments are not supported with text files on asset '{0}'".format(self.name))
+                sys.exit(1)
+
+            # read whole text file into a single string, replace various chars, parse into values, write into self.data
+            in_file = open(os.path.join(assets_path, self.name), 'r')
+            contents = in_file.read()
+            contents = ' '.join(contents.splitlines())
+            contents = contents.replace('(', ' ').replace(')', ' ').replace('[', ' ').replace(']', ' ').replace('{', ' ').replace('}', ' ').replace(',', ' ').replace(';', ' ').replace('\t', ' ')
+            values = contents.split(" ")
+            values = list(filter(None, values))
+            # print (values)  # DEBUG
+            for value in values:
+                try:
+                    int_value = int(value,0)
+                    if self.style == 0 and int_value < 0 and int_value >= -128:
+                        int_value=int_value+256;
+                    elif self.style == 1 and int_value < 0 and int_value >= -(128*256):
+                        int_value=int_value+(256*256);
+
+                    if int_value < 0 or int_value >= (256*256) or (self.style == 0 and int_value >= 256):
+                        print("Fatal: value '{0}' out of range on text asset '{1}'".format(value, self.name))
+                        sys.exit(1)
+
+                    self.data.append(int_value)
+                    self.size+=(self.style + 1)
+                except ValueError:
+                    print("Warning: invalid value '{0}' on text asset '{1}' has been ignored".format(value, self.name))
+
         in_file.close()
 
         # do the requested modifies to the data
@@ -318,6 +353,8 @@ try:
         elif ls[0] == ":":                               # if line starts with : it means we have an attribute
             if ls == ":format unsigned int":
                 a.set_style(1)
+            elif ls == ":text" or ls == ":data":
+                a.set_text(1)
             elif ls[:11] == ":overwrite ":
                 ovp = ls[11:].split()
                 try:
