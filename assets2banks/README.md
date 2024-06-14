@@ -6,83 +6,75 @@
 assets2banks <asset folder> [--firstbank=<number>[,<size>]][--compile][--singleheader[=<filename>]][--exclude=<filename>][--allowsplitting]
 ```
 
-Using the assets2banks utility you can create .c source files and their respective .h header files containing one constant data array for each single file found in the specified asset folder.
-(Adding --singleheader you'll generate a single assets2banks.h file (or any name you prefer giving to it) instead of one single .h header file for each bank)
-Also, if you add the --compile option to your command line, object files (RELs) will be generated in place of the C source files, so you won't have to compile them yourself.
+Using the *assets2banks* utility you can create .c source files and their respective .h header files containing one constant data array for each single file found in the specified asset folder.
 
-If the asset folder contains files you wish assets2banks to ignore (for instance, a file called .gitignore) you can exclude each file using the --exclude option.
+* Using `--singleheader` you'll generate a single `assets2banks.h` file (or any name you prefer giving to it) instead of one single .h header file for each bank.
 
-Assets and assetgroups bigger than a single bank (16 kB) are now supported using the --allowsplitting option.
+* If you add the `--compile` option to your command line, object files (RELs) will be generated in place of the C source files, so you won't have to compile them yourself.
+
+* If the asset folder contains files you wish *assets2banks* to ignore (for instance, a file called `.gitignore`) you can exclude each file using the command line `--exclude` option.
+
+* Assets and assetgroups bigger than a single bank (16 kB) are also supported using the `--allowsplitting` option.
 
 Example usage:
-
 ```
 assets2banks assets
 ```
-
 this creates a set of bank*n*.c and bank*n*.h files (starting from n=2) with data taken from the files found inside *assets* subfolder.
+
 Each array will be named from the original filename, replacing spaces, periods and brackets with an underscore (it doesn't convert any other char so please use only alphanumeric chars).
 
-For each array there will be a #define into the .h file specifying the size in bytes, and it'll be called [arrayname]_size.
-Also, there will be an additional #define called [arrayname]_bank for each asset, so you know in which bank your asset has been placed.
+For each array there will be a `#define` into the .h file specifying the size in bytes, and it'll be called *arrayname*_size.
+
+Also, there will be an additional `#define` called *arrayname*_bank for each asset, so you know in which bank your asset has been placed.
 
 Generating RELs instead of C source files:
-
 ```
 assets2banks assets --compile
 ```
-
 this creates a set of bank*n*.rel and bank*n*.h files (starting from n=2) with data taken from the files found inside *assets* subfolder.
+
 The data in the object files will be inside a BANK*n* segment, ready as you needed them for the linking phase.
 
 Generating a single header file instead of separate header files for each bank:
-
 ```
 assets2banks assets --singleheader
 ```
 this creates a set of bank*n*.rel files (starting from n=2) and a *single* assets2banks.h header file with data taken from the files found inside *assets* subfolder.
 
 In case you need the banks count to start from a different number (default is 2) for instance when you need to allocate other code banks before the data banks, you can do that using:
-
 ```
 assets2banks assets --firstbank=6
 ```
-
 this creates a set of bank*n*.c and bank*n*.h files starting from n=6 as specified.
 
 Finally, in case you've got some free space in your ROM lower 32 KB, you can ask assets2banks to create a data block which can fit up to the whole space available.
-For example, let's suppose you have more than 8 KB free in your lower 32 KB, you can make assets2banks use this available space for bank1:
 
+For example, let's suppose you have more than 8 KB free in your lower 32 KB, you can make assets2banks use this available space for bank1:
 ```
 assets2banks assets --firstbank=1,8192
 ```
-
 the utility will try to allocate assets within this space too, and this might help to save a whole bank.
-When using this option, also a bank1.c and bank1.h files will be created, and these should be compiled and linked with your other object files with no special instructions to the linker, as in this example:
 
+When using this option, also a *bank1.c* and *bank1.h* files will be created, and these should be compiled and linked with your other object files with no special instructions to the linker, as in this example:
 ```
 sdcc -o output.ihx -mz80 --data-loc 0xC000 -Wl-b_BANK2=0x8000 -Wl-b_BANK3=0x8000 --no-std-crt0 crt0_sms.rel main.rel SMSlib.lib bank1.rel bank2.rel bank3.rel
 ```
+(we assumed we had created *bank1.rel*, *bank2.rel* and *bank3.rel* - these should be placed at the end of the object list, in ascending order. Note that there is no `-Wl-b_BANK1=0x8000`)
 
-(we assumed we had bank1.rel, bank2.rel and bank3.rel - then they should be placed at the end of the object list, in ascending order. Note that there is no '-Wl-b_BANK1=0x8000'.)
-
-Finally, this option can even be used to allocate an asset bigger than 16 KB, of course only if the available space is enough.
+Finally, this option can even be used to allocate an asset or assetgroup bigger than 16 KB, if the available space is enough.
 
 Of course you can combine all the options if you wish. For instance this:
-
 ```
 assets2banks assets --firstbank=6 --singleheader=assets.h --compile
 ```
-
 creates a set of this creates a set of bank*n*.rel (compiled objects) files starting from n=6 and a *single assets.h* header file.
 
-If an asset (or an assetgroup) is bigger than 16 kB, it's also possible to split that to multiple banks using the --allowsplitting option. For example using:
-
+If an asset (or an assetgroup) is bigger than 16 kB, it's also possible to split that to multiple banks using the `--allowsplitting` option. For example using:
 ```
 assets2banks assets --singleheader=assets.h --compile --allowsplitting
 ```
-
-if the size of the 'bigfile' asset found in the assets folder is more than 16 kB, the program will split it into multiple parts called `bigfile_PART0`, `bigfile_PART1`, etc. and fit the parts in successive banks.
+if the size of a `bigfile` asset found in the assets folder is more than 16 kB, the program will split it into multiple parts called `bigfile_PART0`, `bigfile_PART1`, etc. and fit the parts in successive banks.
 
 ## assets2banks config file options
 
@@ -90,12 +82,12 @@ assets2banks' behavior regarding specific assets can optionally be configured us
 
 This **must** be named *assets2banks.cfg* and it can define/contain what follows:
 
- * line comments (using the # as first char on the line)
- * empty lines (will be ignored)
+ * line comments (using the # as first non space char on the line)
+ * empty lines (these will be ignored)
 
 ### assets grouping
 
-You can create a group of assets. Listed assets will be allocated in the same bank (groups are defined using open and close curly braces "{" and "}")
+You can create a group of assets, and the listed assets will be allocated in the same bank. Asset groups are defined using open and close curly braces (`{` and `}`) on their own lines.
 
 For instance:
 ```
@@ -106,18 +98,24 @@ some_other_file.bin
 ```
 will make sure that the two listed files will be kept together.
 
+### asset attributes
+
+Assets attributes are instruction for handling a specific asset and always refer to the last previously listed asset.
+
+All asset attributes starts with `:` and there's at most *one* attribute for each new line.
+
+Here are all the possible attributes.
+
 ### asset attribute :format
 
-Note: all asset attributes starts with ':' and there's at most one attribute for each new line. They always refer to the last previously listed asset
-
-The :format attribute makes it possible to define the asset data as an array of unsigned int instead of the regular unsigned char.
+The :format attribute makes it possible to define the asset data as an array of `unsigned int` instead of the regular `unsigned char` type.
 
 Example:
 ```
 background_tilemap.bin
 :format unsigned int
 ```
-will create a background_tilemap_bin[] **const unsigned int** array instead of a **const unsigned char** array.
+will create a `const unsigned int background_tilemap_bin[]` array instead of a `const unsigned char background_tilemap_bin[]` array.
 
 ### asset attribute :overwrite
 
@@ -205,7 +203,7 @@ the provided value(s) will be placed *after* the asset's data.
 
 ### asset attribute :text (or :data)
 
-The :text attribute can be used when the asset file is a text file containing data (instead of a being a binary file) and thus needs to be parsed.
+The :text attribute can be used when the asset file is a text file containing data, instead of a being a binary file, and thus needs to be parsed.
 
 Example usage:
 ```
@@ -213,7 +211,7 @@ sin_x_LUT.txt
 :text
 ```
 
-Inside the text file the values can be expressed in decimal or hexadecimal form, and negative numbers are accepted down to -128 for char arrays and -32768 for int arrays.
+Inside the text file the values can be expressed in decimal or in 0x-prefixed hex form, and negative numbers are accepted down to -128 for char arrays and -32768 for int arrays.
 
 Values can be separated by any number of spaces, tabs, newlines, commas, semicolumns or brakets of any kind. An example of a valid text file could be:
 ```
@@ -272,7 +270,6 @@ By using:
 ```
 you can import only _length_ bytes from the file, skipping the first _count_ bytes. If _length_ is omitted, the whole file is imported after skipping the first _count_ bytes.
 
-
 Example usage:
 ```
 blob1.bin
@@ -280,13 +277,15 @@ blob1.bin
 
 blob2.bin
 :segment 128 skip 256
+
+blob3.bin
+:segment skip 32
 ```
-will import only the first 1024 bytes from _blob1.bin_ and 128 bytes from _blob2.bin_ after skipping the first 256 bytes.
+will import only the first 1024 bytes from _blob1.bin_, then 128 bytes from _blob2.bin_ after skipping the first 256 bytes, and the whole _blob3.bin_ file dropping the first 32 bytes.
 
 ### short but complete example of all the features
 
 Here's an example of a short (but feature complete) configuration file:
-
 ```
 # assets2banks.cfg example file
 # this is a line comment
@@ -322,6 +321,10 @@ asset4.bin
 # 'asset4.bin' 128 elements starting from array[32] will be set to the values listed
 # (values list will be reitered until 128 array elements are replaced)
 
+random_values_table.txt
+:text
+# this is a text file that will be parsed into an array
+
 somedata.bin
 :segment skip 32
 :modify AND 0xFE
@@ -329,7 +332,7 @@ somedata.bin
 :append 0x00
 # takes 'somedata.bin' skipping the first 32 bytes from it, clears the last bit of each element, prepends a 2 bytes header 0xF5 0xC9 and then appends one 0x00 byte to it
 ```
-
 Of course all the assets in the asset folder which are not mentioned in the config file will be handled as ungrouped and without special attributes.
+
 A config file is absolutely not mandatory, and if you don't need grouping and/or special attributes there's no advantage in having one.
 
