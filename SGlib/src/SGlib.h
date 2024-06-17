@@ -58,8 +58,11 @@ void SG_loadSpritePatterns (void *src, unsigned int tilefrom, unsigned int size)
 void SG_loadTileMap (unsigned char x, unsigned char y, void *src, unsigned int size);
 void SG_loadTileMapArea (unsigned char x, unsigned char y, void *src, unsigned char width, unsigned char height);
 void SG_setNextTileatXY (unsigned char x, unsigned char y);
-void SG_setTileatXY (unsigned char x, unsigned char y, unsigned char tile);
 void SG_setTile (unsigned char tile);
+void SG_getNextTileatXY (unsigned char x, unsigned char y);
+unsigned char SG_getTile (void);
+#define SG_setTileatXY(x,y,tile) do{SG_setNextTileatXY((x),(y));SG_setTile(tile);}while(0)
+#define SG_getTileatXY(x,y)      (SG_getNextTileatXY((x),(y)),SG_getTile())
 
 /* functions for sprites handling */
 void SG_initSprites (void);

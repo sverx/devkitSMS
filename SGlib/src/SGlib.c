@@ -109,8 +109,9 @@ unsigned char SpriteNextFree;
 
 #ifndef NESTED_DI_EI_SUPPORT
 /* macro definitions (no nested DI/EI support) */
-#define SG_write_to_VDPRegister(VDPReg,value)  do{DISABLE_INTERRUPTS; VDPControlPort=(value);     VDPControlPort=(VDPReg)|0x80;    ENABLE_INTERRUPTS;}while(0)
-#define SG_set_address_VRAM(address)           do{DISABLE_INTERRUPTS; VDPControlPort=LO(address); VDPControlPort=HI(address)|0x40; ENABLE_INTERRUPTS;}while(0)
+#define SG_write_to_VDPRegister(VDPReg,value)  do{DISABLE_INTERRUPTS; VDPControlPort=(value);     VDPControlPort=(VDPReg)|0x80;     ENABLE_INTERRUPTS;}while(0)
+#define SG_set_address_VRAM(address)           do{DISABLE_INTERRUPTS; VDPControlPort=LO(address); VDPControlPort=HI(address)|0x40;  ENABLE_INTERRUPTS;}while(0)
+#define SG_set_address_VRAM_read(address)      do{DISABLE_INTERRUPTS; VDPControlPort=LO(address); VDPControlPort=HI(address)&~0x40; ENABLE_INTERRUPTS;}while(0)
 #else
 /* inline __critical functions (nested DI/EI supported!) */
 inline void SG_write_to_VDPRegister (unsigned char VDPReg, unsigned char value) {
@@ -141,6 +142,11 @@ inline void SG_set_address_VRAM (unsigned int address) {
 inline void SG_byte_to_VDP_data (unsigned char data) {
   /* INTERNAL FUNCTION */
   VDPDataPort = data;
+}
+
+inline unsigned char  SG_byte_from_VDP_data (void) {
+  /* INTERNAL FUNCTION */
+  return(VDPDataPort);
 }
 
 inline void SG_byte_array_to_VDP_data (const unsigned char *data, unsigned int size) {
@@ -209,7 +215,6 @@ void SG_setSpriteMode (unsigned char mode) {
   }
 }
 
-
 void SG_loadTilePatterns (void *src, unsigned int tilefrom, unsigned int size) {
   SG_set_address_VRAM (PGTADDRESS + (tilefrom << 3));
   SG_byte_array_to_VDP_data (src, size);
@@ -225,17 +230,20 @@ void SG_loadSpritePatterns (void *src, unsigned int tilefrom, unsigned int size)
   SG_byte_array_to_VDP_data (src, size);
 }
 
-void SG_setTileatXY (unsigned char x, unsigned char y, unsigned char tile) {
-  SG_set_address_VRAM (PNTADDRESS + (y << 5) + x);
-  SG_byte_to_VDP_data (tile);
-}
-
 void SG_setNextTileatXY (unsigned char x, unsigned char y) {
   SG_set_address_VRAM (PNTADDRESS + (y << 5) + x);
 }
 
 void SG_setTile (unsigned char tile) {
   SG_byte_to_VDP_data (tile);
+}
+
+void SG_getNextTileatXY (unsigned char x, unsigned char y) {
+  SG_set_address_VRAM_read (PNTADDRESS + (y << 5) + x);
+}
+
+unsigned char SG_getTile (void) {
+  return(SG_byte_from_VDP_data());
 }
 
 void SG_loadTileMap (unsigned char x, unsigned char y, void *src, unsigned int size) {
@@ -448,23 +456,23 @@ unsigned int SG_getKeyboardJoypadReleased (void) {
 
 unsigned char SG_getKeycodes (unsigned int *keys, unsigned char max_keys) {
     unsigned char count=0;
-    
+
     for(unsigned char keyb_row=0; keyb_row < 8; keyb_row++) {
         unsigned int keyb_stat, row_no;
-        
+
         SC_PPI_C = keyb_row;
         row_no = keyb_row << 12;
-        keyb_stat=(~((SC_PPI_B << 8) | SC_PPI_A)) & 0x0FFF;           
+        keyb_stat=(~((SC_PPI_B << 8) | SC_PPI_A)) & 0x0FFF;
         for(unsigned int bit_mask=0x800; keyb_stat; bit_mask >>= 1) {
-            if (keyb_stat & bit_mask) { 
-                if (count < max_keys) 
+            if (keyb_stat & bit_mask) {
+                if (count < max_keys)
                         keys[count++] = row_no + bit_mask;
                 else
                     return count;
                 keyb_stat -= bit_mask;
-            } 
-        }   
-    } 
+            }
+        }
+    }
     return count;
 }
 
