@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 # Author: sverx
-# Version: 3.1.0
+# Version: 3.1.1  **bugfix**
 
 from __future__ import absolute_import, division, generators, unicode_literals, print_function, nested_scopes
 import sys
@@ -152,6 +152,9 @@ class Asset:
 
         # do the requested modifies to the data
         for m in self.modifies:
+            if m.length == 0:
+                m.length = len(self.data)
+
             if m.operator == 'add':
                 for cnt in range(m.length):
                     if (m.start+cnt)<len(self.data):
@@ -394,7 +397,7 @@ try:
                 if mdf[0].lower() == 'add' or mdf[0].lower() == 'and' or mdf[0].lower() == 'or' or mdf[0].lower() == 'xor':
                     try:
                         if len(mdf) == 2:                # if there is one value only after the operator, we modify all array elements
-                            md = Modify(mdf[0].lower(), 0, a.size, [mdf[1]])
+                            md = Modify(mdf[0].lower(), 0, 0, [mdf[1]])
                         elif len(mdf) == 3:              # if there are two values only after the operator, we modify one array element only
                             md = Modify(mdf[0].lower(), int(mdf[1], 0), 1, [mdf[2]])
                         else:                            # if there are three (or more) values after the operator, we modify *len* array elements from *start*
