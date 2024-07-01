@@ -1,7 +1,12 @@
 XL3
-H 9 areas 39 global symbols
+H 9 areas 3E global symbols
 M SGlib
 O -mz80
+S _SG_SRAM Def008000
+S _ROM_bank_to_be_mapped_on_slot0 Def00FFFD
+S _ROM_bank_to_be_mapped_on_slot1 Def00FFFE
+S _ROM_bank_to_be_mapped_on_slot2 Def00FFFF
+S _SRAM_bank_to_be_mapped_on_slot2 Def00FFFC
 S .__.ABS. Def000000
 A _CODE size 6D0 flags 0 addr 0
 S _SG_VRAMmemcpy_brief Def000600

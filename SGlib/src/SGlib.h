@@ -49,6 +49,36 @@ void SG_setBackdropColor (unsigned char entry);
 /* wait until next VBlank starts */
 void SG_waitForVBlank (void);
 
+/* macro for ROM bankswitching */
+volatile __at (0xffff) unsigned char ROM_bank_to_be_mapped_on_slot2;
+#define SG_mapROMBank(n)       ROM_bank_to_be_mapped_on_slot2=(n)
+
+/* macro to retrieve the currently mapped ROM bank */
+#define SG_getROMBank()        (ROM_bank_to_be_mapped_on_slot2)
+
+/* macros to preserve and restore the currently mapped ROM bank */
+/* NOTE: they need to be used within the same scope (they use local variables) */
+/* Typical use: In functions using SG_mapROMBank(), to make sure the mapped bank */
+/* when entering the function is unchanged upon return. */
+/* Use only one SG_saveROMBank() before the first SG_mapROMBank() in the function, */
+/* and at least one SG_restoreROMBank() per following return statement. */
+/* SG_restoreROMBank() may be used several times, for instance to access data in the original bank. */
+#define SG_saveROMBank()       unsigned char _saved_slot2_ROM_bank = ROM_bank_to_be_mapped_on_slot2
+#define SG_restoreROMBank()    SG_mapROMBank(_saved_slot2_ROM_bank)
+
+/* additional symbols to control other mapper slots - use with care! */
+volatile __at (0xfffe) unsigned char ROM_bank_to_be_mapped_on_slot1;
+volatile __at (0xfffd) unsigned char ROM_bank_to_be_mapped_on_slot0;
+
+/* macro for SRAM access */
+volatile __at (0xfffc) unsigned char SRAM_bank_to_be_mapped_on_slot2;
+#define SG_enableSRAM()        SRAM_bank_to_be_mapped_on_slot2=0x08
+#define SG_enableSRAMBank(n)   SRAM_bank_to_be_mapped_on_slot2=((((n)<<2)|0x08)&0x0C)
+#define SG_disableSRAM()       SRAM_bank_to_be_mapped_on_slot2=0x00
+
+/* SRAM access is as easy as accessing an array of char */
+__at (0x8000) unsigned char SG_SRAM[];
+
 /* functions to load tiles into VRAM */
 void SG_loadTilePatterns (void *src, unsigned int tilefrom, unsigned int size);
 void SG_loadTileColours (void *src, unsigned int tilefrom, unsigned int size);
@@ -117,7 +147,6 @@ unsigned int SG_getKeyboardJoypadReleased (void);
 
 /* read from keyboard max keys and return the keycodes and amount */
 unsigned char SG_getKeycodes (unsigned int *keys, unsigned char max_keys);
-
 
 /* low level functions */
 void SG_VRAMmemcpy (unsigned int dst, void *src, unsigned int size);
