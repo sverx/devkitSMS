@@ -1,5 +1,5 @@
 XL3
-H 9 areas 3E global symbols
+H 9 areas 41 global symbols
 M SGlib
 O -mz80
 S _SG_SRAM Def008000
@@ -8,13 +8,14 @@ S _ROM_bank_to_be_mapped_on_slot1 Def00FFFE
 S _ROM_bank_to_be_mapped_on_slot2 Def00FFFF
 S _SRAM_bank_to_be_mapped_on_slot2 Def00FFFC
 S .__.ABS. Def000000
-A _CODE size 6D0 flags 0 addr 0
+S ___sdcc_call_hl Ref000000
+A _CODE size 6E3 flags 0 addr 0
 S _SG_VRAMmemcpy_brief Def000600
 S _SG_loadSpritePatterns Def00011C
 S _SG_detectKeyboard Def00042C
 S _SG_getKeyboardJoypadPressed Def0004DC
 S _SG_copySpritestoSAT Def0003B6
-S _SG_nmi_isr Def0006BD
+S _SG_nmi_isr Def0006D0
 S _SG_setBackdropColor Def00005F
 S _SG_getKeysPressed Def0003E1
 S _SG_getNextTileatXY Def000171
@@ -30,11 +31,12 @@ S _SG_loadTilePatterns Def0000BC
 S _SG_VRAMmemset Def00061F
 S _SG_VRAMmemcpy Def0005DA
 S _SG_getKeysReleased Def000409
+S _SG_setFrameInterruptHandler Def000673
 S _SG_loadTileMapArea Def0001D8
 S _SG_setSpriteMode Def00006A
 S _SG_resetPauseRequest Def000426
 S _SG_loadTileMap Def000195
-S _SG_isr Def000673
+S _SG_isr Def000677
 S _SG_getTile Def000192
 S _SG_getKeyboardJoypadHeld Def0004F1
 S _SG_loadTileColours Def0000EB
@@ -50,8 +52,9 @@ S _SG_getKeysStatus Def0003DC
 S _SG_addSprite Def000269
 S _VDPReg_init Def000015
 S _SG_queryPauseRequested Def000422
-A _DATA size 8F flags 0 addr 0
+A _DATA size 91 flags 0 addr 0
 S _PauseRequested Def000001
+S _SG_theFrameInterruptHandler Def00008F
 S _KBDKeysStatus Def000006
 S _PreviousKeysStatus Def000004
 S _KBDPreviousKeysStatus Def000008
@@ -120,6 +123,10 @@ R 00 00 01 00
 T 8E 00 00
 R 00 00 01 00
 T 8E 00 00
+R 00 00 01 00
+T 8F 00 00
+R 00 00 01 00
+T 8F 00 00
 R 00 00 01 00
 T 00 00 00
 R 00 00 02 00
@@ -669,25 +676,31 @@ T 70 06 00 E1 F1 E9
 R 00 00 00 00
 T 73 06 00
 R 00 00 00 00
-T 73 06 00 F5 C5 D5 E5 FD E5 DD E5 DD 21 00 00 DD
+T 73 06 00 22 8F 00 C9
+R 00 00 00 00 00 04 01 00
+T 77 06 00
 R 00 00 00 00
-T 80 06 00 39 3B DB BF DD 77 FF 07 30 26 FD 21
+T 77 06 00 F5 C5 D5 E5 FD E5 DD E5 DD 21 00 00 DD
 R 00 00 00 00
-T 8C 06 00 00 00 FD 36 00 01 2A 02 00 22 04 00 DB
-R 00 00 00 00 00 03 01 00 00 0A 01 00 00 0D 01 00
-T 99 06 00 DD 47 0E 00 DB DC 1E 00 B1 F5 7B B0 4F
+T 84 06 00 39 3B DB BF DD 77 FF 07 30 35 21 00 00
+R 00 00 00 00 00 0E 01 00
+T 91 06 00 36 01 2A 02 00 22 04 00 DB DD 47 0E 00
+R 00 00 00 00 00 06 01 00 00 09 01 00
+T 9E 06 00 DB DC 1E 00 B1 F5 7B B0 4F F1 2F 32
 R 00 00 00 00
-T A6 06 00 F1 2F 32 02 00 79 2F 32 03 00
-R 00 00 00 00 00 06 01 00 00 0B 01 00
-T B0 06 00
+T AA 06 00 02 00 79 2F 32 03 00 3A 90 00 FD 21
+R 00 00 00 00 00 03 01 00 00 08 01 00 00 0B 01 00
+T B6 06 00 8F 00 FD B6 00 28 06 2A 8F 00 CD 00 00
+R 00 00 00 00 00 03 01 00 00 0B 01 00 02 0E 06 00
+T C3 06 00
 R 00 00 00 00
-T B0 06 00 FB 33 DD E1 FD E1 E1 D1 C1 F1 FB ED 4D
+T C3 06 00 FB 33 DD E1 FD E1 E1 D1 C1 F1 FB ED 4D
 R 00 00 00 00
-T BD 06 00
+T D0 06 00
 R 00 00 00 00
-T BD 06 00 F5 C5 D5 E5 FD E5 21 01 00 36 01 FD E1
+T D0 06 00 F5 C5 D5 E5 FD E5 21 01 00 36 01 FD E1
 R 00 00 00 00 00 0A 01 00
-T CA 06 00 E1 D1 C1 F1 ED 45
+T DD 06 00 E1 D1 C1 F1 ED 45
 R 00 00 00 00
 T 00 00 00
 R 00 00 07 00

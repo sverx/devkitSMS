@@ -107,6 +107,12 @@ unsigned char SpriteTable[(MAXSPRITES+1)*4];
 #endif
 unsigned char SpriteNextFree;
 
+#ifndef NO_FRAME_INT_HOOK
+/* If non-NULL, will be called by SG_isr after acknowledging */
+/* the interrupt and reading controller status */
+void (*SG_theFrameInterruptHandler)(void);
+#endif
+
 #ifndef NESTED_DI_EI_SUPPORT
 /* macro definitions (no nested DI/EI support) */
 #define SG_write_to_VDPRegister(VDPReg,value)  do{DISABLE_INTERRUPTS; VDPControlPort=(value);     VDPControlPort=(VDPReg)|0x80;     ENABLE_INTERRUPTS;}while(0)
@@ -505,6 +511,12 @@ void SG_VRAMmemsetW (unsigned int dst, unsigned int value, unsigned int size) {
   }
 }
 
+#ifndef NO_FRAME_INT_HOOK
+void SG_setFrameInterruptHandler (void (*theHandlerFunction)(void)) __z88dk_fastcall {
+  SG_theFrameInterruptHandler=theHandlerFunction;
+}
+#endif
+
 /* Interrupt Service Routines */
 void SG_isr (void) __critical __interrupt(0) {
   volatile unsigned char VDPStatus=VDPStatusPort;  /* this also aknowledge interrupt at VDP */
@@ -517,6 +529,11 @@ void SG_isr (void) __critical __interrupt(0) {
     /* read key input */
     PreviousKeysStatus=KeysStatus;
     KeysStatus=~(((IOPortH)<<8)|IOPortL);
+#ifndef NO_FRAME_INT_HOOK
+    if (SG_theFrameInterruptHandler) {
+      SG_theFrameInterruptHandler();
+    }
+#endif
   }
   /* Z80 disable the interrupts on ISR, so we should re-enable them explicitly */
   ENABLE_INTERRUPTS;

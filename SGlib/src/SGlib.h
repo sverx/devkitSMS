@@ -154,6 +154,13 @@ void SG_VRAMmemcpy_brief (unsigned int dst, void *src, unsigned char size);
 void SG_VRAMmemset (unsigned int dst, unsigned char value, unsigned int size);
 void SG_VRAMmemsetW (unsigned int dst, unsigned int value, unsigned int size);
 
+/* vertical interrupt hook */
+#ifndef NO_FRAME_INT_HOOK
+/* If non-NULL, the specified function will be called by SG_isr after acknowledging */
+/* the interrupt and reading controller status. */
+void SG_setFrameInterruptHandler (void (*theHandlerFunction)(void)) __z88dk_fastcall;
+#endif
+
 /* the Interrupt Service Routines (do not modify) */
 void SG_isr (void) __critical __interrupt(0);
 void SG_nmi_isr (void) __critical __interrupt;
