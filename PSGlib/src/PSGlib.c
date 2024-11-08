@@ -102,34 +102,6 @@ void PSGStop (void) {
   }
 }
 
-void PSGResume (void) {
-/* *********************************************************************
-  resume the previously playing music (also using current attenuation)
-*/
-  if (!PSGMusicStatus) {
-    if (!PSGChannel0SFX) {
-      PSGPort=PSGLatch|PSGChannel0|(PSGChan0LowTone&0x0F);       // restore channel 0 frequency
-      PSGPort=PSGChan0HighTone&0x3F;
-      PSGPort=PSGLatch|PSGChannel0|PSGVolumeData|(((PSGChan0Volume&0x0F)+PSGMusicVolumeAttenuation>15)?15:(PSGChan0Volume&0x0F)+PSGMusicVolumeAttenuation); // restore channel 0 volume
-    }
-    if (!PSGChannel1SFX) {
-      PSGPort=PSGLatch|PSGChannel1|(PSGChan1LowTone&0x0F);       // restore channel 1 frequency
-      PSGPort=PSGChan1HighTone&0x3F;
-      PSGPort=PSGLatch|PSGChannel1|PSGVolumeData|(((PSGChan1Volume&0x0F)+PSGMusicVolumeAttenuation>15)?15:(PSGChan1Volume&0x0F)+PSGMusicVolumeAttenuation); // restore channel 1 volume
-    }
-    if (!PSGChannel2SFX) {
-      PSGPort=PSGLatch|PSGChannel2|(PSGChan2LowTone&0x0F);       // restore channel 2 frequency
-      PSGPort=PSGChan2HighTone&0x3F;
-      PSGPort=PSGLatch|PSGChannel2|PSGVolumeData|(((PSGChan2Volume&0x0F)+PSGMusicVolumeAttenuation>15)?15:(PSGChan2Volume&0x0F)+PSGMusicVolumeAttenuation); // restore channel 2 volume
-    }
-    if (!PSGChannel3SFX) {
-      PSGPort=PSGLatch|PSGChannel3|(PSGChan3LowTone&0x0F);       // restore channel 3 frequency
-      PSGPort=PSGLatch|PSGChannel3|PSGVolumeData|(((PSGChan3Volume&0x0F)+PSGMusicVolumeAttenuation>15)?15:(PSGChan3Volume&0x0F)+PSGMusicVolumeAttenuation); // restore channel 3 volume
-    }
-    PSGMusicStatus=PSG_PLAYING;
-  }
-}
-
 #ifdef PSGLIB_MULTIBANK
 void PSGPlay (void *song, unsigned char bank) {
 #else
@@ -159,120 +131,11 @@ void PSGPlay (void *song) {
 #endif
 }
 
-#ifdef PSGLIB_MULTIBANK
-void PSGPlayLoops (void *song, unsigned char bank, unsigned char loops) {
-#else
-void PSGPlayLoops (void *song, unsigned char loops) {
-#endif
-/* *********************************************************************
-  receives the address of the PSG to start playing (continuously) and
-  the number of loops (going back to loop point) requested
-*/
-#ifdef PSGLIB_MULTIBANK
-  PSGPlay(song, bank);
-#else
-  PSGPlay(song);
-#endif
-  PSGLoopFlag=0;
-  PSGLoopCounter=loops;
-}
-
-void PSGCancelLoop (void) {
-/* *********************************************************************
-  sets the currently looping music to no more loops after the current
-*/
-  PSGLoopFlag=0;
-  PSGLoopCounter=0;
-}
-
-#ifdef PSGLIB_MULTIBANK
-void PSGPlayNoRepeat (void *song, unsigned char bank) {
-#else
-void PSGPlayNoRepeat (void *song) {
-#endif
-/* *********************************************************************
-  receives the address of the PSG to start playing (once)
-*/
-#ifdef PSGLIB_MULTIBANK
-  PSGPlay(song, bank);
-#else
-  PSGPlay(song);
-#endif
-  PSGLoopFlag=0;
-  PSGLoopCounter=0;
-}
-
 unsigned char PSGGetStatus (void) {
 /* *********************************************************************
   returns the current status of music
 */
   return(PSGMusicStatus);
-}
-
-void PSGSilenceChannels (void) {
-/* *********************************************************************
-  silence all the PSG channels
-*/
-  PSGPort=PSGLatch|PSGChannel0|PSGVolumeData|0x0F;
-  PSGPort=PSGLatch|PSGChannel1|PSGVolumeData|0x0F;
-  PSGPort=PSGLatch|PSGChannel2|PSGVolumeData|0x0F;
-  PSGPort=PSGLatch|PSGChannel3|PSGVolumeData|0x0F;
-}
-
-void PSGRestoreVolumes (void) {
-/* *********************************************************************
-  restore the PSG channels volumes (if a tune or an SFX uses them!)
-*/
-  if (PSGChannel0SFX)
-    PSGPort=PSGLatch|PSGChannel0|PSGVolumeData|(((PSGSFXChan0Volume&0x0F)+PSGSFXVolumeAttenuation>15)?15:(PSGSFXChan0Volume&0x0F)+PSGSFXVolumeAttenuation);
-  else if (PSGMusicStatus)
-    PSGPort=PSGLatch|PSGChannel0|PSGVolumeData|(((PSGChan0Volume&0x0F)+PSGMusicVolumeAttenuation>15)?15:(PSGChan0Volume&0x0F)+PSGMusicVolumeAttenuation);
-  if (PSGChannel1SFX)
-    PSGPort=PSGLatch|PSGChannel1|PSGVolumeData|(((PSGSFXChan1Volume&0x0F)+PSGSFXVolumeAttenuation>15)?15:(PSGSFXChan1Volume&0x0F)+PSGSFXVolumeAttenuation);
-  else if (PSGMusicStatus)
-    PSGPort=PSGLatch|PSGChannel1|PSGVolumeData|(((PSGChan1Volume&0x0F)+PSGMusicVolumeAttenuation>15)?15:(PSGChan1Volume&0x0F)+PSGMusicVolumeAttenuation);
-  if (PSGChannel2SFX)
-    PSGPort=PSGLatch|PSGChannel2|PSGVolumeData|(((PSGSFXChan2Volume&0x0F)+PSGSFXVolumeAttenuation>15)?15:(PSGSFXChan2Volume&0x0F)+PSGSFXVolumeAttenuation);
-  else if (PSGMusicStatus)
-    PSGPort=PSGLatch|PSGChannel2|PSGVolumeData|(((PSGChan2Volume&0x0F)+PSGMusicVolumeAttenuation>15)?15:(PSGChan2Volume&0x0F)+PSGMusicVolumeAttenuation);
-  if (PSGChannel3SFX)
-    PSGPort=PSGLatch|PSGChannel3|PSGVolumeData|(((PSGSFXChan3Volume&0x0F)+PSGSFXVolumeAttenuation>15)?15:(PSGSFXChan3Volume&0x0F)+PSGSFXVolumeAttenuation);
-  else if (PSGMusicStatus)
-    PSGPort=PSGLatch|PSGChannel3|PSGVolumeData|(((PSGChan3Volume&0x0F)+PSGMusicVolumeAttenuation>15)?15:(PSGChan3Volume&0x0F)+PSGMusicVolumeAttenuation);
-}
-
-void PSGSetMusicVolumeAttenuation (unsigned char attenuation) {
-/* *********************************************************************
-  sets the volume attenuation for the music (0-15)
-*/
-  PSGMusicVolumeAttenuation=attenuation;
-  if (PSGMusicStatus) {
-    if (!PSGChannel0SFX)
-      PSGPort=PSGLatch|PSGChannel0|PSGVolumeData|(((PSGChan0Volume&0x0F)+PSGMusicVolumeAttenuation>15)?15:(PSGChan0Volume&0x0F)+PSGMusicVolumeAttenuation);
-    if (!PSGChannel1SFX)
-      PSGPort=PSGLatch|PSGChannel1|PSGVolumeData|(((PSGChan1Volume&0x0F)+PSGMusicVolumeAttenuation>15)?15:(PSGChan1Volume&0x0F)+PSGMusicVolumeAttenuation);
-    if (!PSGChannel2SFX)
-      PSGPort=PSGLatch|PSGChannel2|PSGVolumeData|(((PSGChan2Volume&0x0F)+PSGMusicVolumeAttenuation>15)?15:(PSGChan2Volume&0x0F)+PSGMusicVolumeAttenuation);
-    if (!PSGChannel3SFX)
-      PSGPort=PSGLatch|PSGChannel3|PSGVolumeData|(((PSGChan3Volume&0x0F)+PSGMusicVolumeAttenuation>15)?15:(PSGChan3Volume&0x0F)+PSGMusicVolumeAttenuation);
-  }
-}
-
-void PSGSetSFXVolumeAttenuation (unsigned char attenuation) {
-/* *********************************************************************
-  sets the volume attenuation for the SFXs (0-15)
-*/
-  PSGSFXVolumeAttenuation=attenuation;
-  if (PSGMusicStatus) {
-    if (PSGChannel0SFX)
-      PSGPort=PSGLatch|PSGChannel0|PSGVolumeData|(((PSGSFXChan0Volume&0x0F)+PSGSFXVolumeAttenuation>15)?15:(PSGSFXChan0Volume&0x0F)+PSGSFXVolumeAttenuation);
-    if (PSGChannel1SFX)
-      PSGPort=PSGLatch|PSGChannel1|PSGVolumeData|(((PSGSFXChan1Volume&0x0F)+PSGSFXVolumeAttenuation>15)?15:(PSGSFXChan1Volume&0x0F)+PSGSFXVolumeAttenuation);
-    if (PSGChannel2SFX)
-      PSGPort=PSGLatch|PSGChannel2|PSGVolumeData|(((PSGSFXChan2Volume&0x0F)+PSGSFXVolumeAttenuation>15)?15:(PSGSFXChan2Volume&0x0F)+PSGSFXVolumeAttenuation);
-    if (PSGChannel3SFX)
-      PSGPort=PSGLatch|PSGChannel3|PSGVolumeData|(((PSGSFXChan3Volume&0x0F)+PSGSFXVolumeAttenuation>15)?15:(PSGSFXChan3Volume&0x0F)+PSGSFXVolumeAttenuation);
-  }
 }
 
 void PSGSFXStop (void) {
@@ -359,6 +222,7 @@ unsigned char PSGSFXGetStatus (void) {
   return(PSGSFXStatus);
 }
 
+#ifndef PSGLIB_NOSFXCODE
 void PSGSFXPlayLoop (void *sfx, unsigned char channels) {
 /* *********************************************************************
   receives the address of the SFX to start continuously and the mask
@@ -367,6 +231,7 @@ void PSGSFXPlayLoop (void *sfx, unsigned char channels) {
   PSGSFXPlay(sfx, channels);
   PSGSFXLoopFlag=1;
 }
+#endif
 
 void PSGFrame (void) {
 /* *********************************************************************
@@ -691,6 +556,7 @@ _PSG_ReadByte_C:
 __endasm;
 }
 
+#ifndef PSGLIB_NOSFXCODE
 void PSGSFXFrame (void) {
 /* ********************************************************************
    processes a SFX frame
@@ -819,3 +685,4 @@ _SFXsubstring:
   jp _intSFXLoop
 __endasm;
 }
+#endif

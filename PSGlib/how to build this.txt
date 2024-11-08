@@ -1,1 +1,27 @@
-sdcc -mz80 -c PSGlib.c
+
+# default compile
+sdcc -c -mz80 --max-allocs-per-node 100000 PSGlib.c
+sdcc -c -mz80 --max-allocs-per-node 100000 PSGAttenuation.c
+sdcc -c -mz80 --max-allocs-per-node 100000 PSGPlayLoops.c
+sdcc -c -mz80 --max-allocs-per-node 100000 PSGRestoreVolumes.c
+sdcc -c -mz80 --max-allocs-per-node 100000 PSGResume.c
+
+# multibank compile
+sdcc -c -mz80 --max-allocs-per-node 100000 -D PSGLIB_MULTIBANK -o PSGlib_MB.rel PSGlib.c
+sdcc -c -mz80 --max-allocs-per-node 100000 -D PSGLIB_MULTIBANK -o PSGAttenuation_MB.rel PSGAttenuation.c
+sdcc -c -mz80 --max-allocs-per-node 100000 -D PSGLIB_MULTIBANK -o PSGPlayLoops_MB.rel PSGPlayLoops.c
+sdcc -c -mz80 --max-allocs-per-node 100000 -D PSGLIB_MULTIBANK -o PSGRestoreVolumes_MB.rel PSGRestoreVolumes.c
+sdcc -c -mz80 --max-allocs-per-node 100000 -D PSGLIB_MULTIBANK -o PSGResume_MB.rel PSGResume.c
+
+# noSFX compile
+sdcc -c -mz80 --max-allocs-per-node 100000 -D PSGLIB_NOSFXCODE -o PSGlib_NOSFX.rel PSGlib.c
+sdcc -c -mz80 --max-allocs-per-node 100000 -D PSGLIB_NOSFXCODE -o PSGAttenuation_NOSFX.rel PSGAttenuation.c
+sdcc -c -mz80 --max-allocs-per-node 100000 -D PSGLIB_NOSFXCODE -o PSGPlayLoops_NOSFX.rel PSGPlayLoops.c
+sdcc -c -mz80 --max-allocs-per-node 100000 -D PSGLIB_NOSFXCODE -o PSGRestoreVolumes_NOSFX.rel PSGRestoreVolumes.c
+sdcc -c -mz80 --max-allocs-per-node 100000 -D PSGLIB_NOSFXCODE -o PSGResume_NOSFX.rel PSGResume.c
+
+# create libraries
+sdar r PSGlib.lib PSGlib.rel PSGAttenuation.rel PSGPlayLoops.rel PSGRestoreVolumes.rel PSGResume.rel
+sdar r PSGlib_MB.lib PSGlib_MB.rel PSGAttenuation_MB.rel PSGPlayLoops_MB.rel PSGRestoreVolumes_MB.rel PSGResume_MB.rel
+sdar r PSGlib_NOSFX.lib PSGlib_NOSFX.rel PSGAttenuation_NOSFX.rel PSGPlayLoops_NOSFX.rel PSGRestoreVolumes_NOSFX.rel PSGResume_NOSFX.rel
+
