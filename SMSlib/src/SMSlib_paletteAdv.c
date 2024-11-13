@@ -24,18 +24,6 @@ void SMS_loadBGPaletteHalfBrightness (const void *palette) __z88dk_fastcall {
   __endasm;
 }
 
-void SMS_zeroBGPalette (void) {
-  ASM_LD_DE_IMM(#SMS_CRAMAddress);
-  ASM_DE_TO_VDP_CONTROL;
-  ASM_LD_B_IMM(#16);
-  __asm
-    xor a
-1$: out (_VDPDataPort),a       ; 11
-    nop                        ; 4
-    djnz 1$                    ; 13 = 28 *VRAM SAFE ON GG TOO*
-  __endasm;
-}
-
 void SMS_loadSpritePaletteHalfBrightness (const void *palette) __z88dk_fastcall {
   // *palette will be in HL
   ASM_LD_DE_IMM(#SMS_CRAMAddress+0x10);
@@ -48,18 +36,6 @@ void SMS_loadSpritePaletteHalfBrightness (const void *palette) __z88dk_fastcall 
     out (_VDPDataPort),a       ; 11
     inc hl                     ; 6
     djnz 1$                    ; 13  *VRAM SAFE*
-  __endasm;
-}
-
-void SMS_zeroSpritePalette (void) {
-  ASM_LD_DE_IMM(#SMS_CRAMAddress+0x10);
-  ASM_DE_TO_VDP_CONTROL;
-  ASM_LD_B_IMM(#16);
-  __asm
-    xor a
-1$: out (_VDPDataPort),a       ; 11
-    nop                        ; 4
-    djnz 1$                    ; 13 = 28 *VRAM SAFE ON GG TOO*
   __endasm;
 }
 #endif
