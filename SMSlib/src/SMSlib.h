@@ -290,7 +290,6 @@ unsigned int SMS_getKeysReleased (void);
 #define PORT_A_KEY_1            0x0010
 #define PORT_A_KEY_2            0x0020
 #define PORT_A_KEY_START        PORT_A_KEY_1    /* handy alias */
-
 #define PORT_B_KEY_UP           0x0040
 #define PORT_B_KEY_DOWN         0x0080
 #define PORT_B_KEY_LEFT         0x0100
@@ -298,11 +297,12 @@ unsigned int SMS_getKeysReleased (void);
 #define PORT_B_KEY_1            0x0400
 #define PORT_B_KEY_2            0x0800
 #define PORT_B_KEY_START        PORT_B_KEY_1    /* handy alias */
-
 #define RESET_KEY               0x1000          /* (absent on SMS II) */
-#define CARTRIDGE_SLOT          0x2000          /* ??? */
-#define PORT_A_TH               0x4000          /* for light gun */
-#define PORT_B_TH               0x8000          /* for light gun */
+#define CARTRIDGE_SLOT          0x2000          /* (hardware dependent) see note [1] below */
+#define PORT_A_TH               0x4000          /* used by the light gun */
+#define PORT_B_TH               0x8000          /* used by the light gun */
+/* [1]: CARTRIDGE_SLOT bit is usually 0 on Master System and Game Gear, but it's usually 1 on Genesis/MegaDrive,
+ * so you might want to mask that one out if you want to compare the value returned from SMS_getKeys* functions with zero */
 #endif
 
 #ifdef TARGET_GG
