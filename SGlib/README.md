@@ -65,6 +65,9 @@ unsigned char SG_getKeycodes (unsigned int *keys, unsigned char max_keys)
 _Bool SG_queryPauseRequested (void)      /* the pause key has been pressed since previous check */
 void SG_resetPauseRequest (void)         /* reset/acknowledge pause requests */
 
+/* function to decompress data to VRAM */
+void SMS_decompressZX7toVRAM (const void *src, unsigned int dst)
+
 /* low level functions */
 void SG_VRAMmemcpy (unsigned int dst, void *src, unsigned int size)              /* memcpy to VRAM */
 void SG_VRAMmemcpy_brief (unsigned int dst, void *src, unsigned char size)       /* memcpy to VRAM (256 bytes max) */

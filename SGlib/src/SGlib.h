@@ -148,6 +148,12 @@ unsigned int SG_getKeyboardJoypadReleased (void);
 /* read from keyboard max keys and return the keycodes and amount */
 unsigned char SG_getKeycodes (unsigned int *keys, unsigned char max_keys);
 
+/* functions to decompress data to VRAM */
+#define SG_loadZX7compressedBGTiles(src,tilefrom)      SG_decompressZX7toVRAM((src),PGTADDRESS+((tilefrom)<<3))
+#define SG_loadZX7compressedSpritesTiles(src,tilefrom) SG_decompressZX7toVRAM((src),SGTADDRESS+((tilefrom)<<3))
+#define SG_loadZX7compressedTilesatAddr(src,dst)       SG_decompressZX7toVRAM((src),(dst))
+void SG_decompressZX7toVRAM (const void *src, unsigned int dst) __naked;
+
 /* low level functions */
 void SG_VRAMmemcpy (unsigned int dst, void *src, unsigned int size);
 void SG_VRAMmemcpy_brief (unsigned int dst, void *src, unsigned char size);
