@@ -42,7 +42,7 @@ SG_getTileatXY(x,y)
 void SG_initSprites (void)
 _Bool SG_addSprite (unsigned char x, unsigned char y, unsigned char tile, unsigned char attr)	/* returns false if no more sprites are available */
 void SG_setClippingWindow (unsigned char x0, unsigned char y0, unsigned char x1, unsigned char y1)
-_Bool SG_addSpriteClipping (int x, int y, unsigned char tile, unsigned char attr)		/* returns false if no more sprites are available or sprite clipped */
+_Bool SG_addSpriteClipping (int x, int y, unsigned char tile, unsigned char attr)		        /* returns false if no more sprites are available or sprite clipped */
 void SG_finalizeSprites (void)
 void SG_copySpritestoSAT (void)
 
@@ -65,8 +65,11 @@ unsigned char SG_getKeycodes (unsigned int *keys, unsigned char max_keys)
 _Bool SG_queryPauseRequested (void)      /* the pause key has been pressed since previous check */
 void SG_resetPauseRequest (void)         /* reset/acknowledge pause requests */
 
-/* function to decompress data to VRAM */
-void SMS_decompressZX7toVRAM (const void *src, unsigned int dst)
+/* functions and macros to decompress data to VRAM */
+void SG_decompressZX7toVRAM (const void *src, unsigned int dst)       /* function that does the decompression */
+SG_loadZX7compressedBGTiles(src,tilefrom)                             /* handy macro to decompress tiles to background */
+SG_loadZX7compressedSpritesTiles(src,tilefrom)                        /* handy macro to decompress tiles to sprites */
+SG_loadZX7compressedTilesatAddr(src,dst)                              /* handy macro to decompress tiles to any location in VRAM */
 
 /* low level functions */
 void SG_VRAMmemcpy (unsigned int dst, void *src, unsigned int size)              /* memcpy to VRAM */
