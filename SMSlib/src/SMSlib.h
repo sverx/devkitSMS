@@ -133,6 +133,8 @@ void SMS_load1bppTiles (const void *src, unsigned int tilefrom, unsigned int siz
 /* functions to load compressed tiles into VRAM */
 #define SMS_loadSTC0compressedTiles(src,tilefrom) SMS_loadSTC0compressedTilesatAddr((src),TILEtoADDR(tilefrom))
 void SMS_loadSTC0compressedTilesatAddr (const void *src, unsigned int dst) __naked __sdcccall(1);
+#define SMS_loadSTC4compressedTiles(src,tilefrom) SMS_loadSTC4compressedTilesatAddr((src),TILEtoADDR(tilefrom))
+void SMS_loadSTC4compressedTilesatAddr (const void *src, unsigned int dst) __naked __sdcccall(1);
 #define SMS_loadPSGaidencompressedTiles(src,tilefrom) SMS_loadPSGaidencompressedTilesatAddr((src),TILEtoADDR(tilefrom))
 void SMS_loadPSGaidencompressedTilesatAddr (const void *src, unsigned int dst) __naked __sdcccall(1);
 #define SMS_loadZX7compressedTiles(src,tilefrom) SMS_decompressZX7toVRAM((src),TILEtoADDR(tilefrom))

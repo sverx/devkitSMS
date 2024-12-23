@@ -7,7 +7,6 @@
 
 #pragma save
 #pragma disable_warning 85
-
 void SMS_loadSTC0compressedTilesatAddr (const void *src, unsigned int dst) __naked __sdcccall(1) {
   __asm
   ld c,#0xbf                          ; VDP_CTRL_PORT
@@ -53,5 +52,4 @@ _compressed_FF:
   jp _stc0_decompress_outer_loop
   __endasm;
 }
-
 #pragma restore
