@@ -24,9 +24,6 @@ void main(void)
    * the SMS_printatXY macro is there for convenience */
   SMS_printatXY(4,12,"Hello, World! [3/3]");
 
-  /* Turn on the display */
-  SMS_displayOn();
-
   /* Do nothing */
   for(;;) { }
 }
