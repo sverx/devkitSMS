@@ -392,11 +392,14 @@ void UNSAFE_SMS_copySpritestoSAT (void);
 void UNSAFE_SMS_VRAMmemcpy32 (unsigned int dst, const void *src);
 void UNSAFE_SMS_VRAMmemcpy64 (unsigned int dst, const void *src);
 void UNSAFE_SMS_VRAMmemcpy128 (unsigned int dst, const void *src);
+void UNSAFE_SMS_VRAMmemcpy (unsigned int dst, const void *src, unsigned int size) __naked __z88dk_callee __preserves_regs(iyh,iyl) __sdcccall(1);
 
 /* handy macros for UNSAFE_SMS_VRAMmemcpy* */
-#define UNSAFE_SMS_load1Tile(src,theTile)     UNSAFE_SMS_VRAMmemcpy32((theTile)*32,(src))
-#define UNSAFE_SMS_load2Tiles(src,tilefrom)   UNSAFE_SMS_VRAMmemcpy64((tilefrom)*32,(src))
-#define UNSAFE_SMS_load4Tiles(src,tilefrom)   UNSAFE_SMS_VRAMmemcpy128((tilefrom)*32,(src))
+#define UNSAFE_SMS_load1Tile(src,theTile)               UNSAFE_SMS_VRAMmemcpy32((theTile)*32,(src))
+#define UNSAFE_SMS_load2Tiles(src,tilefrom)             UNSAFE_SMS_VRAMmemcpy64((tilefrom)*32,(src))
+#define UNSAFE_SMS_load4Tiles(src,tilefrom)             UNSAFE_SMS_VRAMmemcpy128((tilefrom)*32,(src))
+#define UNSAFE_SMS_loadNTiles(src,tilefrom,tilecount)   UNSAFE_SMS_VRAMmemcpy((tilefrom)*32,(src),(tilecount)*32)
+#define UNSAFE_SMS_loadTiles(src,tilefrom,size)         UNSAFE_SMS_VRAMmemcpy((tilefrom)*32,(src),(size))
 
 /* function to print messages to the debug console of emulators */
 void SMS_debugPrintf(const unsigned char *format, ...) __naked __preserves_regs(a,b,c,iyh,iyl);

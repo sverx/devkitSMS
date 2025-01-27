@@ -191,15 +191,18 @@ void SMS_VRAMmemsetW (unsigned int dst, unsigned int value, unsigned int size)  
 
   - VRAM unsafe functions. Fast, but dangerous, can be safely used only during VBlank or when screen is off
 ```
-void UNSAFE_SMS_copySpritestoSAT (void)                         /* copy sprites to Sprites Attribute Table */
-void UNSAFE_SMS_VRAMmemcpy32 (unsigned int dst, void *src)      /* copy 32 bytes to VRAM */
-void UNSAFE_SMS_VRAMmemcpy64 (unsigned int dst, void *src)      /* copy 64 bytes to VRAM */
-void UNSAFE_SMS_VRAMmemcpy128 (unsigned int dst, void *src)     /* copy 128 bytes to VRAM */
+void UNSAFE_SMS_copySpritestoSAT (void)                                             /* copy sprites to Sprites Attribute Table */
+void UNSAFE_SMS_VRAMmemcpy32 (unsigned int dst, void *src)                          /* copy 32 bytes to VRAM */
+void UNSAFE_SMS_VRAMmemcpy64 (unsigned int dst, void *src)                          /* copy 64 bytes to VRAM */
+void UNSAFE_SMS_VRAMmemcpy128 (unsigned int dst, void *src)                         /* copy 128 bytes to VRAM */
+void UNSAFE_SMS_VRAMmemcpy (unsigned int dst, const void *src, unsigned int size)   /* copy any amount of bytes to VRAM */
 
 /* handy macros for UNSAFE_SMS_VRAMmemcpy* functions (can be safely used only during VBlank or when screen is off) */
-UNSAFE_SMS_load1Tile(src,theTile)           /* copy ONE tile to VRAM */
-UNSAFE_SMS_load2Tiles(src,tilefrom)         /* copy TWO tiles to VRAM */
-UNSAFE_SMS_load4Tiles(src,tilefrom)         /* copy FOUR tiles to VRAM */
+UNSAFE_SMS_load1Tile(src,theTile)              /* copy ONE tile to VRAM */
+UNSAFE_SMS_load2Tiles(src,tilefrom)            /* copy TWO tiles to VRAM */
+UNSAFE_SMS_load4Tiles(src,tilefrom)            /* copy FOUR tiles to VRAM */
+UNSAFE_SMS_loadNTiles(src,tilefrom,tilecount)  /* copy any amount of tiles to VRAM */
+UNSAFE_SMS_loadTiles(src,tilefrom,size)        /* copy any amount of bytes to VRAM */
 ```
 
  - SEGA/SDSC headers
