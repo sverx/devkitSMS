@@ -127,7 +127,7 @@ void SMS_crt0_RST18(unsigned int tile) __z88dk_fastcall __preserves_regs(b,c,d,e
 #define TILE_PRIORITY             0x1000
 
 /* functions to load tiles into VRAM */
-#define SMS_loadTiles(src,tilefrom,size)            SMS_VRAMmemcpy (TILEtoADDR(tilefrom),(src),(size))
+#define SMS_loadTiles(src,tilefrom,size)            SMS_VRAMmemcpy((tilefrom)*32,(src),(size))
 void SMS_load1bppTiles (const void *src, unsigned int tilefrom, unsigned int size, unsigned char color0, unsigned char color1);
 
 /* functions to load compressed tiles into VRAM */
