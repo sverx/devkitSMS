@@ -6,11 +6,12 @@
 #include "SMSlib.h"
 #include "SMSlib_common.c"
 
-/* UNSAFE_SMS_loadNTiles() calls UNSAFE_SMS_VRAMmemcpy() */
+// VRAM unsafe functions. Fast, but dangerous!
+/* UNSAFE_SMS_loadNTiles() and UNSAFE_SMS_loadTiles() are macros that call UNSAFE_SMS_VRAMmemcpy() */
 
 #pragma save
 #pragma disable_warning 85
-void UNSAFE_SMS_VRAMmemcpy (unsigned int dst, const void *src, unsigned int size) __naked __z88dk_callee __preserves_regs(iyh,iyl) __sdcccall(1) {
+void * UNSAFE_SMS_VRAMmemcpy (unsigned int dst, const void *src, unsigned int size) __naked __z88dk_callee __preserves_regs(iyh,iyl) __sdcccall(1) {
   // dst in hl
   // src in de
   // size onto the stack

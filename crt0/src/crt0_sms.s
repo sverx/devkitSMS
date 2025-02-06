@@ -26,7 +26,7 @@
 ;  this library does not by itself cause the resulting executable to
 ;  be covered by the GNU General Public License. This exception does
 ;  not however invalidate any other reasons why the executable file
-;   might be covered by the GNU General Public License.
+;  might be covered by the GNU General Public License.
 ;--------------------------------------------------------------------------
 
         .module crt0
@@ -35,7 +35,7 @@
         .area _HEADER (ABS)
         .org    0                       ; Reset 00h
         di                              ; disable interrupt
-        im 1                            ; interrupt mode 1 (this won't change)
+        im 1                            ; interrupt mode 1 (this will never change)
         ld sp, #0xdff0                  ; set stack pointer at end of RAM
         jr init
 ;--------------------------------------------------------------------------
@@ -99,11 +99,15 @@ clear_ram:
         .org     0x66                   ; handle NMI
         jp _SMS_nmi_isr
 ;--------------------------------------------------------------------------
-        ; here's a block of 128 OUTI instructions, made for enabling
+        ; here is a block of 128 OUTI instructions, made for enabling
         ; UNSAFE but FAST short data transfers to VRAM
 ;--------------------------------------------------------------------------
 _OUTI128::                              ; _OUTI128 label points to a block of 128 OUTI and a RET
-        .rept 64
+        .rept 32
+        outi
+        .endm
+_OUTI96::                               ; _OUTI96 label points to a block of 96 OUTI and a RET
+        .rept 32
         outi
         .endm
 _OUTI64::                               ; _OUTI64 label points to a block of 64 OUTI and a RET
@@ -143,3 +147,4 @@ gsinit::
 gsinit_next:
         .area   _GSFINAL
         ret
+
