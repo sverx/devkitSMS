@@ -150,6 +150,7 @@ unsigned char SG_getKeycodes (unsigned int *keys, unsigned char max_keys);
 
 /* functions to decompress data to VRAM */
 #define SG_loadZX7compressedBGTiles(src,tilefrom)      SG_decompressZX7toVRAM((src),0x4000+((tilefrom)<<3))
+#define SG_loadZX7compressedBGColors(src,tilefrom)     SG_decompressZX7toVRAM((src),0x6000+((tilefrom)<<3))
 #define SG_loadZX7compressedSpritesTiles(src,tilefrom) SG_decompressZX7toVRAM((src),0x7800+((tilefrom)<<3))
 #define SG_loadZX7compressedTilesatAddr(src,dst)       SG_decompressZX7toVRAM((src),(dst))
 void SG_decompressZX7toVRAM (const void *src, unsigned int dst) __naked;
