@@ -1,1 +1,2 @@
-sdcc -o SGlib.rel -c -mz80 SGlib.c
+sdcc -o SGlib.rel -c -mz80 --max-allocs-per-node 100000 SGlib.c
+

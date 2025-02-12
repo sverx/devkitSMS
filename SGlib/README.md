@@ -65,9 +65,13 @@ unsigned char SG_getKeycodes (unsigned int *keys, unsigned char max_keys)
 _Bool SG_queryPauseRequested (void)      /* the pause key has been pressed since previous check */
 void SG_resetPauseRequest (void)         /* reset/acknowledge pause requests */
 
+/* decompress data to RAM */
+void SG_decompressZX7 (const void *src, void *dst)                    /* function that does the decompression to RAM */
+
 /* functions and macros to decompress data to VRAM */
-void SG_decompressZX7toVRAM (const void *src, unsigned int dst)       /* function that does the decompression */
-SG_loadZX7compressedBGTiles(src,tilefrom)                             /* handy macro to decompress tiles to background */
+void SG_decompressZX7toVRAM (const void *src, unsigned int dst)       /* function that does the decompression directly to VRAM */
+SG_loadZX7compressedBGTiles(src,tilefrom)                             /* handy macro to decompress tiles to background tiles */
+SG_loadZX7compressedBGColors(src,tilefrom)                            /* handy macro to decompress tiles to background attributes */
 SG_loadZX7compressedSpritesTiles(src,tilefrom)                        /* handy macro to decompress tiles to sprites */
 SG_loadZX7compressedTilesatAddr(src,dst)                              /* handy macro to decompress tiles to any location in VRAM */
 
