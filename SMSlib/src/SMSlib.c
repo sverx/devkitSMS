@@ -25,22 +25,21 @@ __sfr __at 0x3F IOPortCtrl;
 #endif
 
 /* the VDP registers initialization value (ROM) */
-const unsigned char VDPReg_init[11]={
-                  0x04, /* reg0: Mode 4 */
-                  0x20, /* reg1: display OFF - frame int (vblank) ON */
-                  0xFF, /* reg2: PNT at 0x3800 */
-                  0xFF, /* reg3: should always be 0xFF with mode 4 */
-                  0xFF, /* reg4: should always be 0xFF with mode 4 */
-                  0xFF, /* reg5: SAT at 0x3F00 */
-                  0xFF, /* reg6: Sprite tiles at 0x2000 */
+const unsigned char VDPReg_init[]={
+                  0x04, /* reg0: activate mode 4 */
+                  0x20, /* reg1: display: OFF - frame int (vblank): ON */
+                  0xFF, /* reg2: PNT is at address 0x3800 */
+                  0xFF, /* reg3: should always be 0xFF in mode 4 */
+                  0xFF, /* reg4: should always be 0xFF in mode 4 */
+                  0xFF, /* reg5: SAT is at address 0x3F00 */
+                  0xFF, /* reg6: Sprite tiles begins at address 0x2000 */
                   0x00, /* reg7: backdrop color (zero) */
                   0x00, /* reg8: scroll X (zero) */
                   0x00, /* reg9: scroll Y (zero) */
-                  0xFF  /* regA: line interrupt count (offscreen) */
-                                    };
+                  0xFF, /* regA: line interrupt count (offscreen) */
+};
 
-/* the VDP registers #0 and #1 'shadow' (initialized RAM) */
-unsigned char VDPReg[2]={0x04, 0x20};
+unsigned char VDPReg[]={0x04, 0x20};  /* the VDP registers #0 and #1 'shadow' (initialized RAM) */
 
 volatile bool VDPBlank;               /* used by INTerrupt */
 volatile unsigned char SMS_VDPFlags;  /* holds the sprite overflow and sprite collision flags */
@@ -74,19 +73,37 @@ void (*SMS_theLineInterruptHandler)(void);
 
 #ifndef TARGET_GG
 #ifdef  VDPTYPE_DETECTION
-inline void SMS_detect_VDP_type (void) {
-  // INTERNAL FUNCTION
-  unsigned char old_value,new_value;
-  while (VDPVCounterPort!=0x80);      // wait for line 0x80
-  new_value=VDPVCounterPort;
-  do {
-    old_value=new_value;              // wait until VCounter 'goes back'
-    new_value=VDPVCounterPort;
-  } while (old_value<=new_value);
-  if (old_value>=0xE7)
-    VDPType=VDP_PAL;                  // old value should be 0xF2
-  else
-    VDPType=VDP_NTSC;                 // old value should be 0xDA
+unsigned char SMS_detect_VDP_type (void) __z88dk_fastcall __naked __preserves_regs(c,d,e,h,iyh,iyl) {
+  // returns last vcount read before going back
+  __asm
+
+    in a,(0x7E)
+1$:
+    ld b,a
+    in a,(0x7E)
+    cp b
+    jr nz,1$          ; wait until stable value
+
+    cp #0x80
+    jr nz,1$          ; wait until line $80
+
+    ld l,a            ; load line number in L
+
+
+    in a,(0x7E)
+2$:
+    ld b,a
+    in a,(0x7E)
+    cp b
+    jr nz,2$          ; wait until stable value
+
+    cp l
+    jr z,2$           ; wait until it is no longer on the same line
+    ret c             ; we are done when new line value is less than the old one
+
+    ld l,a
+    jp 2$
+  __endasm;
 }
 #endif
 #endif
@@ -103,18 +120,23 @@ void SMS_init (void) {
   GG_setSpritePaletteColor(0, RGB(0,0,0));
 #endif
   /* VDP initialization */
-  for (i=0;i<0x0B;i++)
+  for (i=0;i<sizeof(VDPReg_init);i++)
     SMS_write_to_VDPRegister(i,VDPReg_init[i]);
   /* reset sprites */
   SMS_initSprites();
-  // SMS_finalizeSprites();   // useless now!
   SMS_copySpritestoSAT();
 #ifndef TARGET_GG
   /* init Pause (SMS only) */
   SMS_resetPauseRequest();
-#ifdef  VDPTYPE_DETECTION
+#ifdef VDPTYPE_DETECTION
   /* PAL/NTSC detection (SMS only) */
-  SMS_detect_VDP_type();
+  DISABLE_INTERRUPTS;
+  unsigned char detected=SMS_detect_VDP_type();
+  ENABLE_INTERRUPTS;
+  if (detected==0xF2)
+    VDPType=VDP_PAL;
+  else if (detected==0xDA)
+    VDPType=VDP_NTSC;
 #endif
 #endif
 }
@@ -311,14 +333,16 @@ void SMS_setLineCounter (unsigned char count) __z88dk_fastcall {
   SMS_write_to_VDPRegister(0x0A,count);
 }
 
-/* Vcount */
-unsigned char SMS_getVCount (void) {
-  return(VDPVCounterPort);
-}
-
-/* Hcount */
-unsigned char SMS_getHCount (void) {
-  return(VDPHCounterPort);
+unsigned char SMS_getVCount (void) __naked __preserves_regs(c,d,e,h,l,iyh,iyl) {
+  __asm
+    in a,(0x7E)
+1$:
+    ld b,a
+    in a,(0x7E)
+    cp b
+    ret z          ; when we got the same value twice it is stable (Genesis/MegaDrive issue workaround)
+    jp 1$          ; wait until value is stable
+  __endasm;
 }
 
 /* Interrupt Service Routines */

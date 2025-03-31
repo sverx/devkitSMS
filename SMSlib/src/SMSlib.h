@@ -375,10 +375,8 @@ __sfr __at (0xbf) SMS_VDPControlPort;
 /* alternative version of SMS_setBGScrollX to be used in the line interrupt handler for raster effects */
 #define INLINE_SMS_setBGScrollX(scrollX)      do{SMS_VDPControlPort=(scrollX);SMS_VDPControlPort=0x88;}while(0)
 
-/* Vcount */
-unsigned char SMS_getVCount (void);
-/* Hcount */
-unsigned char SMS_getHCount (void);
+/* Vcount  */
+unsigned char SMS_getVCount (void) __naked __preserves_regs(c,d,e,h,l,iyh,iyl);
 
 /* low level functions */
 void SMS_VRAMmemcpy (unsigned int dst, const void *src, unsigned int size) __naked __z88dk_callee __preserves_regs(iyh,iyl) __sdcccall(1);
