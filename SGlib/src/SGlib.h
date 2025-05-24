@@ -94,6 +94,11 @@ unsigned char SG_getTile (void);
 #define SG_setTileatXY(x,y,tile) do{SG_setNextTileatXY((x),(y));SG_setTile(tile);}while(0)
 #define SG_getTileatXY(x,y)      (SG_getNextTileatXY((x),(y)),SG_getTile())
 
+/* functions for fake bitmap mode */
+void SG_setPixelColor (unsigned char x, unsigned char y, _Bool foreground, unsigned char color);
+void SG_setPixel (unsigned char x, unsigned char y, _Bool foreground);
+#define SG_putPixel(x,y,fg,c) do{SG_setPixel((x),(y),(fg));SG_setPixelColor((x),(y),(fg),(c));}while(0)
+
 /* functions for sprites handling */
 void SG_initSprites (void);
 _Bool SG_addSprite (unsigned char x, unsigned char y, unsigned char tile, unsigned char attr);  /* returns false if no more sprites are available */

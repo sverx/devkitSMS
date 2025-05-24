@@ -252,6 +252,49 @@ unsigned char SG_getTile (void) {
   return(SG_byte_from_VDP_data());
 }
 
+void SG_setPixelColor (unsigned char x, unsigned char y, _Bool foreground, unsigned char color) {
+  unsigned char data;
+  unsigned char y_8, x_8;
+  unsigned int address;
+
+  y_8 = y >> 3;
+  x_8 = x >> 3;
+  address = (y_8 << 8) + (x_8 << 3) + (y % 8);
+
+  SG_set_address_VRAM_read (CGTADDRESS + address);
+  WAIT_VRAM; 
+  data = VDPDataPort;
+  color &= 0x0F;
+  if (foreground)
+    data = (data & 0x0F) | (color << 4);
+  else
+    data = (data & 0xF0) | color;
+  SG_set_address_VRAM (CGTADDRESS + address); 
+  WAIT_VRAM;
+  VDPDataPort = data;
+}
+
+void SG_setPixel (unsigned char x, unsigned char y, _Bool foreground) {
+  unsigned char data;
+  unsigned char y_8, x_8;
+  unsigned int address;
+
+  y_8 = y >> 3;
+  x_8 = x >> 3;
+  address = (y_8 << 8) + (x_8 << 3) + (y % 8);
+
+  SG_set_address_VRAM_read (PGTADDRESS + address);
+  WAIT_VRAM; 
+  data = VDPDataPort;
+  if (foreground)
+    data |= 0x80 >> (x % 8);
+  else
+    data &= ~(0x80 >> (x % 8));
+  SG_set_address_VRAM (PGTADDRESS + address);
+  WAIT_VRAM;
+  VDPDataPort = data; 
+}
+
 void SG_loadTileMap (unsigned char x, unsigned char y, void *src, unsigned int size) {
   SG_set_address_VRAM (PNTADDRESS + (y << 5) + x);
   SG_byte_array_to_VDP_data (src, size);
