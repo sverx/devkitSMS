@@ -97,7 +97,8 @@ unsigned char SG_getTile (void);
 /* functions for fake bitmap mode */
 void SG_setPixelColor (unsigned char x, unsigned char y, _Bool foreground, unsigned char color);
 void SG_setPixel (unsigned char x, unsigned char y, _Bool foreground);
-#define SG_putPixel(x,y,fg,c) do{SG_setPixel((x),(y),(fg));SG_setPixelColor((x),(y),(fg),(c));}while(0)
+#define SG_get_Tile_address(x,y) (((y)>>3) << 8) + (((x) >> 3)<<3) + ((y) % 8)
+#define SG_putPixel(x,y,fg,c)    do{SG_setPixel((x),(y),(fg));SG_setPixelColor((x),(y),(fg),(c));}while(0)
 
 /* functions for sprites handling */
 void SG_initSprites (void);

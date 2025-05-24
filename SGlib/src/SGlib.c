@@ -254,12 +254,9 @@ unsigned char SG_getTile (void) {
 
 void SG_setPixelColor (unsigned char x, unsigned char y, _Bool foreground, unsigned char color) {
   unsigned char data;
-  unsigned char y_8, x_8;
   unsigned int address;
 
-  y_8 = y >> 3;
-  x_8 = x >> 3;
-  address = (y_8 << 8) + (x_8 << 3) + (y % 8);
+  address = SG_get_Tile_address(x, y);
 
   SG_set_address_VRAM_read (CGTADDRESS + address);
   WAIT_VRAM; 
@@ -276,12 +273,9 @@ void SG_setPixelColor (unsigned char x, unsigned char y, _Bool foreground, unsig
 
 void SG_setPixel (unsigned char x, unsigned char y, _Bool foreground) {
   unsigned char data;
-  unsigned char y_8, x_8;
   unsigned int address;
 
-  y_8 = y >> 3;
-  x_8 = x >> 3;
-  address = (y_8 << 8) + (x_8 << 3) + (y % 8);
+  address = SG_get_Tile_address(x, y);
 
   SG_set_address_VRAM_read (PGTADDRESS + address);
   WAIT_VRAM; 
