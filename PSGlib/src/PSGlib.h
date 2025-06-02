@@ -48,7 +48,9 @@ void PSGStop (void);
 void PSGResume (void);
 unsigned char PSGGetStatus (void);
 
-void PSGSetMusicVolumeAttenuation (unsigned char attenuation);
+#define PSGSetMusicVolumeChannelsAttenuation(chn0_attenuation,chn1_attenuation,chn2_attenuation,chn3_attenuation)    PSGSetMusicVolumeChannelsAttenuation_f(((((unsigned int)(chn3_attenuation)&0x0F)<<12)|(((unsigned int)(chn2_attenuation)&0x0F)<<8)|(((unsigned int)(chn1_attenuation)&0x0F)<<4)|((unsigned int)(chn0_attenuation)&0x0F)))
+#define PSGSetMusicVolumeAttenuation(attenuation)                                                                    PSGSetMusicVolumeChannelsAttenuation((attenuation),(attenuation),(attenuation),(attenuation))
+void PSGSetMusicVolumeChannelsAttenuation_f (unsigned int channels_attenuation);
 void PSGSetSFXVolumeAttenuation (unsigned char attenuation);
 
 void PSGSFXPlay (void *sfx, unsigned char channels);

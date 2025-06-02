@@ -36,7 +36,7 @@ extern unsigned char PSGMusicSkipFrames;          // the frames we need to skip
 extern unsigned char PSGLoopFlag;                 // the tune should loop infinitely or not (flag)
 extern unsigned char PSGLoopCounter;              // how many times the tune should loop
 extern unsigned char PSGMusicLastLatch;           // the last PSG music latch
-extern unsigned char PSGMusicVolumeAttenuation;   // the volume attenuation applied to the tune (0-15)
+extern unsigned char PSGMusicVolumeAttenuationChn[4];   // the volume attenuation applied to the tune (0-15) per each channel
 
 //  decompression vars
 extern unsigned char PSGMusicSubstringLen;        // lenght of the substring we are playing

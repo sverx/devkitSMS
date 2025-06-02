@@ -38,7 +38,7 @@ unsigned char PSGMusicSkipFrames;          // the frames we need to skip
 unsigned char PSGLoopFlag;                 // the tune should loop infinitely or not (flag)
 unsigned char PSGLoopCounter;              // how many times the tune should loop
 unsigned char PSGMusicLastLatch;           // the last PSG music latch
-unsigned char PSGMusicVolumeAttenuation;   // the volume attenuation applied to the tune (0-15)
+unsigned char PSGMusicVolumeAttenuationChn[4];   // the volume attenuation applied to the tune (0-15) per each channel
 
 //  decompression vars
 unsigned char PSGMusicSubstringLen;        // lenght of the substring we are playing
@@ -147,7 +147,7 @@ void PSGSFXStop (void) {
       if (PSGMusicStatus) {
         PSGPort=PSGLatch|PSGChannel0|(PSGChan0LowTone&0x0F);
         PSGPort=PSGChan0HighTone&0x3F;
-        PSGPort=PSGLatch|PSGChannel0|PSGVolumeData|(((PSGChan0Volume&0x0F)+PSGMusicVolumeAttenuation>15)?15:(PSGChan0Volume&0x0F)+PSGMusicVolumeAttenuation);
+        PSGPort=PSGLatch|PSGChannel0|PSGVolumeData|(((PSGChan0Volume&0x0F)+PSGMusicVolumeAttenuationChn[0]>15)?15:(PSGChan0Volume&0x0F)+PSGMusicVolumeAttenuationChn[0]);
       } else {
         PSGPort=PSGLatch|PSGChannel0|PSGVolumeData|0x0F;
       }
@@ -158,7 +158,7 @@ void PSGSFXStop (void) {
       if (PSGMusicStatus) {
         PSGPort=PSGLatch|PSGChannel1|(PSGChan1LowTone&0x0F);
         PSGPort=PSGChan1HighTone&0x3F;
-        PSGPort=PSGLatch|PSGChannel1|PSGVolumeData|(((PSGChan1Volume&0x0F)+PSGMusicVolumeAttenuation>15)?15:(PSGChan1Volume&0x0F)+PSGMusicVolumeAttenuation);
+        PSGPort=PSGLatch|PSGChannel1|PSGVolumeData|(((PSGChan1Volume&0x0F)+PSGMusicVolumeAttenuationChn[1]>15)?15:(PSGChan1Volume&0x0F)+PSGMusicVolumeAttenuationChn[1]);
       } else {
         PSGPort=PSGLatch|PSGChannel1|PSGVolumeData|0x0F;
       }
@@ -169,7 +169,7 @@ void PSGSFXStop (void) {
       if (PSGMusicStatus) {
         PSGPort=PSGLatch|PSGChannel2|(PSGChan2LowTone&0x0F);
         PSGPort=PSGChan2HighTone&0x3F;
-        PSGPort=PSGLatch|PSGChannel2|PSGVolumeData|(((PSGChan2Volume&0x0F)+PSGMusicVolumeAttenuation>15)?15:(PSGChan2Volume&0x0F)+PSGMusicVolumeAttenuation);
+        PSGPort=PSGLatch|PSGChannel2|PSGVolumeData|(((PSGChan2Volume&0x0F)+PSGMusicVolumeAttenuationChn[2]>15)?15:(PSGChan2Volume&0x0F)+PSGMusicVolumeAttenuationChn[2]);
       } else {
         PSGPort=PSGLatch|PSGChannel2|PSGVolumeData|0x0F;
       }
@@ -179,7 +179,7 @@ void PSGSFXStop (void) {
     if (PSGChannel3SFX) {
       if (PSGMusicStatus) {
         PSGPort=PSGLatch|PSGChannel3|(PSGChan3LowTone&0x0F);
-        PSGPort=PSGLatch|PSGChannel3|PSGVolumeData|(((PSGChan3Volume&0x0F)+PSGMusicVolumeAttenuation>15)?15:(PSGChan3Volume&0x0F)+PSGMusicVolumeAttenuation);
+        PSGPort=PSGLatch|PSGChannel3|PSGVolumeData|(((PSGChan3Volume&0x0F)+PSGMusicVolumeAttenuationChn[3]>15)?15:(PSGChan3Volume&0x0F)+PSGMusicVolumeAttenuationChn[3]);
       } else {
         PSGPort=PSGLatch|PSGChannel3|PSGVolumeData|0x0F;
       }
@@ -339,15 +339,17 @@ _latch_Volume:
   ld (_PSGChan1Volume),a         ; save volume data
   ld a,(_PSGChannel1SFX)         ; channel 1 available for music?
   or a
-  jr z,_sendVolume2PSG_B
-  jp _intLoop
+  jp nz,_intLoop
+  ld de,#_PSGMusicVolumeAttenuationChn+1
+  jp _sendVolume2PSG_B
 
 _ifchn0v:
   ld (_PSGChan0Volume),a         ; save volume data
   ld a,(_PSGChannel0SFX)         ; channel 0 available for music?
   or a
-  jr z,_sendVolume2PSG_B
-  jp _intLoop
+  jp nz,_intLoop
+  ld de,#_PSGMusicVolumeAttenuationChn+0
+  jp _sendVolume2PSG_B
 
 _send2PSG_B:
   ld a,b
@@ -361,14 +363,17 @@ _latch_Volume_23:
   ld (_PSGChan3Volume),a         ; save volume data
   ld a,(_PSGChannel3SFX)         ; channel 3 available for music?
   or a
-  jr z,_sendVolume2PSG_B
-  jp _intLoop
+  jp nz,_intLoop
+  ld de,#_PSGMusicVolumeAttenuationChn+3
+  jp _sendVolume2PSG_B
+
 _chn2:
   ld (_PSGChan2Volume),a         ; save volume data
   ld a,(_PSGChannel2SFX)         ; channel 2 available for music?
   or a
-  jr z,_sendVolume2PSG_B
-  jp _intLoop
+  jp nz,_intLoop
+  ld de,#_PSGMusicVolumeAttenuationChn+2
+  jp _sendVolume2PSG_B
 
 _skipFrame:
   dec a
@@ -406,7 +411,7 @@ _sendVolume2PSG_A:
   ld c,a                           ; save the PSG command byte
   and #0x0F                        ; keep lower nibble
   ld b,a                           ; save value
-  ld a,(_PSGMusicVolumeAttenuation) ; load volume attenuation
+  ld a,(de)                        ; load volume attenuation
   add a,b                          ; add value
   cp #0x0F                         ; check overflow
   jr c,_no_overflow                ; if it is <=15 then ok
@@ -446,7 +451,7 @@ _high_part_Tone_ch1:
   ld (_PSGChan1HighTone),a       ; save channel 1 tone HIGH data
   ld a,(_PSGChannel1SFX)         ; channel 1 available for music?
   or a
-  jr z,_send2PSG_B
+  jp z,_send2PSG_B
   jp _intLoop
 
 _high_part_Tone_ch2:
