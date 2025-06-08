@@ -29,7 +29,7 @@ void bresenham(unsigned char x1, unsigned char y1, unsigned char x2, unsigned ch
             xEnd = x2;
         }
 
-        SG_putPixel(x, y, 1, color);
+        SG_setPixel(x, y, color);
 
         while (x < xEnd) {
             x++;
@@ -39,7 +39,7 @@ void bresenham(unsigned char x1, unsigned char y1, unsigned char x2, unsigned ch
                 y += (dy < 0) ? -1 : 1;
                 p += twoDyDx;
             }
-            SG_putPixel(x, y, 1, color);
+            SG_setPixel(x, y, color);
         }
     } else {
         int twoDx = dx1 << 1;
@@ -56,7 +56,7 @@ void bresenham(unsigned char x1, unsigned char y1, unsigned char x2, unsigned ch
             yEnd = y2;
         }
 
-        SG_putPixel(x, y, 1, color);
+        SG_setPixel(x, y, color);
 
         while (y < yEnd) {
             y++;
@@ -66,7 +66,7 @@ void bresenham(unsigned char x1, unsigned char y1, unsigned char x2, unsigned ch
                 x += (dx < 0) ? -1 : 1;
                 p += twoDxDy;
             }
-            SG_putPixel(x, y, 1, color);
+            SG_setPixel(x, y, color);
         }
     }
 }
@@ -86,28 +86,18 @@ void line(unsigned char x1, unsigned char y1, unsigned char x2, unsigned char y2
 }
 
 void main(void) {
-    char blank[8] = { 0, 0, 0, 0,
-                    0, 0, 0, 0};
-    
+    SG_initBMPmode(SG_COLOR_BLACK, SG_COLOR_LIGHT_GREEN);
     SG_displayOn();
-    for(unsigned int i=0; i < 256 * 3; ++i)
-    {
-      SG_loadTilePatterns(blank, i, 8);
-      SG_loadTileColours(blank, i, 8);
-    }
+    
+    line(100, 100, 150, 100, NO_COLOR_UPDATE); 
+    line(150, 100, 150, 50,  NO_COLOR_UPDATE);  
+    line(150, 50, 100, 50,   NO_COLOR_UPDATE);  
+    line(100, 50, 125, 25,   NO_COLOR_UPDATE);    
+    line(125, 25, 150, 50,   NO_COLOR_UPDATE);
+    line(150, 50, 100, 100,  NO_COLOR_UPDATE);
+    line(100, 100, 100, 50,  NO_COLOR_UPDATE);
+    line(100, 50, 150, 100,  NO_COLOR_UPDATE);
 
-    unsigned int tileno=0;
-    for(unsigned char y=0; y < (192 >> 3); ++y)
-      for(unsigned char x=0; x < (256 >> 3); ++x)
-        SG_setTileatXY(x, y, tileno++);
-
-    line(100, 100, 150, 100, 2); 
-    line(150, 100, 150, 50,  3);  
-    line(150, 50, 100, 50,   4);  
-    line(100, 50, 125, 25,   5);    
-    line(125, 25, 150, 50,   6);
-    line(150, 50, 100, 100,  7);
-    line(100, 100, 100, 50,  8);
-    line(100, 50, 150, 100,  9);
+    while(1) SG_waitForVBlank();
 }
 

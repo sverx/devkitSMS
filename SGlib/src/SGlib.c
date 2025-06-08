@@ -254,35 +254,43 @@ unsigned char SG_getTile (void) {
   return(SG_byte_from_VDP_data());
 }
 
-void SG_setPixelColor (unsigned char x, unsigned char y, _Bool foreground, unsigned char color) {
-  unsigned char data;
+void SG_initBMPmode (unsigned char bg_color, unsigned char fg_color) {
+  unsigned char color_data=((fg_color & 0x0F)  << 4) + (bg_color & 0x0F);
+  unsigned int tileno=0;
   
-  SG_set_address_VRAM_read (CGTADDRESS + SG_get_Tile_address(x, y));
-  WAIT_VRAM; 
-  data = VDPDataPort;
-  color &= 0x0F;
-  if (foreground)
-    data = (data & 0x0F) | (color << 4);
-  else
-    data = (data & 0xF0) | color;
-  SG_set_address_VRAM (CGTADDRESS + SG_get_Tile_address(x, y)); 
+  SG_set_address_VRAM (CGTADDRESS + SG_get_Tile_address(0, 0));
   WAIT_VRAM;
-  VDPDataPort = data;
+  for (unsigned char y=0; y != SG_MAX_CONSOLE_RES_Y; ++y) {
+    for (unsigned char x=0; x != SG_MAX_CONSOLE_RES_X; ++x) {
+      for(unsigned char t=8; t != 0; --t) {
+        VDPDataPort = color_data;
+      }
+      SG_setTileatXY(x, y, tileno++);
+    }
+  }
 }
 
-void SG_setPixel (unsigned char x, unsigned char y, _Bool foreground) {
+void SG_setPixel (unsigned char x, unsigned char y, unsigned char color) {
   unsigned char data;
+  unsigned int address=SG_get_Tile_address(x, y);
   
-  SG_set_address_VRAM_read (PGTADDRESS + SG_get_Tile_address(x, y));
+  SG_set_address_VRAM_read (PGTADDRESS + address);
   WAIT_VRAM; 
-  data = VDPDataPort;
-  if (foreground)
-    data |= 0x80 >> (x % 8);
-  else
-    data &= ~(0x80 >> (x % 8));
-  SG_set_address_VRAM (PGTADDRESS + SG_get_Tile_address(x, y));
+  data = VDPDataPort | (0x80 >> (x % 8));
+  SG_set_address_VRAM (PGTADDRESS + address);
   WAIT_VRAM;
-  VDPDataPort = data; 
+  VDPDataPort = data;
+
+  if (color != NO_COLOR_UPDATE) {
+    SG_set_address_VRAM_read (CGTADDRESS + address);
+    WAIT_VRAM; 
+    data = VDPDataPort;
+    color &= 0x0F;
+    data = (data & 0x0F) | (color << 4);
+    SG_set_address_VRAM (CGTADDRESS + address); 
+    WAIT_VRAM;
+    VDPDataPort = data;  
+  }
 }
 
 void SG_loadTileMap (unsigned char x, unsigned char y, void *src, unsigned int size) {
