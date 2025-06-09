@@ -285,10 +285,9 @@ void SG_setPixel (unsigned char x, unsigned char y, unsigned char color) {
   SG_set_address_VRAM (PGTADDRESS + address);
   VDPDataPort = data;
 
-
   //set color data if requested
-  color &= 0x7F;
-  if (color != NO_COLOR_UPDATE) {
+  if (!(color & NO_COLOR_UPDATE)) {
+    color &= 0x0F;
     SG_set_address_VRAM_read (CGTADDRESS + address);
     WAIT_VRAM; 
     data = VDPDataPort;
