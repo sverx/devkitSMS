@@ -258,11 +258,10 @@ void SG_initBMPmode (unsigned char bg_color, unsigned char fg_color) {
   unsigned char color_data=((fg_color & 0x0F)  << 4) + (bg_color & 0x0F);
   unsigned int tileno=0;
   
-  SG_set_address_VRAM (CGTADDRESS + SG_get_Tile_address(0, 0));
-  WAIT_VRAM;
-  for (unsigned char y=0; y != SG_MAX_CONSOLE_RES_Y; ++y) {
-    for (unsigned char x=0; x != SG_MAX_CONSOLE_RES_X; ++x) {
-      for(unsigned char t=8; t != 0; --t) {
+  for (unsigned char y=0; y != SG_MAX_TILE_RES_Y; ++y) {
+    for (unsigned char x=0; x != SG_MAX_TILE_RES_X; ++x) {
+      SG_set_address_VRAM (CGTADDRESS + SG_get_Tile_address(x << 3, y << 3));
+      for(unsigned char t=8; t != 0; --t) {  
         VDPDataPort = color_data;
       }
       SG_setTileatXY(x, y, tileno++);
@@ -271,24 +270,37 @@ void SG_initBMPmode (unsigned char bg_color, unsigned char fg_color) {
 }
 
 void SG_setPixel (unsigned char x, unsigned char y, unsigned char color) {
-  unsigned char data;
+  unsigned char data=(0x80 >> (x % 8));
   unsigned int address=SG_get_Tile_address(x, y);
+  _Bool fg_color=(color <= 0x10); 
   
+  //set pattern data
   SG_set_address_VRAM_read (PGTADDRESS + address);
   WAIT_VRAM; 
-  data = VDPDataPort | (0x80 >> (x % 8));
+  if (fg_color) {
+    data |= VDPDataPort;
+  } else {
+    data = VDPDataPort & (~data);
+  }
   SG_set_address_VRAM (PGTADDRESS + address);
-  WAIT_VRAM;
   VDPDataPort = data;
 
+
+  //set color data if requested
+  color &= 0x7F;
   if (color != NO_COLOR_UPDATE) {
     SG_set_address_VRAM_read (CGTADDRESS + address);
     WAIT_VRAM; 
     data = VDPDataPort;
-    color &= 0x0F;
-    data = (data & 0x0F) | (color << 4);
+
+    // coloring foreground or background
+    if (fg_color) {
+      data = (data & 0x0F) | (color << 4);
+    } else {
+      data = (data & 0xF0) | color;
+    }
+
     SG_set_address_VRAM (CGTADDRESS + address); 
-    WAIT_VRAM;
     VDPDataPort = data;  
   }
 }

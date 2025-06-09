@@ -103,7 +103,8 @@ unsigned char SG_getTile (void);
 /* functions for fake bitmap mode */
 void SG_initBMPmode (unsigned char background_color, unsigned char foreground_color);
 void SG_setPixel (unsigned char x, unsigned char y, unsigned char color);
-#define NO_COLOR_UPDATE             0xFF
+#define NO_COLOR_UPDATE             0x10
+#define SG_BgColor(x)               (x | 0x80)
 
 /* functions for sprites handling */
 void SG_initSprites (void);

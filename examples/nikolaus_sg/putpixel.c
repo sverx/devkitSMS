@@ -85,19 +85,30 @@ void line(unsigned char x1, unsigned char y1, unsigned char x2, unsigned char y2
   bresenham(x1, y1, x2, y2, color);
 }
 
-void main(void) {
-    SG_initBMPmode(SG_COLOR_BLACK, SG_COLOR_LIGHT_GREEN);
-    SG_displayOn();
-    
-    line(100, 100, 150, 100, NO_COLOR_UPDATE); 
-    line(150, 100, 150, 50,  NO_COLOR_UPDATE);  
-    line(150, 50, 100, 50,   NO_COLOR_UPDATE);  
-    line(100, 50, 125, 25,   NO_COLOR_UPDATE);    
-    line(125, 25, 150, 50,   NO_COLOR_UPDATE);
-    line(150, 50, 100, 100,  NO_COLOR_UPDATE);
-    line(100, 100, 100, 50,  NO_COLOR_UPDATE);
-    line(100, 50, 150, 100,  NO_COLOR_UPDATE);
 
-    while(1) SG_waitForVBlank();
+unsigned char color(unsigned char color, _Bool bgmode) {
+
+    return bgmode ? SG_BgColor(color) : color;
 }
 
+void draw_house(unsigned char x_offset, unsigned char y_offset, _Bool extra_color, _Bool bgmode) {
+
+    line(50+x_offset,    100+y_offset,   100+x_offset,   100+y_offset,   color((extra_color ? 2 : NO_COLOR_UPDATE), bgmode)); 
+    line(100+x_offset,   100+y_offset,   100+x_offset,   50+y_offset,    color((extra_color ? 3 : NO_COLOR_UPDATE), bgmode));  
+    line(100+x_offset,   50+y_offset,    50+x_offset,    50+y_offset,    color((extra_color ? 4 : NO_COLOR_UPDATE), bgmode));  
+    line(50+x_offset,    50+y_offset,    75+x_offset,    25+y_offset,    color((extra_color ? 5 : NO_COLOR_UPDATE), bgmode));    
+    line(75+x_offset,    25+y_offset,    100+x_offset,   50+y_offset,    color((extra_color ? 6 : NO_COLOR_UPDATE), bgmode));
+    line(100+x_offset,   50+y_offset,    50+x_offset,    100+y_offset,   color((extra_color ? 7 : NO_COLOR_UPDATE), bgmode));
+    line(50+x_offset,    100+y_offset,   50+x_offset,    50+y_offset,    color((extra_color ? 8 : NO_COLOR_UPDATE), bgmode));
+    line(50+x_offset,    50+y_offset,    100+x_offset,   100+y_offset,   color((extra_color ? 9 : NO_COLOR_UPDATE), bgmode));
+}
+
+void main(void) {
+    SG_initBMPmode(SG_COLOR_WHITE, SG_COLOR_LIGHT_GREEN);
+    SG_displayOn();
+    
+    draw_house(0,   0,  1, 0);
+    draw_house(75, 75,  0, 0);
+    draw_house(75,  0,  1, 1);
+    while(1) SG_waitForVBlank();
+}
