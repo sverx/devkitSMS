@@ -21,6 +21,9 @@
 #define PSGLoop             #0x01
 #define PSGEnd              #0x00
 
+// When set, the SFX should loop
+#define SFX_LOOP_FLAG       0x10
+
 /* define PSGPort (SDCC z80 syntax) */
 __sfr __at 0x7F PSGPort;
 
@@ -75,7 +78,6 @@ void *PSGSFXStart;                         // the pointer to the beginning of SF
 void *PSGSFXPointer;                       // the pointer to the current address
 void *PSGSFXLoopPoint;                     // the pointer to the loop begin
 unsigned char PSGSFXSkipFrames;            // the frames we need to skip
-unsigned char PSGSFXLoopFlag;              // the SFX should loop or not (flag)
 unsigned char PSGSFXVolumeAttenuation;     // the volume attenuation applied to the SFX (0-15)
 
 // decompression vars for SFX
@@ -187,12 +189,12 @@ void PSGSFXPlay (void *sfx, unsigned char channels) {
                                      which channel(s) the SFX will use
 */
   PSGSFXStop();
-  PSGSFXLoopFlag=0;
   PSGSFXStart=sfx;              // store begin of SFX
   PSGSFXPointer=sfx;            // set the pointer to begin of SFX
   PSGSFXLoopPoint=sfx;          // looppointer points to begin too
   PSGSFXSkipFrames=0;           // reset the skip frames
   PSGSFXSubstringLen=0;         // reset the substring len
+  // SFX_LOOP_FLAG cleared (no loop) by default
   PSGChannelSFX = channels & (SFX_CHANNEL0|SFX_CHANNEL1|SFX_CHANNEL2|SFX_CHANNEL3);
 }
 
@@ -200,7 +202,7 @@ void PSGSFXCancelLoop (void) {
 /* *********************************************************************
   sets the currently looping SFX to no more loops after the current
 */
-  PSGSFXLoopFlag=0;
+  PSGChannelSFX &= ~SFX_LOOP_FLAG;
 }
 
 unsigned char PSGSFXGetStatus (void) {
@@ -217,7 +219,7 @@ void PSGSFXPlayLoop (void *sfx, unsigned char channels) {
                     that indicates which channel(s) the SFX will use
 */
   PSGSFXPlay(sfx, channels);
-  PSGSFXLoopFlag=1;
+  PSGChannelSFX |= SFX_LOOP_FLAG;
 }
 #endif
 
@@ -655,8 +657,8 @@ _SFXsetLoopPoint:
   jp _intSFXLoop
 
 _sfxLoop:
-  ld a,(_PSGSFXLoopFlag)              ; is it a looping SFX?
-  or a
+  ld a,(_PSGChannelSFX)              ; is it a looping SFX?
+  bit 4, a
   jp z,_PSGSFXStop                    ; No:stop it! (tail call optimization)
   ld hl,(_PSGSFXLoopPoint)
   ld (_PSGSFXPointer),hl

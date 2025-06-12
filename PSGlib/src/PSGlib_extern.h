@@ -71,7 +71,6 @@ extern void *PSGSFXStart;                         // the pointer to the beginnin
 extern void *PSGSFXPointer;                       // the pointer to the current address
 extern void *PSGSFXLoopPoint;                     // the pointer to the loop begin
 extern unsigned char PSGSFXSkipFrames;            // the frames we need to skip
-extern unsigned char PSGSFXLoopFlag;              // the SFX should loop or not (flag)
 extern unsigned char PSGSFXVolumeAttenuation;     // the volume attenuation applied to the SFX (0-15)
 
 // decompression vars for SFX
