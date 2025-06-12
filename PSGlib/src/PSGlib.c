@@ -60,9 +60,6 @@ unsigned char PSGChan2LowTone;             // the low tone bits for channel 2
 unsigned char PSGChan2HighTone;            // the high tone bits for channel 2
 unsigned char PSGChan3LowTone;             // the tone bits for channel 3
 
-// flags for channels SFX access
-// (uses SFX_CHANNEL0-3 bits)
-unsigned char PSGChannelSFX;               // Bit set means channel is allocated to SFX
 
 // volume buffering for SFX
 unsigned char PSGSFXChan0Volume;           // the volume for SFX channel 0
@@ -71,7 +68,9 @@ unsigned char PSGSFXChan2Volume;           // the volume for SFX channel 2
 unsigned char PSGSFXChan3Volume;           // the volume for SFX channel 3
 
 // fundamental vars for SFX
-unsigned char PSGSFXStatus;                // are we playing a SFX?
+
+// Flags for channels SFX access (uses SFX_CHANNEL0-3 bits). If no channel bits are set, then an SFX is not being played.
+unsigned char PSGChannelSFX;               // Bit set means channel is allocated to SFX
 void *PSGSFXStart;                         // the pointer to the beginning of SFX
 void *PSGSFXPointer;                       // the pointer to the current address
 void *PSGSFXLoopPoint;                     // the pointer to the loop begin
@@ -140,51 +139,46 @@ void PSGSFXStop (void) {
 /* *********************************************************************
   stops the SFX (leaving the music on, if it's playing)
 */
-  if (PSGSFXStatus) {
-    if (PSGChannelSFX & SFX_CHANNEL0) {
-      if (PSGMusicStatus) {
-        PSGPort=PSGLatch|PSGChannel0|(PSGChan0LowTone&0x0F);
-        PSGPort=PSGChan0HighTone&0x3F;
-        PSGPort=PSGLatch|PSGChannel0|PSGVolumeData|(((PSGChan0Volume&0x0F)+PSGMusicVolumeAttenuation>15)?15:(PSGChan0Volume&0x0F)+PSGMusicVolumeAttenuation);
-      } else {
-        PSGPort=PSGLatch|PSGChannel0|PSGVolumeData|0x0F;
-      }
-      PSGChannelSFX&=~SFX_CHANNEL0;
+  if (PSGChannelSFX & SFX_CHANNEL0) {
+    if (PSGMusicStatus) {
+      PSGPort=PSGLatch|PSGChannel0|(PSGChan0LowTone&0x0F);
+      PSGPort=PSGChan0HighTone&0x3F;
+      PSGPort=PSGLatch|PSGChannel0|PSGVolumeData|(((PSGChan0Volume&0x0F)+PSGMusicVolumeAttenuation>15)?15:(PSGChan0Volume&0x0F)+PSGMusicVolumeAttenuation);
+    } else {
+      PSGPort=PSGLatch|PSGChannel0|PSGVolumeData|0x0F;
     }
-
-    if (PSGChannelSFX & SFX_CHANNEL1) {
-      if (PSGMusicStatus) {
-        PSGPort=PSGLatch|PSGChannel1|(PSGChan1LowTone&0x0F);
-        PSGPort=PSGChan1HighTone&0x3F;
-        PSGPort=PSGLatch|PSGChannel1|PSGVolumeData|(((PSGChan1Volume&0x0F)+PSGMusicVolumeAttenuation>15)?15:(PSGChan1Volume&0x0F)+PSGMusicVolumeAttenuation);
-      } else {
-        PSGPort=PSGLatch|PSGChannel1|PSGVolumeData|0x0F;
-      }
-      PSGChannelSFX&=~SFX_CHANNEL1;
-    }
-
-    if (PSGChannelSFX & SFX_CHANNEL2) {
-      if (PSGMusicStatus) {
-        PSGPort=PSGLatch|PSGChannel2|(PSGChan2LowTone&0x0F);
-        PSGPort=PSGChan2HighTone&0x3F;
-        PSGPort=PSGLatch|PSGChannel2|PSGVolumeData|(((PSGChan2Volume&0x0F)+PSGMusicVolumeAttenuation>15)?15:(PSGChan2Volume&0x0F)+PSGMusicVolumeAttenuation);
-      } else {
-        PSGPort=PSGLatch|PSGChannel2|PSGVolumeData|0x0F;
-      }
-      PSGChannelSFX&=~SFX_CHANNEL2;
-    }
-
-    if (PSGChannelSFX & SFX_CHANNEL3) {
-      if (PSGMusicStatus) {
-        PSGPort=PSGLatch|PSGChannel3|(PSGChan3LowTone&0x0F);
-        PSGPort=PSGLatch|PSGChannel3|PSGVolumeData|(((PSGChan3Volume&0x0F)+PSGMusicVolumeAttenuation>15)?15:(PSGChan3Volume&0x0F)+PSGMusicVolumeAttenuation);
-      } else {
-        PSGPort=PSGLatch|PSGChannel3|PSGVolumeData|0x0F;
-      }
-      PSGChannelSFX&=~SFX_CHANNEL3;
-    }
-    PSGSFXStatus=PSG_STOPPED;
   }
+
+  if (PSGChannelSFX & SFX_CHANNEL1) {
+    if (PSGMusicStatus) {
+      PSGPort=PSGLatch|PSGChannel1|(PSGChan1LowTone&0x0F);
+      PSGPort=PSGChan1HighTone&0x3F;
+      PSGPort=PSGLatch|PSGChannel1|PSGVolumeData|(((PSGChan1Volume&0x0F)+PSGMusicVolumeAttenuation>15)?15:(PSGChan1Volume&0x0F)+PSGMusicVolumeAttenuation);
+    } else {
+      PSGPort=PSGLatch|PSGChannel1|PSGVolumeData|0x0F;
+    }
+  }
+
+  if (PSGChannelSFX & SFX_CHANNEL2) {
+    if (PSGMusicStatus) {
+      PSGPort=PSGLatch|PSGChannel2|(PSGChan2LowTone&0x0F);
+      PSGPort=PSGChan2HighTone&0x3F;
+      PSGPort=PSGLatch|PSGChannel2|PSGVolumeData|(((PSGChan2Volume&0x0F)+PSGMusicVolumeAttenuation>15)?15:(PSGChan2Volume&0x0F)+PSGMusicVolumeAttenuation);
+    } else {
+      PSGPort=PSGLatch|PSGChannel2|PSGVolumeData|0x0F;
+    }
+  }
+
+  if (PSGChannelSFX & SFX_CHANNEL3) {
+    if (PSGMusicStatus) {
+      PSGPort=PSGLatch|PSGChannel3|(PSGChan3LowTone&0x0F);
+      PSGPort=PSGLatch|PSGChannel3|PSGVolumeData|(((PSGChan3Volume&0x0F)+PSGMusicVolumeAttenuation>15)?15:(PSGChan3Volume&0x0F)+PSGMusicVolumeAttenuation);
+    } else {
+      PSGPort=PSGLatch|PSGChannel3|PSGVolumeData|0x0F;
+    }
+  }
+
+  PSGChannelSFX &= ~SFX_ALL_CHANNELS;
 }
 
 void PSGSFXPlay (void *sfx, unsigned char channels) {
@@ -200,7 +194,6 @@ void PSGSFXPlay (void *sfx, unsigned char channels) {
   PSGSFXSkipFrames=0;           // reset the skip frames
   PSGSFXSubstringLen=0;         // reset the substring len
   PSGChannelSFX = channels & (SFX_CHANNEL0|SFX_CHANNEL1|SFX_CHANNEL2|SFX_CHANNEL3);
-  PSGSFXStatus=PSG_PLAYING;
 }
 
 void PSGSFXCancelLoop (void) {
@@ -214,7 +207,7 @@ unsigned char PSGSFXGetStatus (void) {
 /* *********************************************************************
   returns the current SFX status
 */
-  return(PSGSFXStatus);
+  return (PSGChannelSFX & SFX_ALL_CHANNELS) ? PSG_PLAYING : PSG_STOPPED;
 }
 
 #ifndef PSGLIB_NOSFXCODE
@@ -559,8 +552,8 @@ void PSGSFXFrame (void) {
    processes a SFX frame
 */
 __asm
-  ld a,(_PSGSFXStatus)           ; check if we have got to play SFX
-  or a
+  ld a,(_PSGChannelSFX)          ; check if we have got to play SFX
+  and #0xf
   ret z
 
   ld a,(_PSGSFXSkipFrames)       ; check if we have got to skip frames
