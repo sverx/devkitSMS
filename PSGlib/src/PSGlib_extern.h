@@ -59,10 +59,8 @@ extern unsigned char PSGChan2HighTone;            // the high tone bits for chan
 extern unsigned char PSGChan3LowTone;             // the tone bits for channel 3
 
 // flags for channels SFX access
-extern unsigned char PSGChannel0SFX;              // !0 means channel 0 is allocated to SFX
-extern unsigned char PSGChannel1SFX;              // !0 means channel 1 is allocated to SFX
-extern unsigned char PSGChannel2SFX;              // !0 means channel 2 is allocated to SFX
-extern unsigned char PSGChannel3SFX;              // !0 means channel 3 is allocated to SFX
+// (uses SFX_CHANNEL0-3 bits)
+extern unsigned char PSGChannelSFX;               // Bit set means channel is allocated to SFX
 
 // volume buffering for SFX
 extern unsigned char PSGSFXChan0Volume;           // the volume for SFX channel 0
