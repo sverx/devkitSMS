@@ -46,6 +46,12 @@ void SG_setBackdropColor (unsigned char entry);
 #define SG_COLOR_GRAY                  0x0E
 #define SG_COLOR_WHITE                 0x0F
 
+// screen numbers
+#define SG_MAX_SCREEN_RES_X            (256)
+#define SG_MAX_SCREEN_RES_Y            (192)
+#define SG_MAX_TILE_RES_X              (SG_MAX_SCREEN_RES_X >> 3)
+#define SG_MAX_TILE_RES_Y              (SG_MAX_SCREEN_RES_Y >> 3)
+
 /* wait until next VBlank starts */
 void SG_waitForVBlank (void);
 
@@ -93,6 +99,12 @@ void SG_getNextTileatXY (unsigned char x, unsigned char y);
 unsigned char SG_getTile (void);
 #define SG_setTileatXY(x,y,tile) do{SG_setNextTileatXY((x),(y));SG_setTile(tile);}while(0)
 #define SG_getTileatXY(x,y)      (SG_getNextTileatXY((x),(y)),SG_getTile())
+
+/* functions for fake bitmap mode */
+void SG_initBMPmode (unsigned char background_color, unsigned char foreground_color);
+void SG_setPixel (unsigned char x, unsigned char y, unsigned char color);
+#define NO_COLOR_UPDATE             0x10
+#define SG_BgColor(x)               (x | 0x80)
 
 /* functions for sprites handling */
 void SG_initSprites (void);
