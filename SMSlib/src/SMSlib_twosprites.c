@@ -68,7 +68,7 @@ _secondSpriteClipped:
 */
 
 #ifdef NO_SPRITE_CHECKS
-// 1st sdcccall(1) ASM version: 204 CPU cycles
+// 1st sdcccall(1) ASM version: 215 CPU cycles
 void SMS_addTwoAdjoiningSprites_f (unsigned char y, unsigned int x_tile) __naked __preserves_regs(d,e,iyh,iyl) __sdcccall(1) {
   // Y passed in A
   // X passed in D
@@ -87,7 +87,8 @@ void SMS_addTwoAdjoiningSprites_f (unsigned char y, unsigned int x_tile) __naked
     ld (hl),a                        ; write Y again for the second sprite (always as Y-1)
 
     ld hl,#_SpriteTableXN
-    sla c
+    sla c                            ; SpriteNextFree * 2
+    add hl,bc                        ; hl+=SpriteNextFree
     ld (hl),d                        ; write X
     inc hl
     ld (hl),e                        ; write tile number
