@@ -33,6 +33,7 @@ void SMS_addFourAdjoiningSprites_f (unsigned char y, unsigned int x_tile) __nake
 
     ld hl,#_SpriteTableXN
     sla c
+    add hl,bc                        ; hl+=SpriteNextFree*2
     ld (hl),d                        ; write X
     inc hl
     ld (hl),e                        ; write tile number
@@ -43,6 +44,7 @@ void SMS_addFourAdjoiningSprites_f (unsigned char y, unsigned int x_tile) __nake
     ld a,(#_spritesWidth)            ; load current sprite width
     ld b,a                           ; save it in B
 #endif
+
     add a,d                          ; add to X
     ret c                            ; if new X is overflowing, do not place second sprite and leave
 
@@ -55,17 +57,15 @@ void SMS_addFourAdjoiningSprites_f (unsigned char y, unsigned int x_tile) __nake
     inc hl
     ld (hl),a                        ; write tile number + spritesTileOffset
 
-    ld  hl,#_SpriteNextFree
-    inc (hl)                         ; increment SpriteNextFree again
-
 #ifdef NO_SPRITE_ZOOM
     ld a,#16
 #else
     ld a,b                           ; load current sprite width from B
     add a,a                          ; double it
 #endif
+
     add a,d                          ; add to X
-    ret c                            ; if new X is overflowing, do not place third sprite and leave
+    jr c,_thirdSpriteClipped         ; if new X is overflowing, do not place third sprite
 
     inc hl
     ld (hl),a                        ; write X + spritesWidth*2
@@ -76,9 +76,6 @@ void SMS_addFourAdjoiningSprites_f (unsigned char y, unsigned int x_tile) __nake
     inc hl
     ld (hl),a                        ; write tile number + spritesTileOffset*2
 
-    ld  hl,#_SpriteNextFree
-    inc (hl)                         ; increment SpriteNextFree again
-
 #ifdef NO_SPRITE_ZOOM
     ld a,#24
 #else
@@ -86,8 +83,9 @@ void SMS_addFourAdjoiningSprites_f (unsigned char y, unsigned int x_tile) __nake
     add a,a                          ; make it twice
     add a,b                          ; make it three times
 #endif
+
     add a,d                          ; add to X
-    ret c                            ; if new X is overflowing, do not place fourth sprite and leave
+    jr c,_fourthSpriteClipped        ; if new X is overflowing, do not place fourth sprite
 
     inc hl
     ld (hl),a                        ; write X + spritesWidth*3
@@ -99,8 +97,21 @@ void SMS_addFourAdjoiningSprites_f (unsigned char y, unsigned int x_tile) __nake
     inc hl
     ld (hl),a                        ; write tile number + spritesTileOffset*3
 
-    ld  hl,#_SpriteNextFree
-    inc (hl)                         ; increment SpriteNextFree again
+    ld a,(#_SpriteNextFree)
+    add a,#3                         ; three more sprites added
+    ld (#_SpriteNextFree),a          ; save SpriteNextFree new value
+    ret
+
+_thirdSpriteClipped:
+    ld a,(#_SpriteNextFree)          ; third sprite has been clipped
+    inc a                            ; so only one more sprite has been added
+    ld (#_SpriteNextFree),a          ; save SpriteNextFree new value
+    ret
+
+_fourthSpriteClipped:
+    ld a,(#_SpriteNextFree)          ; fourth sprite has been clipped
+    add a,#2                         ; so only two more sprites have been added
+    ld (#_SpriteNextFree),a          ; save SpriteNextFree new value
     ret
   __endasm;
 }
@@ -144,6 +155,7 @@ void SMS_addFourAdjoiningSprites_f (unsigned int y, unsigned int x_tile) __naked
     ld a,(#_spritesWidth)            ; load current sprite width
     ld b,a                           ; save it in B
 #endif
+
     add a,d                          ; add to X
     jr c,_secondSpriteClipped        ; if new X is overflowing, do not place second sprite
     inc hl
@@ -161,6 +173,7 @@ void SMS_addFourAdjoiningSprites_f (unsigned int y, unsigned int x_tile) __naked
     ld a,b                           ; load current sprite width
     add a,a                          ; double that
 #endif
+
     add a,d                          ; add to X
     jr c,_thirdSpriteClipped         ; if new X is overflowing, do not place third sprite
     inc hl
@@ -179,6 +192,7 @@ void SMS_addFourAdjoiningSprites_f (unsigned int y, unsigned int x_tile) __naked
     add a,a                          ; double that
     add a,b                          ; three times that
 #endif
+
     add a,d                          ; add to X
     jr c,_fourthSpriteClipped        ; if new X is overflowing, do not place fourth sprite
     inc hl
