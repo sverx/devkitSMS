@@ -1,44 +1,44 @@
-#include "../SMSlib/SMSlib.h"
+#include "SMSlib.h"
 
 unsigned char color;
 
 /* declare the function we'll use as a handler for the line IRQ */
 void lineIRQhandler (void) {
 
-	/* update the preselected color */
-	SMS_setColor(color);
+  /* update the preselected color */
+  SMS_setColor(color);
 
   /* prepare for next color update */
-	color++;
-	SMS_setNextSpriteColoratIndex(0);
+  color++;
+  SMS_setNextSpriteColoratIndex(0);
 }
 
 void main (void) {
 
   /* configure the line IRQ handler */
-	SMS_setLineInterruptHandler(&lineIRQhandler);
+  SMS_setLineInterruptHandler(&lineIRQhandler);
 
   /* configure the line counter to trigger the IRQ after line 2 and every 3rd line after that */
-	SMS_setLineCounter(2);
+  SMS_setLineCounter(2);
 
   /* enable the line interrupt */
-	SMS_enableLineInterrupt();
+  SMS_enableLineInterrupt();
 
   /* we won't even turn the display on, as we're using the backdrop/border color */
-	//SMS_displayOn();
+  //SMS_displayOn();
 
-	for (;;) {
-		SMS_waitForVBlank();
+  for (;;) {
+    SMS_waitForVBlank();
 
-		/* set sprite color #0 to black (the sprite color entry #0 is the default pick for the border and backdrop color) */
-		color = 0;
-		SMS_setNextSpriteColoratIndex(0);
-		SMS_setColor(color);
+    /* set sprite color #0 to black (the sprite color entry #0 is the default pick for the border and backdrop color) */
+    color = 0;
+    SMS_setNextSpriteColoratIndex(0);
+    SMS_setColor(color);
 
-		/* prepare for next color update */
-		color++;
-		SMS_setNextSpriteColoratIndex(0);   /* note: this needs to be the last command to the VDP, so that next command is the first issued in the line IRQ handler */
-	}
+    /* prepare for next color update */
+    color++;
+    SMS_setNextSpriteColoratIndex(0);   /* note: this needs to be the last command to the VDP, so that next command is the first issued in the line IRQ handler */
+  }
 }
 
 SMS_EMBED_SEGA_ROM_HEADER(9999,0);
