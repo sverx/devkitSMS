@@ -12,13 +12,13 @@ void PSGSetMusicVolumeAttenuation (unsigned char attenuation) {
 */
   PSGMusicVolumeAttenuation=attenuation;
   if (PSGMusicStatus) {
-    if (!PSGChannel0SFX)
+    if (!(PSGChannelSFX & SFX_CHANNEL0))
       PSGPort=PSGLatch|PSGChannel0|PSGVolumeData|(((PSGChan0Volume&0x0F)+PSGMusicVolumeAttenuation>15)?15:(PSGChan0Volume&0x0F)+PSGMusicVolumeAttenuation);
-    if (!PSGChannel1SFX)
+    if (!(PSGChannelSFX & SFX_CHANNEL1))
       PSGPort=PSGLatch|PSGChannel1|PSGVolumeData|(((PSGChan1Volume&0x0F)+PSGMusicVolumeAttenuation>15)?15:(PSGChan1Volume&0x0F)+PSGMusicVolumeAttenuation);
-    if (!PSGChannel2SFX)
+    if (!(PSGChannelSFX & SFX_CHANNEL2))
       PSGPort=PSGLatch|PSGChannel2|PSGVolumeData|(((PSGChan2Volume&0x0F)+PSGMusicVolumeAttenuation>15)?15:(PSGChan2Volume&0x0F)+PSGMusicVolumeAttenuation);
-    if (!PSGChannel3SFX)
+    if (!(PSGChannelSFX & SFX_CHANNEL3))
       PSGPort=PSGLatch|PSGChannel3|PSGVolumeData|(((PSGChan3Volume&0x0F)+PSGMusicVolumeAttenuation>15)?15:(PSGChan3Volume&0x0F)+PSGMusicVolumeAttenuation);
   }
 }
@@ -30,13 +30,13 @@ void PSGSetSFXVolumeAttenuation (unsigned char attenuation) {
 */
   PSGSFXVolumeAttenuation=attenuation;
   if (PSGMusicStatus) {
-    if (PSGChannel0SFX)
+    if (PSGChannelSFX & SFX_CHANNEL0)
       PSGPort=PSGLatch|PSGChannel0|PSGVolumeData|(((PSGSFXChan0Volume&0x0F)+PSGSFXVolumeAttenuation>15)?15:(PSGSFXChan0Volume&0x0F)+PSGSFXVolumeAttenuation);
-    if (PSGChannel1SFX)
+    if (PSGChannelSFX & SFX_CHANNEL1)
       PSGPort=PSGLatch|PSGChannel1|PSGVolumeData|(((PSGSFXChan1Volume&0x0F)+PSGSFXVolumeAttenuation>15)?15:(PSGSFXChan1Volume&0x0F)+PSGSFXVolumeAttenuation);
-    if (PSGChannel2SFX)
+    if (PSGChannelSFX & SFX_CHANNEL2)
       PSGPort=PSGLatch|PSGChannel2|PSGVolumeData|(((PSGSFXChan2Volume&0x0F)+PSGSFXVolumeAttenuation>15)?15:(PSGSFXChan2Volume&0x0F)+PSGSFXVolumeAttenuation);
-    if (PSGChannel3SFX)
+    if (PSGChannelSFX & SFX_CHANNEL3)
       PSGPort=PSGLatch|PSGChannel3|PSGVolumeData|(((PSGSFXChan3Volume&0x0F)+PSGSFXVolumeAttenuation>15)?15:(PSGSFXChan3Volume&0x0F)+PSGSFXVolumeAttenuation);
   }
 }
