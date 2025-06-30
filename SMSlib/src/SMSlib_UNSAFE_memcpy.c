@@ -4,6 +4,7 @@
    ************************************************** */
 
 #include "SMSlib.h"
+#include "SMSlib_common.c"
 
 // VRAM unsafe functions. Fast, but dangerous!
 /* UNSAFE_SMS_loadNTiles() and UNSAFE_SMS_loadTiles() are macros that call UNSAFE_SMS_VRAMmemcpy() */
