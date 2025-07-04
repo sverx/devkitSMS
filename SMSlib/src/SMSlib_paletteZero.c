@@ -32,5 +32,29 @@ void SMS_zeroSpritePalette (void) {
     djnz 1$                    ; 13 = 28 *VRAM SAFE ON GG TOO*
   __endasm;
 }
+#else
+void GG_zeroBGPalette (void) {
+  ASM_LD_DE_IMM(#SMS_CRAMAddress);
+  ASM_DE_TO_VDP_CONTROL;
+  ASM_LD_B_IMM(#32);
+  __asm
+    xor a
+1$: out (_VDPDataPort),a       ; 11
+    nop                        ; 4
+    djnz 1$                    ; 13 = 28 *VRAM SAFE ON GG TOO*
+  __endasm;
+}
+
+void GG_zeroSpritePalette (void) {
+  ASM_LD_DE_IMM(#SMS_CRAMAddress+0x20);
+  ASM_DE_TO_VDP_CONTROL;
+  ASM_LD_B_IMM(#32);
+  __asm
+    xor a
+1$: out (_VDPDataPort),a       ; 11
+    nop                        ; 4
+    djnz 1$                    ; 13 = 28 *VRAM SAFE ON GG TOO*
+  __endasm;
+}
 #endif
 #pragma restore

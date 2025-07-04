@@ -232,6 +232,8 @@ void GG_loadSpritePalette (const void *palette) __z88dk_fastcall;
 #define RGB8(r,g,b)       (((r)>>4)|(((g)>>4)<<4)|(((b)>>4)<<8))
 #define RGBHTML(RGB24bit) (((RGB24bit)>>20)|((((RGB24bit)&0xFFFF)>>12)<<4)|((((RGB24bit)&0xFF)>>4)<<8))
 /* advanced functions for palettes */
+void GG_zeroBGPalette (void);
+void GG_zeroSpritePalette (void);
 void GG_loadBGPaletteafterColorAddition (const void *palette, const unsigned int addition_color);
 void GG_loadSpritePaletteafterColorAddition (const void *palette, const unsigned int addition_color);
 void GG_loadBGPaletteafterColorSubtraction (const void *palette, const unsigned int subtraction_color);
