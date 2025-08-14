@@ -213,15 +213,20 @@ sin_x_LUT.txt
 
 Inside the text file the values can be expressed in decimal or in 0x-prefixed hex form, and negative numbers are accepted down to -128 for char arrays and -32768 for int arrays.
 
-Values can be separated by any number of spaces, tabs, newlines, commas, semicolumns or brakets of any kind. An example of a valid text file could be:
+Values can be separated by any number of spaces, tabs, newlines, commas, semicolumns or brakets of any kind. Line comments are supported, starting with a # sign. An example of a valid text file could be:
 ```
--6 -5 -0x0004 ( -0x03 -0x2 -1
+# here is a line comment
+# this is some data in text form
+
+-6 -5 -0x0004 ( -0x03 -0x2 -1    # hex and/or negative is also supported
 {0, 1, 2, 3, 4}
-[5  6  7  8  9]
+
+[5  6  7  8  9]                  # note that no specific separators or brakets are needed
 10,,,11,,,12,,,13
-[14] 15 [16] 17 ]]
-18; 19; {20}; (21);
-0x16, 0x17, 0x18 0x19
+
+[14] 15 [16] 17 ]]               
+018; 019; {020}; (021);          # leading zeroes in decimal values are accepted too
+0x16, 0x17, 0x18         0x19
 ```
 In this example, the text file is turned into an array containing every value from -6 to 25. Note how there's no specific format requirement.
 

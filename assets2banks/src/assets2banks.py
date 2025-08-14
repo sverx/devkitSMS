@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 # Author: sverx
-# Version: 3.1.2  **leading zeroes in decimal values in :text assets now accepted**
+# Version: 3.1.3  **:text assets now can have line comments starting with #**
 
 from __future__ import absolute_import, division, generators, unicode_literals, print_function, nested_scopes
 import sys
@@ -126,7 +126,10 @@ class Asset:
             # read whole text file into a single string, replace various chars, parse into values, write into self.data
             in_file = open(os.path.join(assets_path, self.name), 'r')
             contents = in_file.read()
-            contents = ' '.join(contents.splitlines())
+            contents = contents.splitlines()
+            contents = [content.split('#',1)[0] for content in contents]
+            # print (contents)  # DEBUG
+            contents = ' '.join(contents)
             contents = contents.replace('(', ' ').replace(')', ' ').replace('[', ' ').replace(']', ' ').replace('{', ' ').replace('}', ' ').replace(',', ' ').replace(';', ' ').replace('\t', ' ')
             values = contents.split(" ")
             values = list(filter(None, values))
