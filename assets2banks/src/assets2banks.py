@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 # Author: sverx
-# Version: 3.1.1  **bugfix**
+# Version: 3.1.2  **leading zeroes in decimal values in :text assets now accepted**
 
 from __future__ import absolute_import, division, generators, unicode_literals, print_function, nested_scopes
 import sys
@@ -133,7 +133,11 @@ class Asset:
             # print (values)  # DEBUG
             for value in values:
                 try:
-                    int_value = int(value,0)
+                    if 'x' in value.lower():
+                        int_value = int(value,0)    # there's an 'x' in there so it's likely an hexadecimal value (or some invalid data!)
+                    else:
+                        int_value = int(value,10)   # there's not an 'x' in there so it shoud be a decimal value (or some invalid data!) - let's process that as decimal even if it has leading zeroes
+
                     if self.style == 0 and int_value < 0 and int_value >= -128:
                         int_value=int_value+256;
                     elif self.style == 1 and int_value < 0 and int_value >= -(128*256):
