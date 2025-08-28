@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 # Author: sverx
-# Version: 3.1.3  **:text assets now can have line comments starting with #**
+# Version: 3.1.4  **assets2banks.cfg now supports line comments starting with # everywhere**
 
 from __future__ import absolute_import, division, generators, unicode_literals, print_function, nested_scopes
 import sys
@@ -349,10 +349,9 @@ in_a_group = False
 try:
     config_file = open(os.path.join(assets_path, "assets2banks.cfg"), "r").readlines()
     for l in config_file:
-        ls = l.strip()
+        cl = l.split('#',1)[0]                           # if the line contains a '#' char, remove it and *everything after that*
+        ls = cl.strip()
         if len(ls) == 0:                                 # if line is empty or made of just spaces, skip it
-            pass
-        elif ls[0] == "#":                               # if line starts with # it is a comment, we can skip it
             pass
         elif ls[0] == "{":                               # if line starts with { it means we start a group
             ag = AssetGroup()

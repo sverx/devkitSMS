@@ -80,10 +80,10 @@ if the size of a `bigfile` asset found in the assets folder is more than 16 kB, 
 
 assets2banks' behavior regarding specific assets can optionally be configured using a config file that should be placed in the very same asset folder.
 
-This **must** be named *assets2banks.cfg* and it can define/contain what follows:
+This **must** be named *assets2banks.cfg* and it can contain what follows:
 
- * line comments (using the # as first non space char on the line)
- * empty lines (these will be ignored)
+ * empty lines (will be ignored)
+ * comments (begin the comment using the # char on *any* line)
 
 ### assets grouping
 
@@ -213,9 +213,8 @@ sin_x_LUT.txt
 
 Inside the text file the values can be expressed in decimal or in 0x-prefixed hex form, and negative numbers are accepted down to -128 for char arrays and -32768 for int arrays.
 
-Values can be separated by any number of spaces, tabs, newlines, commas, semicolumns or brakets of any kind. Line comments are supported, starting with a # sign. An example of a valid text file could be:
+Values can be separated by any number of spaces, tabs, newlines, commas, semicolumns or brakets of any kind. Comments are supported, starting with a # sign. An example of a valid text file could be:
 ```
-# here is a line comment
 # this is some data in text form
 
 -6 -5 -0x0004 ( -0x03 -0x2 -1    # hex and/or negative is also supported
@@ -293,7 +292,7 @@ will import only the first 1024 bytes from _blob1.bin_, then 128 bytes from _blo
 Here's an example of a short (but feature complete) configuration file:
 ```
 # assets2banks.cfg example file
-# this is a line comment
+# this is a comment
 
 # next line starts an asset group:
 { 
@@ -316,9 +315,9 @@ asset3 (tilemap).bin
 :modify OR 0 16 0x1000
 # 'asset3 (tilemap).bin' first 16 elements (starting from 0) will be ORed with 0x1000 bit mask
 
-useless_file.bin
+my_notes.txt  # I keep track of some important information in here!
 :ignore
-# 'useless_file.bin' will be ignored
+# 'my_notes.txt' will be ignored
 
 asset4.bin
 :format unsigned int
