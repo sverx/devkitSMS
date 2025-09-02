@@ -48,22 +48,6 @@ assets2banks assets --firstbank=6
 ```
 this creates a set of bank*n*.c and bank*n*.h files starting from n=6 as specified.
 
-Finally, in case you've got some free space in your ROM lower 32 KB, you can ask assets2banks to create a data block which can fit up to the whole space available.
-
-For example, let's suppose you have more than 8 KB free in your lower 32 KB, you can make assets2banks use this available space for bank1:
-```
-assets2banks assets --firstbank=1,8192
-```
-the utility will try to allocate assets within this space too, and this might help to save a whole bank.
-
-When using this option, also a *bank1.c* and *bank1.h* files will be created, and these should be compiled and linked with your other object files with no special instructions to the linker, as in this example:
-```
-sdcc -o output.ihx -mz80 --data-loc 0xC000 -Wl-b_BANK2=0x8000 -Wl-b_BANK3=0x8000 --no-std-crt0 crt0_sms.rel main.rel SMSlib.lib bank1.rel bank2.rel bank3.rel
-```
-(we assumed we had created *bank1.rel*, *bank2.rel* and *bank3.rel* - these should be placed at the end of the object list, in ascending order. Note that there is no `-Wl-b_BANK1=0x8000`)
-
-Finally, this option can even be used to allocate an asset or assetgroup bigger than 16 KB, if the available space is enough.
-
 Of course you can combine all the options if you wish. For instance this:
 ```
 assets2banks assets --firstbank=6 --singleheader=assets.h --compile
@@ -339,4 +323,39 @@ somedata.bin
 Of course all the assets in the asset folder which are not mentioned in the config file will be handled as ungrouped and without special attributes.
 
 A config file is absolutely not mandatory, and if you don't need grouping and/or special attributes there's no advantage in having one.
+
+## advanced usage
+
+In case you've got some free space in your ROM lower 32 KB, you can ask assets2banks to create a data block which can fit up to the whole space available.
+
+For example, let's suppose you have more than 8 KB free in your lower 32 KB, you can make assets2banks use this available space for bank1:
+```
+assets2banks assets --firstbank=1,8192 --compile
+```
+the utility will try to allocate assets within this space too, and this might help to save a whole bank.
+
+When using this option, also a *bank1.c* (and possibly a *bank1.h*) files will be created, and these should be compiled and linked with your other object files with a slightly different instruction to the linker, because we want the BANK1 segment to end up together with our code so we need to use `-Wl-b_BANK1=0x0000` as in this example:
+```
+sdcc -o output.ihx -mz80 --data-loc 0xC000 -Wl-b_BANK1=0x0000 -Wl-b_BANK2=0x8000 -Wl-b_BANK3=0x8000 --no-std-crt0 crt0_sms.rel main.rel SMSlib.lib bank1.rel bank2.rel bank3.rel
+```
+(we assumed we had created *bank1.rel*, *bank2.rel* and *bank3.rel* - these should be placed at the end of the object list, in ascending order)
+
+Alternatively, one could also compile the *bank1.c* using SDCC (instead of using assets2banks' `--compile` option) without assigning it any segment name, in that case the above linker call becomes:
+```
+sdcc -o output.ihx -mz80 --data-loc 0xC000 -Wl-b_BANK2=0x8000 -Wl-b_BANK3=0x8000 --no-std-crt0 crt0_sms.rel main.rel SMSlib.lib bank1.rel bank2.rel bank3.rel
+```
+(note how there are no specific instructions to the linker regarding `BANK1` because that segment name wouldn't in fact exist at all)
+
+Finally, this option can even be used to allocate an asset or assetgroup bigger than 16 KB, if the available space is enough, or it could be even used to keep all your assets together, as for instance if you want to create a 32 KiB only ROM. You can thus use this:
+```
+assets2banks assets --firstbank=1,32768  --compile
+```
+and the linker call would then be:
+```
+sdcc -o output.ihx -mz80 --data-loc 0xC000 -Wl-b_BANK1=0x0000 --no-std-crt0 crt0_sms.rel main.rel SMSlib.lib bank1.rel
+```
+or, alternatively, you could compile the generated *bank1.c* using SDCC (instead of using assets2banks' `--compile` option) without assigning it any segment name, and simply link using this:
+```
+sdcc -o output.ihx -mz80 --data-loc 0xC000 --no-std-crt0 crt0_sms.rel main.rel SMSlib.lib bank1.rel
+```
 
