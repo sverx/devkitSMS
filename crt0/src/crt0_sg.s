@@ -37,16 +37,6 @@
   .org  0
   di                ; disable interrupt
   im 1              ; interrupt mode 1 (this will not change)
-  jp  init
-
-  .org    0x38      ; handle IRQ
-  jp _SG_isr
-
-  .org     0x66     ; handle NMI
-  jp _SG_nmi_isr
-
-  .org   0x70
-init:
   ld sp,#0xc3f0     ; set stack pointer at end of RAM
   xor a             ; clear RAM (to value 0x00)
   ld hl,#0xc000     ;   by setting value 0
@@ -62,11 +52,21 @@ init:
   out (0xDE),a      ; Select ROW 7 (row 7 of PPI is joypad = default - no effect on SG-1000)
 
   ;; Initialise global variables
-  call    gsinit
-  call    _SG_init
-  ei                ; re-enable interrupts before going to main()
+  call  gsinit
+  call  _SG_init
+  ei                ; make sure interrupts are enabled before calling main
   call  _main
-  jp  _exit
+1$:
+  halt              ; main has returned, stop here
+  jr 1$
+
+.ascii 'devkitSMS'  ; this is shameless
+
+  .org   0x38       ; handle IRQ
+  jp _SG_isr
+
+  .org   0x66       ; handle NMI
+  jp _SG_nmi_isr
 
   .rept 128         ; this is a block of 128 OUTI
     outi            ; made for enabling UNSAFE but FAST
@@ -86,20 +86,6 @@ _outi_block::       ; _outi_block label points to END of block
   .area _BSEG
   .area   _BSS
   .area   _HEAP
-
-  .area   _CODE
-__clock::
-  ld  a,#2
-  rst     0x08
-  ret
-
-_exit::
-  ;; Exit - special code to the emulator
-  ld a,#0
-  rst 0x08
-1$:
-  halt
-  jr 1$
 
   .area   _GSINIT
 gsinit::
