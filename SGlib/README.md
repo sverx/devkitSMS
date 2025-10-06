@@ -79,5 +79,9 @@ SG_loadZX7compressedTilesatAddr(src,dst)                              /* handy m
 void SG_VRAMmemcpy (unsigned int dst, void *src, unsigned int size)              /* memcpy to VRAM */
 void SG_VRAMmemcpy_brief (unsigned int dst, void *src, unsigned char size)       /* memcpy to VRAM (256 bytes max) */
 void SG_VRAMmemset (unsigned int dst, unsigned char value, unsigned int size)    /* memset to VRAM */
+
+/* print messages to the debug console of emulators */
+void SG_debugPrintf(const unsigned char *format, ...) __naked __preserves_regs(a,b,c,iyh,iyl);
+
 ```
 

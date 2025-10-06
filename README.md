@@ -20,7 +20,7 @@ note: if you're on Linux or on Windows, all binaries are supplied in the Linux o
 * for SMS: place `SMSlib.h` in a SMSlib folder in your projects root (or directly into your project folder if you prefer doing so) and `SMSlib.lib` in SDCC `lib/z80` folder
 * for GG: place `SMSlib.h` in a SMSlib folder in your projects root (or directly into your project folder if you prefer doing so) and `SMSlib_GG.lib` in SDCC `lib/z80` folder
 * for SG-1000/SC-3000: place `crt0_sg.rel` from this package in a crt0 folder in your projects root (or directly into your project folder if you prefer doing so)
-* for SG-1000/SC-3000: place `SGlib.h` and `SGlib.rel` in a SGlib folder in your projects root (or directly into your project folder if you prefer doing so)
+* for SG-1000/SC-3000: place `SGlib.h` and `SGlib.lib` in a SGlib folder in your projects root (or directly into your project folder if you prefer doing so)
 * (optional) if you plan to use PSG music/SFX, place `PSGlib.h` and `PSGlib.lib` in a PSGlib folder in your projects root (or directly into your project folder if you prefer doing so)
 * (optional) if you plan to use MoonBlaster modules for FM music, place `MBMlib.h` and `MBMlib.rel` in a MBMlib folder in your projects root (or directly into your project folder if you prefer doing so)
 
@@ -31,7 +31,7 @@ note: if you're on Linux or on Windows, all binaries are supplied in the Linux o
 ```
   sdcc -c -mz80 --peep-file peep-rules.txt your_program.c
 ```
-* link your program with `crt0_sms.rel` and the library:
+* link your program with `crt0_sms.rel` and the SMSlib library:
 ```
   sdcc -o your_program.ihx -mz80 --no-std-crt0 --data-loc 0xC000 crt0_sms.rel your_program.rel SMSlib.lib
 ```
@@ -44,11 +44,11 @@ note: if you're on Linux or on Windows, all binaries are supplied in the Linux o
 ```
   sdcc -c -mz80 your_program.c
 ```
-* link your program with `crt0_sg.rel` and `SGlib.rel` (a.k.a. "the SG library"):
+* link your program with `crt0_sg.rel` and `SGlib.lib` (a.k.a. "the SG library"):
 ```
-  sdcc -o your_program.ihx -mz80 --no-std-crt0 --data-loc 0xC000 crt0_sg.rel your_program.rel SGlib.rel
+  sdcc -o your_program.ihx -mz80 --no-std-crt0 --data-loc 0xC000 crt0_sg.rel your_program.rel SGlib.lib
 ```
-  note that you should put `crt0_sg.rel` *first*, and you should put `SGlib.rel` *after* your code.
+  note that you should put `crt0_sg.rel` *first*, and you should put `SGlib.lib` *after* your code.
   
 ### How to load your devkitSMS/SGlib code onto a BASIC IIIa/IIIb cartridge:
 
@@ -58,7 +58,7 @@ Once loaded, the program can be run with the `CALL &H9800` command.
 
 * Link with `crt0_BASIC.rel` instead of `crt0_sg.rel`, and used `--code-loc 0x90a0` to place the code after the interrupt handler.
 ```
-  sdcc -o your_program.ihx -mz80 --no-std-crt0 --code-loc 0x98a0 --data-loc 0xC000 crt0_BASIC.rel your_program.rel SGlib.rel
+  sdcc -o your_program.ihx -mz80 --no-std-crt0 --code-loc 0x98a0 --data-loc 0xC000 crt0_BASIC.rel your_program.rel SGlib.lib
 ```
 * Convert the compiler's hex output to binary
 ```
