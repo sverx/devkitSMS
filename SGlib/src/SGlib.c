@@ -87,9 +87,7 @@ volatile bool VDPSpriteOverflow=false;
 
 volatile unsigned int KeysStatus, PreviousKeysStatus;
 
-/* variables for sprite windowing and clipping */
 unsigned int  spritesHeight=8, spritesWidth=8;
-unsigned char clipWin_x0, clipWin_y0, clipWin_x1, clipWin_y1;
 
 #if MAXSPRITES==32
 unsigned char SpriteTable[MAXSPRITES*4];
@@ -186,7 +184,6 @@ void SG_init (void) {
   SG_initSprites ();
   SG_finalizeSprites ();
   SG_copySpritestoSAT ();
-  SG_setClippingWindow (0, 0, 255, 191);
 }
 
 void SG_setBackdropColor (unsigned char entry) {
@@ -268,39 +265,6 @@ void SG_initSprites (void) {
 _Bool SG_addSprite (unsigned char x, unsigned char y, unsigned char tile, unsigned char attr) {
   unsigned char idx;
   if (SpriteNextFree < MAXSPRITES) {
-    if (y - 1 != 0xd0) {
-#ifdef AUTODETECT_SPRITE_OVERFLOW
-      spriteOverflowCounter ++;
-      if (0 == VDPSpriteOverflow || (spriteOverflowCounter & 1) == spriteOverflowFlipflop)
-#endif
-      {
-        idx = SpriteNextFree << 2;
-        SpriteTable [idx ++] = y;
-        SpriteTable [idx ++] = x;
-        SpriteTable [idx ++] = tile;
-        SpriteTable [idx] = attr;
-        SpriteNextFree ++;
-      }
-    }
-    return true;
-  } else
-    return false;
-}
-
-void SG_setClippingWindow (unsigned char x0, unsigned char y0, unsigned char x1, unsigned char y1) {
-  clipWin_x0=x0;
-  clipWin_y0=y0;
-  clipWin_x1=x1;
-  clipWin_y1=y1;
-}
-
-_Bool SG_addSpriteClipping (int x, int y, unsigned char tile, unsigned char attr) {
-  unsigned char idx;
-  if (SpriteNextFree < MAXSPRITES) {
-    if ((x > clipWin_x1) || (x < ((int) clipWin_x0 - spritesWidth)))
-      return false;                             // sprite clipped
-    if ((y > clipWin_y1) || (y < ((int) clipWin_y0 - spritesHeight)))
-      return false;                             // sprite clipped
     if (y - 1 != 0xd0) {
 #ifdef AUTODETECT_SPRITE_OVERFLOW
       spriteOverflowCounter ++;
