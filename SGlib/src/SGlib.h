@@ -158,6 +158,9 @@ void SG_decompressZX7 (const void *src, void *dst) __naked;
 #define SG_loadZX7compressedTilesatAddr(src,dst)       SG_decompressZX7toVRAM((src),(dst))
 void SG_decompressZX7toVRAM (const void *src, unsigned int dst) __naked;
 
+/* function to print messages to the debug console of emulators */
+void SG_debugPrintf(const unsigned char *format, ...) __naked __preserves_regs(a,b,c,iyh,iyl);
+
 /* low level functions */
 void SG_VRAMmemcpy (unsigned int dst, void *src, unsigned int size);
 void SG_VRAMmemcpy_brief (unsigned int dst, void *src, unsigned char size);
