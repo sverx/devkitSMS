@@ -75,6 +75,10 @@ SG_loadZX7compressedBGColors(src,tilefrom)                            /* handy m
 SG_loadZX7compressedSpritesTiles(src,tilefrom)                        /* handy macro to decompress tiles to sprites */
 SG_loadZX7compressedTilesatAddr(src,dst)                              /* handy macro to decompress tiles to any location in VRAM */
 
+/* Bitmap Mode functions and macros */
+void SG_initBitmapMode (unsigned char foreground_color, unsigned char background_color)   /* initialize BMP mode with specified foreground and background colors */
+SG_putPixel(x,y,color)                                                                    /* macro to put a pixel on the bitmap with the specified color */
+
 /* low level functions */
 void SG_VRAMmemcpy (unsigned int dst, void *src, unsigned int size)              /* memcpy to VRAM */
 void SG_VRAMmemcpy_brief (unsigned int dst, void *src, unsigned char size)       /* memcpy to VRAM (256 bytes max) */
@@ -82,6 +86,5 @@ void SG_VRAMmemset (unsigned int dst, unsigned char value, unsigned int size)   
 
 /* print messages to the debug console of emulators */
 void SG_debugPrintf(const unsigned char *format, ...) __naked __preserves_regs(a,b,c,iyh,iyl);
-
 ```
 

@@ -161,6 +161,11 @@ void SG_decompressZX7toVRAM (const void *src, unsigned int dst) __naked;
 /* function to print messages to the debug console of emulators */
 void SG_debugPrintf(const unsigned char *format, ...) __naked __preserves_regs(a,b,c,iyh,iyl);
 
+/* Bitmap Mode functions */
+void SG_initBitmapMode (unsigned char foreground_color, unsigned char background_color);
+#define  SG_putPixel(x,y,color)      SG_putPixel_f((color),((x)<<8)|(y))
+void SG_putPixel_f (unsigned char color, unsigned int xy_coords);
+
 /* low level functions */
 void SG_VRAMmemcpy (unsigned int dst, void *src, unsigned int size);
 void SG_VRAMmemcpy_brief (unsigned int dst, void *src, unsigned char size);

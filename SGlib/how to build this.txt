@@ -4,8 +4,9 @@ sdcc -o SGlib_spriteClip.rel -c -mz80 --max-allocs-per-node 100000 SGlib_spriteC
 sdcc -o SGlib_zx7.rel        -c -mz80 --max-allocs-per-node 100000 SGlib_zx7.c
 sdcc -o SGlib_zx7_VRAM.rel   -c -mz80 --max-allocs-per-node 100000 SGlib_zx7_VRAM.c
 sdcc -o SGlib_keyboard.rel   -c -mz80 --max-allocs-per-node 100000 SGlib_keyboard.c
+sdcc -o SGlib_bitmap.rel     -c -mz80 --max-allocs-per-node 100000 SGlib_bitmap.c
 sdcc -o SGlib_debug.rel      -c -mz80 --max-allocs-per-node 100000 SGlib_debug.c
 
 # create the library archive
-sdar r SGlib.lib SGlib.rel SGlib_spriteClip.rel SGlib_zx7.rel SGlib_zx7_VRAM.rel SGlib_keyboard.rel SGlib_debug.rel
+sdar r SGlib.lib SGlib.rel SGlib_spriteClip.rel SGlib_zx7.rel SGlib_zx7_VRAM.rel SGlib_keyboard.rel SGlib_bitmap.rel SGlib_debug.rel
 
