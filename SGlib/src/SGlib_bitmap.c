@@ -23,7 +23,7 @@ void SG_initBitmapMode (unsigned char foreground_color, unsigned char background
 
 #pragma save
 #pragma disable_warning 85
-// profile: SG_putPixel_f 413/613/524.1
+// profile: SG_putPixel_f 393/491/453.2
 void SG_putPixel_f (unsigned char color, unsigned int xy_coords) {
   __asm
 
@@ -119,13 +119,10 @@ put_p:
     out (#_VDPControlPort),a
     ei
 
-    ld a,#0x80                   ; shift the MSB right B times
-    inc b
-    jp 2$
-1$:
-    rrca
-2$:
-    djnz 1$
+    ld d,#0
+    ld e,b
+    set 6,e                      ; DE = 0x0040+B (bitshift LUT in crt0)
+    ld a,(de)
     ld e,a                       ; preserve the calculated shifted bit
 
     in a,(#_VDPDataPort)         ; read the byte at PGTADDRESS+offset

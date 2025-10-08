@@ -65,6 +65,9 @@
   .org   0x38       ; handle IRQ
   jp _SG_isr
 
+  .org   0x40       ; bitshift LUT for putPixel
+  .db 0x80,0x40,0x20,0x10,0x08,0x04,0x02,0x01
+
   .org   0x66       ; handle NMI
   jp _SG_nmi_isr
 
