@@ -1,5 +1,5 @@
 ;--------------------------------------------------------------------------
-; *** this is a modified version aimed to SG-1000 homebrew - sverx\2015 ***
+; *** this is a modified version aimed to SG-1000 homebrew - sverx\2025 ***
 ;--------------------------------------------------------------------------
 ;--------------------------------------------------------------------------
 ;  crt0.s - Generic crt0.s for a Z80
@@ -60,14 +60,26 @@
   halt              ; main has returned, stop here
   jr 1$
 
-.ascii 'devkitSMS'  ; this is shameless
+;--------------------------------------------------------------------------
+get_bank::          ; get current code bank num into A
+  ld a,(#0xfffe)    ; (read current page from mapper)
+  ret
+set_bank::          ; set current code bank num to A
+  ld (#0xfffe),a    ; (restore caller page)
+  ret
 
+;--------------------------------------------------------------------------
   .org   0x38       ; handle IRQ
   jp _SG_isr
 
+;--------------------------------------------------------------------------
   .org   0x40       ; bitshift LUT for putPixel
   .db 0x80,0x40,0x20,0x10,0x08,0x04,0x02,0x01
 
+  .org   0x55
+  .ascii 'devkitSMS'; this is shameless
+
+;--------------------------------------------------------------------------
   .org   0x66       ; handle NMI
   jp _SG_nmi_isr
 
@@ -103,4 +115,3 @@ gsinit_next:
 
   .area   _GSFINAL
   ret
-
