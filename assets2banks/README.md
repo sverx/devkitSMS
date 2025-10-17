@@ -3,7 +3,7 @@
 ## assets2banks command line options
 
 ```
-assets2banks <asset folder> [--firstbank=<number>[,<size>]][--compile][--singleheader[=<filename>]][--exclude=<filename>][--allowsplitting]
+assets2banks <asset folder> [--firstbank=<number>[,<size>]][--compile][--singleheader[=<filename>]][--exclude=<filename>][--allowsplitting][--banksize=<size>]
 ```
 
 Using the *assets2banks* utility you can create .c source files and their respective .h header files containing one constant data array for each single file found in the specified asset folder.
@@ -14,7 +14,9 @@ Using the *assets2banks* utility you can create .c source files and their respec
 
 * If the asset folder contains files you wish *assets2banks* to ignore (for instance, a file called `.gitignore`) you can exclude each file using the command line `--exclude` option.
 
-* Assets and assetgroups bigger than a single bank (16 kB) are also supported using the `--allowsplitting` option.
+* Default bank size is 16 KiB, but you can use `--banksize=` if you need a different size.
+
+* Assets and assetgroups bigger than a single bank are also supported using the `--allowsplitting` option.
 
 Example usage:
 ```

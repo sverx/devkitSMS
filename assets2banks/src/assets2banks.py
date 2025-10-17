@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 # Author: sverx
-# Version: 3.1.4  **assets2banks.cfg now supports line comments starting with # everywhere**
+# Version: 3.2  **assets2banks now supports custom bank sizes**
 
 from __future__ import absolute_import, division, generators, unicode_literals, print_function, nested_scopes
 import sys
@@ -270,7 +270,7 @@ def find(fun, seq):
             return item
 
 def print_usage():
-    print("Usage: assets2banks path [--firstbank=<number>[,<size>]][--compile][--singleheader[=<filename>]][--exclude=<filename>][--allowsplitting]")
+    print("Usage: assets2banks path [--firstbank=<number>[,<size>]][--compile][--singleheader[=<filename>]][--exclude=<filename>][--allowsplitting][--banksize=<size>]")
     sys.exit(1)
 
 AssetGroupList = []    # list of the groups (we will sort this)
@@ -282,10 +282,11 @@ print("*** sverx's assets2banks converter ***")
 
 if 2 <= len(sys.argv):
     assets_path = sys.argv[1]
-    first_bank = 2                                                  # first bank will be number 2
-    compile_rel = 0                                                 # RELs not requested
-    single_h = 0                                                    # generate separate .h files
-    allowsplitting = 0                                              # Allow splitting large assets in multiple parts
+    first_bank = 2                        # first bank will be number 2
+    bank_size = 16384                     # standard bank size is 16 KiB
+    compile_rel = 0                       # RELs not requested
+    single_h = 0                          # generate separate .h files
+    allowsplitting = 0                    # allow splitting large assets in multiple parts
 else:
     print_usage()
 
@@ -324,6 +325,13 @@ for n, arg in enumerate(sys.argv):
                 print("Fatal: invalid bank1size parameter")
                 print_usage()
 # ---------- to here ----------
+        elif arg[:11] == "--banksize=":
+            try:
+                bank_size=int("+{0!s}".format(arg[11:]))
+                print("Info: default bank size set to {0!s} bytes".format(bank_size))
+            except ValueError:
+                print("Fatal: invalid banksize parameter")
+                print_usage()
         elif arg == "--compile":
             compile_rel = 1
             print("Info: compiled output requested")
@@ -487,8 +495,8 @@ for ag in AssetGroupList:                                  # now find a place fo
             b.add_assetgroup(ag)
             break
     else:                                                  # we've found no place for this assetgroup, allocate a new bank
-        if ag.size <= 16384:
-            b = Bank(16384)
+        if ag.size <= bank_size:
+            b = Bank(bank_size)
             b.add_assetgroup(ag)
             BankList.append(b)
         else:
@@ -508,14 +516,14 @@ for ag in AssetGroupList:                                  # now find a place fo
                 partno = 0
                 offset = 0
                 while offset < todo:
-                    gf = 16384 - apartgrp.size  # Compute the group free space
+                    gf = bank_size - apartgrp.size  # Compute the group free space
                     if gf == 0:
-                        b = Bank(16384)
+                        b = Bank(bank_size)
                         b.add_assetgroup(apartgrp) # If it is full, it's time to commit it to a bank
                         BankList.append(b)
 
                         apartgrp = AssetGroup()    # Create a new group to continue...
-                        gf = 16384
+                        gf = bank_size
 
                     # Compute how much of the current asset we can add to the group
                     l = gf
@@ -536,7 +544,7 @@ for ag in AssetGroupList:                                  # now find a place fo
                     partno += 1
 
             if apartgrp.size > 0:
-                b = Bank(16384)
+                b = Bank(bank_size)
                 b.add_assetgroup(apartgrp)
                 BankList.append(b)
 
