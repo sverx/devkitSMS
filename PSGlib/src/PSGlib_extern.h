@@ -58,12 +58,6 @@ extern unsigned char PSGChan2LowTone;             // the low tone bits for chann
 extern unsigned char PSGChan2HighTone;            // the high tone bits for channel 2
 extern unsigned char PSGChan3LowTone;             // the tone bits for channel 3
 
-// flags for channels SFX access
-extern unsigned char PSGChannel0SFX;              // !0 means channel 0 is allocated to SFX
-extern unsigned char PSGChannel1SFX;              // !0 means channel 1 is allocated to SFX
-extern unsigned char PSGChannel2SFX;              // !0 means channel 2 is allocated to SFX
-extern unsigned char PSGChannel3SFX;              // !0 means channel 3 is allocated to SFX
-
 // volume buffering for SFX
 extern unsigned char PSGSFXChan0Volume;           // the volume for SFX channel 0
 extern unsigned char PSGSFXChan1Volume;           // the volume for SFX channel 1
@@ -71,12 +65,12 @@ extern unsigned char PSGSFXChan2Volume;           // the volume for SFX channel 
 extern unsigned char PSGSFXChan3Volume;           // the volume for SFX channel 3
 
 // fundamental vars for SFX
-extern unsigned char PSGSFXStatus;                // are we playing a SFX?
+// Flags for channels SFX access (uses SFX_CHANNEL0-3 bits). If no channel bits are set, then an SFX is not being played.
+extern unsigned char PSGChannelSFX;               // Bit set means channel is allocated to SFX
 extern void *PSGSFXStart;                         // the pointer to the beginning of SFX
 extern void *PSGSFXPointer;                       // the pointer to the current address
 extern void *PSGSFXLoopPoint;                     // the pointer to the loop begin
 extern unsigned char PSGSFXSkipFrames;            // the frames we need to skip
-extern unsigned char PSGSFXLoopFlag;              // the SFX should loop or not (flag)
 extern unsigned char PSGSFXVolumeAttenuation;     // the volume attenuation applied to the SFX (0-15)
 
 // decompression vars for SFX
