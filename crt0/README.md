@@ -10,3 +10,8 @@ for SG-1000:
 sdasz80 -g -o crt0_sg.s
 ```
 
+for ColecoVision:
+```
+sdasz80 -g -o crt0_cv.s
+```
+
