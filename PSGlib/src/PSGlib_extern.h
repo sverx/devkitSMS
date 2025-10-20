@@ -3,7 +3,11 @@
    ( part of devkitSMS - github.com/sverx/devkitSMS )
    ************************************************** */
 
+#ifndef TARGET_CV
 #define PSGDataPort         #0x7f
+#else
+#define PSGDataPort         #0xff
+#endif
 
 #define PSGLatch            #0x80
 #define PSGData             #0x40
@@ -20,7 +24,11 @@
 #define PSGEnd              #0x00
 
 /* define PSGPort (SDCC z80 syntax) */
-__sfr __at 0x7F PSGPort;
+#ifndef TARGET_CV
+__sfr __at 0x7f PSGPort;
+#else
+__sfr __at 0xff PSGPort;
+#endif
 
 // fundamental vars
 extern unsigned char PSGMusicStatus;              // are we playing a background music?
