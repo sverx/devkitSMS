@@ -13,14 +13,22 @@ __sfr __at 0xBF VDPControlPort;
 __sfr __at 0xBF VDPStatusPort;
 /* define VDPDataPort */
 __sfr __at 0xBE VDPDataPort;
-/* define VDPVcounter */
-__sfr __at 0x7E VDPVCounterPort;
-/* define VDPHcounter */
-__sfr __at 0x7F VDPHCounterPort;
-/* define IOPort (joypad) */
+
+#ifndef TARGET_CV
+/* define IOPort (SG joypad) */
 __sfr __at 0xDC IOPortL;
-/* define IOPort (joypad) */
+/* define IOPort (SG joypad) */
 __sfr __at 0xDD IOPortH;
+#else
+/* define IOPort (CV joypad) */
+__sfr __at 0xE0 IOPortL;
+/* define IOPort (CV joypad) */
+__sfr __at 0xE2 IOPortH;
+/* define IOPort (CV joypad) */
+__sfr __at 0xC0 IOPortCTRLmode0;
+/* define IOPort (CV joypad) */
+__sfr __at 0x80 IOPortCTRLmode1;
+#endif
 
 #define HI(x)       ((x)>>8)
 #define LO(x)       ((x)&0xFF)
@@ -76,7 +84,10 @@ const unsigned char VDPReg_init[8]={
 unsigned char VDPReg[2]={0x02, 0xa0};
 
 volatile bool VDPBlank;   // used by INTerrupt
-volatile bool   PauseRequested;   // used by NMI
+
+#ifndef TARGET_CV
+volatile bool PauseRequested;   // used by NMI
+#endif
 
 #ifdef AUTODETECT_SPRITE_OVERFLOW
 unsigned char spriteOverflowFlipflop=0;
@@ -321,6 +332,7 @@ unsigned int SG_getKeysReleased (void) {
   return ((~KeysStatus) & PreviousKeysStatus);
 }
 
+#ifndef TARGET_CV
 _Bool SG_queryPauseRequested (void) {
   return (PauseRequested);
 }
@@ -328,6 +340,7 @@ _Bool SG_queryPauseRequested (void) {
 void SG_resetPauseRequest (void) {
   PauseRequested=false;
 }
+#endif
 
 /* low level functions, just to be used for dirty tricks ;) */
 void SG_VRAMmemcpy (unsigned int dst, void *src, unsigned int size) {
@@ -371,21 +384,33 @@ void SG_isr (void) __critical __interrupt(0) {
   VDPSpriteOverflow=(VDPStatus & 0x40);
   VDPSpriteCollision=(VDPStatus & 0x20);
 #endif
+#ifndef TARGET_CV
   if (VDPStatus & 0x80) {
+#endif
     VDPBlank=true;         /* frame interrupt */
-    /* read key input */
+    /* read pad/joy input */
     PreviousKeysStatus=KeysStatus;
+#ifndef TARGET_CV
     KeysStatus=~(((IOPortH)<<8)|IOPortL);
+#else
+    IOPortCTRLmode0=0xff;
+    unsigned int tempKeysStatus=~(((IOPortH|0x80)<<8)|(IOPortL|0x80));
+    IOPortCTRLmode1=0xff;
+    KeysStatus=(((IOPortH&0x40)?0:0x8000)|((IOPortL&0x40)?0:0x80))|tempKeysStatus;
+#endif
+
 #ifndef NO_FRAME_INT_HOOK
     if (SG_theFrameInterruptHandler) {
       SG_theFrameInterruptHandler();
     }
 #endif
+#ifndef TARGET_CV
   }
-  /* Z80 disable the interrupts on ISR, so we should re-enable them explicitly */
-  ENABLE_INTERRUPTS;
+#endif
 }
 
+#ifndef TARGET_CV
 void SG_nmi_isr (void) __critical __interrupt {   /* this is for NMI */
   PauseRequested = true;
 }
+#endif

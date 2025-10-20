@@ -4,7 +4,10 @@
    code: na_th_an, sverx
    ************************************************** */
 
-/* library initialization. you don't need to call this if you use devkitSMS crt0_sg.rel */
+// #define TARGET_CV
+/* to recompile the library for the ColecoVision */
+
+/* library initialization. you don't need to call this if you use devkitSMS crt0_sg.rel or crt0_cv.rel */
 void SG_init (void);
 
 /* VDP operative mode handling functions */
@@ -49,6 +52,7 @@ void SG_setBackdropColor (unsigned char entry);
 /* wait until next VBlank starts */
 void SG_waitForVBlank (void);
 
+#ifndef TARGET_CV
 /* macro for ROM bankswitching */
 volatile __at (0xffff) unsigned char ROM_bank_to_be_mapped_on_slot2;
 #define SG_mapROMBank(n)       ROM_bank_to_be_mapped_on_slot2=(n)
@@ -78,6 +82,11 @@ volatile __at (0xfffc) unsigned char SRAM_bank_to_be_mapped_on_slot2;
 
 /* SRAM access is as easy as accessing an array of char */
 __at (0x8000) unsigned char SG_SRAM[];
+#else
+/* ColecoVision MegaCart ROM bankswitching */
+volatile __at (0xffff) unsigned char CV_MEGACART_BANKSWITCH[];
+#define SG_mapROMBank(n)       CV_MEGACART_BANKSWITCH[-((n)&0x3F)]=(n)
+#endif
 
 /* functions to load tiles into VRAM */
 void SG_loadTilePatterns (void *src, unsigned int tilefrom, unsigned int size);
@@ -111,13 +120,14 @@ unsigned int SG_getKeysReleased (void);
 /* handy defines for joypad(s) handling */
 #ifndef CONTROLLER_PORTS
 #define CONTROLLER_PORTS
+
+#ifndef TARGET_CV
 #define PORT_A_KEY_UP     0x0001
 #define PORT_A_KEY_DOWN   0x0002
 #define PORT_A_KEY_LEFT   0x0004
 #define PORT_A_KEY_RIGHT  0x0008
 #define PORT_A_KEY_1      0x0010
 #define PORT_A_KEY_2      0x0020
-#define PORT_A_KEY_START  PORT_A_KEY_1  /* handy alias */
 
 #define PORT_B_KEY_UP     0x0040
 #define PORT_B_KEY_DOWN   0x0080
@@ -125,17 +135,37 @@ unsigned int SG_getKeysReleased (void);
 #define PORT_B_KEY_RIGHT  0x0200
 #define PORT_B_KEY_1      0x0400
 #define PORT_B_KEY_2      0x0800
-#define PORT_B_KEY_START  PORT_B_KEY_1  /* handy alias */
 
 #define RESET_KEY         0x1000
 #define CARTRIDGE_SLOT    0x2000        /* ??? */
 #define PORT_A_TH         0x4000        /* for light gun */
 #define PORT_B_TH         0x8000        /* for light gun */
+#else
+#define PORT_A_KEY_UP     0x0001
+#define PORT_A_KEY_RIGHT  0x0002
+#define PORT_A_KEY_DOWN   0x0004
+#define PORT_A_KEY_LEFT   0x0008
+#define PORT_A_KEY_1      0x0040
+#define PORT_A_KEY_2      0x0080
+
+#define PORT_B_KEY_UP     0x0100
+#define PORT_B_KEY_RIGHT  0x0200
+#define PORT_B_KEY_DOWN   0x0400
+#define PORT_B_KEY_LEFT   0x0800
+#define PORT_B_KEY_1      0x4000
+#define PORT_B_KEY_2      0x8000
 #endif
 
+#define PORT_A_KEY_START  PORT_A_KEY_1  /* handy alias */
+#define PORT_B_KEY_START  PORT_B_KEY_1  /* handy alias */
+#endif
+
+#ifndef TARGET_CV
 _Bool SG_queryPauseRequested (void);    /* true if the pause key has been pressed */
 void SG_resetPauseRequest (void);       /* reset/acknowledge pause requests */
+#endif
 
+#ifndef TARGET_CV
 _Bool SG_detectKeyboard (void);         /* true if an attached keyboard is detected */
 void SG_scanKeyboardJoypad (void);      /* this scans the keyboard keys (emulating a joypad) */
 
@@ -147,6 +177,7 @@ unsigned int SG_getKeyboardJoypadReleased (void);
 
 /* read from keyboard max keys and return the keycodes and amount */
 unsigned char SG_getKeycodes (unsigned int *keys, unsigned char max_keys);
+#endif
 
 /* decompress data to RAM */
 void SG_decompressZX7 (const void *src, void *dst) __naked;
@@ -181,4 +212,7 @@ void SG_setFrameInterruptHandler (void (*theHandlerFunction)(void)) __z88dk_fast
 
 /* the Interrupt Service Routines (do not modify) */
 void SG_isr (void) __critical __interrupt(0);
+
+#ifndef TARGET_CV
 void SG_nmi_isr (void) __critical __interrupt;
+#endif

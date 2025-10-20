@@ -10,3 +10,10 @@ sdcc -o SGlib_debug.rel      -c -mz80 --max-allocs-per-node 100000 SGlib_debug.c
 # create the library archive
 sdar r SGlib.lib SGlib.rel SGlib_spriteClip.rel SGlib_zx7.rel SGlib_zx7_VRAM.rel SGlib_keyboard.rel SGlib_bitmap.rel SGlib_debug.rel
 
+# compile the modules for ColecoVision
+sdcc -o SGlib_CV.rel         -c -mz80 --max-allocs-per-node 100000 -DTARGET_CV SGlib.c
+sdcc -o SGlib_bitmap_CV.rel  -c -mz80 --max-allocs-per-node 100000 -DTARGET_CV SGlib_bitmap.c
+
+# create the ColecoVision library archive
+sdar r SGlib_CV.lib SGlib_CV.rel SGlib_spriteClip.rel SGlib_zx7.rel SGlib_zx7_VRAM.rel SGlib_bitmap_CV.rel SGlib_debug.rel
+
