@@ -21,9 +21,9 @@ sdcc -c -mz80 --max-allocs-per-node 100000 -D PSGLIB_NOSFXCODE -o PSGRestoreVolu
 sdcc -c -mz80 --max-allocs-per-node 100000 -D PSGLIB_NOSFXCODE -o PSGResume_NOSFX.rel PSGResume.c
 
 # ColecoVision version
-sdcc -c -mz80 --max-allocs-per-node 100000 -D TARGET_CV -o PSGlib_CV.relPSGlib.c
-sdcc -c -mz80 --max-allocs-per-node 100000 -D TARGET_CV -o PSGAttenuation_CV.relPSGAttenuation.c
-sdcc -c -mz80 --max-allocs-per-node 100000 -D TARGET_CV -o PSGPlayLoops_CV.relPSGPlayLoops.c
+sdcc -c -mz80 --max-allocs-per-node 100000 -D TARGET_CV -o PSGlib_CV.rel PSGlib.c
+sdcc -c -mz80 --max-allocs-per-node 100000 -D TARGET_CV -o PSGAttenuation_CV.rel PSGAttenuation.c
+sdcc -c -mz80 --max-allocs-per-node 100000 -D TARGET_CV -o PSGPlayLoops_CV.rel PSGPlayLoops.c
 sdcc -c -mz80 --max-allocs-per-node 100000 -D TARGET_CV -o PSGRestoreVolumes_CV.rel PSGRestoreVolumes.c
 sdcc -c -mz80 --max-allocs-per-node 100000 -D TARGET_CV -o PSGResume_CV.rel PSGResume.c
 
