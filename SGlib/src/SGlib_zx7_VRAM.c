@@ -17,10 +17,25 @@ void SG_decompressZX7toVRAM (const void *src, unsigned int dst) __naked {
   __asm
   ld c,#0xbf     ; VDP control port
   set 6,d        ; set VRAM write bit
+#ifndef TARGET_CV
   di             ; set VRAM address
+#else
+  ld a,#1
+  ld (#_CV_VDP_op_pending),a
+#endif
   out (c),e
   out (c),d
+#ifndef TARGET_CV
   ei
+#else
+  push hl
+    ld hl,#_CV_VDP_op_pending
+    ld (hl),#0
+    ld hl,#_CV_NMI_srv_pending
+    bit 0,(hl)
+    call nz,_SG_isr_process
+  pop hl
+#endif
   res 6,d        ; remove VRAM write bit
   dec c          ; data port
 
@@ -95,10 +110,27 @@ dzx7s_outer_loop:
 
 dzx7s_inner_loop:
   nop                     ; 4
+#ifndef TARGET_CV
   di                      ; 4 = 27 (safe on every Master System or Game Gear)
+#else
+  push hl
+    ld hl,#_CV_VDP_op_pending
+    ld (hl),#1
+  pop hl
+#endif
   out (c),l
   out (c),h
+#ifndef TARGET_CV
   ei             ; 4
+#else
+  push hl
+    ld hl,#_CV_VDP_op_pending
+    ld (hl),#0
+    ld hl,#_CV_NMI_srv_pending
+    bit 0,(hl)
+    call nz,_SG_isr_process
+  pop hl
+#endif
   inc hl         ; 6
   xor a          ; 4
   ret nz         ; 5      (this ret will never happen, it is just to wait 5 cycles)
@@ -112,10 +144,27 @@ dzx7s_inner_loop:
   nop            ; 4
   nop            ; 4
   nop            ; 4
+#ifndef TARGET_CV
   di             ; 4 = 28 (safe on every Master System or Game Gear)
+#else
+  push hl
+    ld hl,#_CV_VDP_op_pending
+    ld (hl),#1
+  pop hl
+#endif
   out (c),e
   out (c),d
+#ifndef TARGET_CV
   ei
+#else
+  push hl
+    ld hl,#_CV_VDP_op_pending
+    ld (hl),#0
+    ld hl,#_CV_NMI_srv_pending
+    bit 0,(hl)
+    call nz,_SG_isr_process
+  pop hl
+#endif
   out (#0xbe),a
   inc de                  ; 6
   djnz dzx7s_inner_loop   ; 13
@@ -129,7 +178,7 @@ dzx7s_inner_loop:
   pop af
   ld c,#0xbe
   pop hl         ; restore source address (compressed data)
-  jr nc, dzx7s_main_loop
+  jp nc, dzx7s_main_loop
 
 dzx7s_next_bit:
   add a,a        ; check next bit

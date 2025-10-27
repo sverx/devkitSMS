@@ -5,68 +5,8 @@
    ************************************************** */
 
 #include "SGlib.h"
+#include "SGlib_common.h"
 #include <stdbool.h>
-
-/* define VDPControlPort (SDCC z80 syntax) */
-__sfr __at 0xBF VDPControlPort;
-/* define VDPStatusPort */
-__sfr __at 0xBF VDPStatusPort;
-/* define VDPDataPort */
-__sfr __at 0xBE VDPDataPort;
-
-#ifndef TARGET_CV
-/* define IOPort (SG joypad) */
-__sfr __at 0xDC IOPortL;
-/* define IOPort (SG joypad) */
-__sfr __at 0xDD IOPortH;
-#else
-/* define IOPort (CV joypad) */
-__sfr __at 0xE0 IOPortL;
-/* define IOPort (CV joypad) */
-__sfr __at 0xE2 IOPortH;
-/* define IOPort (CV joypad) */
-__sfr __at 0xC0 IOPortCTRLmode0;
-/* define IOPort (CV joypad) */
-__sfr __at 0x80 IOPortCTRLmode1;
-#endif
-
-#define HI(x)       ((x)>>8)
-#define LO(x)       ((x)&0xFF)
-
-#ifndef MAXSPRITES
-#define MAXSPRITES      32
-#endif
-
-#define DISABLE_INTERRUPTS    __asm di __endasm
-#define ENABLE_INTERRUPTS     __asm ei __endasm
-
-#define WAIT_VRAM             __asm nop \
-                                    nop \
-                                    nop __endasm
-
-/*  --------------------------------------------------------- *
-        SG-1000 VRAM memory map:
-
-    $0000 +---------+
-          |   PGT   |  ($1800 bytes, pattern generator table)
-    $1800 +---------+
-          |   PNT   |  ($0300 bytes, nametable)
-    $1B00 +---------+
-          |   SAT   |  ($0080 bytes, sprite attribute table)
-    $1B80 +---------+
-          |         |  ($0480 bytes free)
-    $2000 +---------+
-          |   CGT   |  ($1800 bytes, colour table)
-    $3800 +---------+
-          |   SGT   |  ($0800 bytes, sprite generator table)
-          +---------+
- *  --------------------------------------------------------- */
-
-#define PNTADDRESS      0x1800
-#define SATADDRESS      0x1B00
-#define PGTADDRESS      0x0000
-#define CGTADDRESS      0x2000
-#define SGTADDRESS      0x3800
 
 /* the VDP registers initialization value */
 const unsigned char VDPReg_init[8]={
@@ -79,6 +19,12 @@ const unsigned char VDPReg_init[8]={
   0x07, // SG bits 13-11 = 1 1 1     (address = $3800)
   0x01  // text color (unused in Mode2) / backdrop (black)
 };
+
+/* ColecoVision VDP/NMI semaphore variables */
+#ifdef TARGET_CV
+_Bool CV_VDP_op_pending;
+_Bool CV_NMI_srv_pending;
+#endif
 
 /* the VDP registers #0 and #1 'shadow' RAM */
 unsigned char VDPReg[2]={0x02, 0xa0};
@@ -111,38 +57,6 @@ unsigned char SpriteNextFree;
 /* If non-NULL, will be called by SG_isr after acknowledging */
 /* the interrupt and reading controller status */
 void (*SG_theFrameInterruptHandler)(void);
-#endif
-
-#ifndef NESTED_DI_EI_SUPPORT
-/* macro definitions (no nested DI/EI support) */
-#define SG_write_to_VDPRegister(VDPReg,value)  do{DISABLE_INTERRUPTS; VDPControlPort=(value);     VDPControlPort=(VDPReg)|0x80;     ENABLE_INTERRUPTS;}while(0)
-#define SG_set_address_VRAM(address)           do{DISABLE_INTERRUPTS; VDPControlPort=LO(address); VDPControlPort=HI(address)|0x40;  ENABLE_INTERRUPTS;}while(0)
-#define SG_set_address_VRAM_read(address)      do{DISABLE_INTERRUPTS; VDPControlPort=LO(address); VDPControlPort=HI(address)&~0x40; ENABLE_INTERRUPTS;}while(0)
-#else
-/* inline __critical functions (nested DI/EI supported!) */
-inline void SG_write_to_VDPRegister (unsigned char VDPReg, unsigned char value) {
-  /* INTERNAL FUNCTION */
-  __critical {
-    VDPControlPort=value;
-    VDPControlPort=VDPReg|0x80;
-  }
-}
-
-inline void SG_set_address_CRAM (unsigned char address) {
-  /* INTERNAL FUNCTION */
-  __critical {
-    VDPControlPort=address;
-    VDPControlPort=0xC0;
-  }
-}
-
-inline void SG_set_address_VRAM (unsigned int address) {
-  /* INTERNAL FUNCTION */
-  __critical {
-    VDPControlPort=LO(address);
-    VDPControlPort=HI(address)|0x40;
-  }
-}
 #endif
 
 inline void SG_byte_to_VDP_data (unsigned char data) {
@@ -378,39 +292,55 @@ void SG_setFrameInterruptHandler (void (*theHandlerFunction)(void)) __z88dk_fast
 #endif
 
 /* Interrupt Service Routines */
+#ifndef TARGET_CV
 void SG_isr (void) __critical __interrupt(0) {
   volatile unsigned char VDPStatus=VDPStatusPort;  /* this also aknowledge interrupt at VDP */
 #ifdef AUTODETECT_SPRITE_OVERFLOW
   VDPSpriteOverflow=(VDPStatus & 0x40);
   VDPSpriteCollision=(VDPStatus & 0x20);
 #endif
-#ifndef TARGET_CV
   if (VDPStatus & 0x80) {
-#endif
     VDPBlank=true;         /* frame interrupt */
-    /* read pad/joy input */
+    /* read pad input */
     PreviousKeysStatus=KeysStatus;
-#ifndef TARGET_CV
     KeysStatus=~(((IOPortH)<<8)|IOPortL);
-#else
-    IOPortCTRLmode0=0xff;
-    unsigned int tempKeysStatus=~(((IOPortH|0x80)<<8)|(IOPortL|0x80));
-    IOPortCTRLmode1=0xff;
-    KeysStatus=(((IOPortH&0x40)?0:0x8000)|((IOPortL&0x40)?0:0x80))|tempKeysStatus;
-#endif
-
 #ifndef NO_FRAME_INT_HOOK
     if (SG_theFrameInterruptHandler) {
       SG_theFrameInterruptHandler();
     }
 #endif
-#ifndef TARGET_CV
   }
-#endif
 }
 
-#ifndef TARGET_CV
 void SG_nmi_isr (void) __critical __interrupt {   /* this is for NMI */
   PauseRequested = true;
+}
+#else
+void SG_isr_process (void) {
+  volatile unsigned char VDPStatus=VDPStatusPort;  /* this also aknowledge interrupt at VDP */
+#ifdef AUTODETECT_SPRITE_OVERFLOW
+  VDPSpriteOverflow=(VDPStatus & 0x40);
+  VDPSpriteCollision=(VDPStatus & 0x20);
+#endif
+  VDPBlank=true;         /* frame interrupt */
+  /* read joy input */
+  PreviousKeysStatus=KeysStatus;
+  IOPortCTRLmode0=0xff;
+  unsigned int tempKeysStatus=~(((IOPortH|0x80)<<8)|(IOPortL|0x80));
+  IOPortCTRLmode1=0xff;
+  KeysStatus=(((IOPortH&0x40)?0:0x8000)|((IOPortL&0x40)?0:0x80))|tempKeysStatus;
+#ifndef NO_FRAME_INT_HOOK
+  if (SG_theFrameInterruptHandler) {
+    SG_theFrameInterruptHandler();
+  }
+#endif
+  CV_NMI_srv_pending=false;
+}
+
+void SG_isr (void) __critical __interrupt {   /* this is for ColecoVision NMI */
+  if (!CV_VDP_op_pending)
+    SG_isr_process();
+  else
+    CV_NMI_srv_pending=true;
 }
 #endif

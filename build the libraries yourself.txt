@@ -1,0 +1,3 @@
+- in SMSlib/src folder there's a note about building SMSlib yourself
+- in SGlib/src folder there's a note about building SGlib yourself
+

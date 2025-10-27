@@ -4,14 +4,8 @@
    ************************************************** */
 
 #include "SGlib.h"
-
-#define PGTADDRESS      0x0000
-#define CGTADDRESS      0x2000
-
-/* define VDPControlPort (SDCC z80 syntax) */
-__sfr __at 0xBF VDPControlPort;
-/* define VDPDataPort */
-__sfr __at 0xBE VDPDataPort;
+#include "SGlib_common.h"
+#include <stdbool.h>
 
 void SG_initBitmapMode (unsigned char foreground_color, unsigned char background_color) {
   SG_VRAMmemset (PGTADDRESS, 0x00, 256*3*8);
@@ -23,6 +17,7 @@ void SG_initBitmapMode (unsigned char foreground_color, unsigned char background
 
 #pragma save
 #pragma disable_warning 85
+#ifndef TARGET_CV
 // profile: 393 to 491 cycles
 void SG_putPixel_f (unsigned char color, unsigned int xy_coords) {
   __asm
@@ -165,4 +160,37 @@ p_bkgcol:
 
   __endasm;
 }
+#else
+#define SG_get_Tile_address(x,y)  ((unsigned int)(((y)>>3) << 8) + (((x) >> 3) << 3) + ((y) % 8))
+void SG_putPixel (unsigned char x, unsigned char y, unsigned char color) {
+  unsigned int address=SG_get_Tile_address(x, y);
+
+  // check if color data update is needed
+  SG_set_address_VRAM_read (CGTADDRESS + address);
+  WAIT_VRAM;
+  unsigned char color_data = VDPDataPort;
+  if ((color_data & 0x0F) == color) {
+    color=0;   // we want a pixel in the current background color
+  } else if ((color_data >> 4) == color) {
+    color=1;   // we want a pixel in the current foreground color
+  } else {
+    color_data = (color_data & 0x0F) | (color << 4);
+    SG_set_address_VRAM (CGTADDRESS + address);
+    VDPDataPort = color_data;
+    color=1;    // we want a pixel in the new foreground color
+  }
+
+  unsigned char pattern_data=(0x80 >> (x & 0x07));
+  // set pattern data
+  SG_set_address_VRAM_read (PGTADDRESS + address);
+  WAIT_VRAM;
+  if (color) {
+    pattern_data |= VDPDataPort;
+  } else {
+    pattern_data = VDPDataPort & (~pattern_data);
+  }
+  SG_set_address_VRAM (PGTADDRESS + address);
+  VDPDataPort = pattern_data;
+}
+#endif
 #pragma restore

@@ -1,7 +1,7 @@
 devkitSMS
 =======
 
-a collection of tools and code (with a *very* presumptuous name) for SEGA Master System / SEGA Game Gear / SEGA SG-1000 / SEGA SC-3000 homebrew development using 'C' language (and the SDCC compiler).
+a collection of tools and code (with a *very* presumptuous name) for SEGA Master System, Game Gear, SG-1000/SC-3000 and ColecoVision homebrew development using 'C' language (and the SDCC compiler).
 
 ### How to code your own programs using devkitSMS:
 
