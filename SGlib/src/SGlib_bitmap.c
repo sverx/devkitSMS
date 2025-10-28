@@ -11,15 +11,14 @@ void SG_initBitmapMode (unsigned char foreground_color, unsigned char background
   SG_VRAMmemset (PGTADDRESS, 0x00, 256*3*8);
   SG_VRAMmemset (CGTADDRESS, ((foreground_color&0x0f)<<4)|(background_color&0x0f), 256*3*8);
   SG_setNextTileatXY(0,0);
-  for(unsigned int tile=0; tile<((256 >> 3)*(192>>3)); tile++)
+  for(unsigned int tile=0; tile<((256>>3)*(192>>3)); tile++)
     VDPDataPort = tile;
 }
 
 #pragma save
 #pragma disable_warning 85
-#ifndef TARGET_CV
-// profile: 393 to 491 cycles
-void SG_putPixel_f (unsigned char color, unsigned int xy_coords) {
+// profile: 393 to 491 cycles (SG-1000)
+void SG_putPixel_f (unsigned char color, unsigned int xy_coords) __preserves_regs(iyh,iyl) {
   __asm
 
     /* in:  A color
@@ -54,21 +53,36 @@ void SG_putPixel_f (unsigned char color, unsigned int xy_coords) {
     ; C holds the requested pixel color
 
     ld a,l
+#ifndef TARGET_CV
     di
+#else
+    push hl
+      ld hl,#_CV_VDP_op_pending
+      ld (hl),#1
+    pop hl
+#endif
     out (#_VDPControlPort),a     ; we want to read a byte from VRAM
     ld a,h
     or #0x20                     ; because CGTADDRESS = 0x2000
     out (#_VDPControlPort),a     ; 11
+#ifndef TARGET_CV
     ei                           ; 4
     nop                          ; 4
     nop                          ; 4
     nop                          ; 4 = 27 (VRAM SAFE)
+#else
+    call putpixel_cv_ei
+#endif
     in a,(#_VDPDataPort)         ; read the byte at CGTADDRESS+offset
 
     ld e,a                       ; preserve A
     and #0x0F
     cp c
+#ifndef TARGET_CV
     jr z,p_bkgcol                ; when equal it means we want to put a pixel in background color
+#else
+    jp z,p_bkgcol                ; when equal it means we want to put a pixel in background color
+#endif
 
     ld a,e                       ; restore A
     rrca
@@ -92,13 +106,23 @@ void SG_putPixel_f (unsigned char color, unsigned int xy_coords) {
     ld c,a                       ; C now holds the new foreground color with the old background color
 
     ld a,l
+#ifndef TARGET_CV
     di
+#else
+    push hl
+      ld hl,#_CV_VDP_op_pending
+      ld (hl),#1
+    pop hl
+#endif
     out (#_VDPControlPort),a     ; we want to write a byte to VRAM
     ld a,h
     or #0x60                     ; because because CGTADDRESS = 0x2000 and WRITE_VRAM = 0x4000
     out (#_VDPControlPort),a
+#ifndef TARGET_CV
     ei
-
+#else
+    call putpixel_cv_ei
+#endif
     ld a,c
     out (#_VDPDataPort),a        ; 11 write new color attributes to VRAM
 
@@ -107,20 +131,31 @@ p_fgcol:
 
 put_p:
     ld a,l                       ; 4
+#ifndef TARGET_CV
     nop                          ; 4
     di                           ; 4 = 30 (VRAM SAFE)
+#else
+    push hl
+      ld hl,#_CV_VDP_op_pending
+      ld (hl),#1
+    pop hl
+#endif
     out (#_VDPControlPort),a     ; we want to read a byte from VRAM
     ld a,h
     out (#_VDPControlPort),a
+#ifndef TARGET_CV
     ei
+#else
+    call putpixel_cv_ei
+#endif
 
 #ifndef TARGET_CV
-    ld d,#0x00
+    ld d,#0x00                   ; bitshift LUT in crt0 at $0040 (SG-1000)
 #else
-    ld d,#0x80
+    ld d,#0x80                   ; bitshift LUT in crt0 at $8040 (ColecoVision)
 #endif
     ld e,b
-    set 6,e                      ; DE = 0x0040+B (bitshift LUT in crt0 at $0040/$8040)
+    set 6,e                      ; DE = LUT+B
     ld a,(de)
     ld e,a                       ; preserve the calculated shifted bit
 
@@ -134,13 +169,23 @@ put_p_write:
     ld e,a                       ; preserve the new byte value
 
     ld a,l
+#ifndef TARGET_CV
     di
+#else
+    push hl
+      ld hl,#_CV_VDP_op_pending
+      ld (hl),#1
+    pop hl
+#endif
     out (#_VDPControlPort),a     ; we want to write a byte to VRAM
     ld a,h
     or #0x40                     ; because WRITE_VRAM = 0x4000
     out (#_VDPControlPort),a
+#ifndef TARGET_CV
     ei
-
+#else
+    call putpixel_cv_ei
+#endif
     ld a,e                       ; restore the new byte value
     out (#_VDPDataPort),a        ; write updated pattern to VRAM
     ret                          ; process complete!
@@ -158,39 +203,27 @@ p_bkgcol:
     ld c,#0
     jp put_p
 
+#ifdef TARGET_CV
+putpixel_cv_ei:
+    push hl
+      ld hl,#_CV_VDP_op_pending
+      ld (hl),#0
+      ld hl,#_CV_NMI_srv_pending
+      bit 0,(hl)
+      jr z, skip_call
+      push iy
+      push de
+      push bc
+      push af
+        call _SG_isr_process
+      pop af
+      pop bc
+      pop de
+      pop iy
+skip_call:
+    pop hl
+    ret
+#endif
   __endasm;
 }
-#else
-#define SG_get_Tile_address(x,y)  ((unsigned int)(((y)>>3) << 8) + (((x) >> 3) << 3) + ((y) % 8))
-void SG_putPixel (unsigned char x, unsigned char y, unsigned char color) {
-  unsigned int address=SG_get_Tile_address(x, y);
-
-  // check if color data update is needed
-  SG_set_address_VRAM_read (CGTADDRESS + address);
-  WAIT_VRAM;
-  unsigned char color_data = VDPDataPort;
-  if ((color_data & 0x0F) == color) {
-    color=0;   // we want a pixel in the current background color
-  } else if ((color_data >> 4) == color) {
-    color=1;   // we want a pixel in the current foreground color
-  } else {
-    color_data = (color_data & 0x0F) | (color << 4);
-    SG_set_address_VRAM (CGTADDRESS + address);
-    VDPDataPort = color_data;
-    color=1;    // we want a pixel in the new foreground color
-  }
-
-  unsigned char pattern_data=(0x80 >> (x & 0x07));
-  // set pattern data
-  SG_set_address_VRAM_read (PGTADDRESS + address);
-  WAIT_VRAM;
-  if (color) {
-    pattern_data |= VDPDataPort;
-  } else {
-    pattern_data = VDPDataPort & (~pattern_data);
-  }
-  SG_set_address_VRAM (PGTADDRESS + address);
-  VDPDataPort = pattern_data;
-}
-#endif
 #pragma restore

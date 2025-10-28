@@ -28,13 +28,7 @@ void SG_decompressZX7toVRAM (const void *src, unsigned int dst) __naked {
 #ifndef TARGET_CV
   ei
 #else
-  push hl
-    ld hl,#_CV_VDP_op_pending
-    ld (hl),#0
-    ld hl,#_CV_NMI_srv_pending
-    bit 0,(hl)
-    call nz,_SG_isr_process
-  pop hl
+  call ZX7toVRAM_cv_ei
 #endif
   res 6,d        ; remove VRAM write bit
   dec c          ; data port
@@ -123,13 +117,7 @@ dzx7s_inner_loop:
 #ifndef TARGET_CV
   ei             ; 4
 #else
-  push hl
-    ld hl,#_CV_VDP_op_pending
-    ld (hl),#0
-    ld hl,#_CV_NMI_srv_pending
-    bit 0,(hl)
-    call nz,_SG_isr_process
-  pop hl
+  call ZX7toVRAM_cv_ei
 #endif
   inc hl         ; 6
   xor a          ; 4
@@ -157,13 +145,7 @@ dzx7s_inner_loop:
 #ifndef TARGET_CV
   ei
 #else
-  push hl
-    ld hl,#_CV_VDP_op_pending
-    ld (hl),#0
-    ld hl,#_CV_NMI_srv_pending
-    bit 0,(hl)
-    call nz,_SG_isr_process
-  pop hl
+  call ZX7toVRAM_cv_ei
 #endif
   out (#0xbe),a
   inc de                  ; 6
@@ -191,6 +173,28 @@ dzx7s_next_bit:
 l_ret:
   pop hl
   ret
+
+#ifdef TARGET_CV
+ZX7toVRAM_cv_ei:
+  push hl
+    ld hl,#_CV_VDP_op_pending
+    ld (hl),#0
+    ld hl,#_CV_NMI_srv_pending
+    bit 0,(hl)
+    jr z, skip_call
+    push iy
+    push de
+    push bc
+    push af
+      call _SG_isr_process
+    pop af
+    pop bc
+    pop de
+    pop iy
+skip_call:
+  pop hl
+  ret
+#endif
   __endasm;
 }
 #pragma restore
