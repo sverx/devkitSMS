@@ -223,13 +223,13 @@ Check [SUPPORT.md](https://github.com/sverx/devkitSMS/blob/master/SUPPORT.md) to
 ### Some of the many cool games developed with devkitSMS so far include:
 
 * armixer24's [Tetris4GG](https://www.smspower.org/Homebrew/Tetris4GG-GG)
-* badcomputer's [Astro Climber](https://www.smspower.org/Homebrew/AstroClimber-SMS), [Razing Core](https://www.smspower.org/Homebrew/RazingCore-SMS) and [Frontier Force](https://www.smspower.org/Homebrew/FrontierForce-SMS)
+* badcomputer's [Astro Climber](https://www.smspower.org/Homebrew/AstroClimber-SMS), [Razing Core](https://www.smspower.org/Homebrew/RazingCore-SMS), [Frontier Force](https://www.smspower.org/Homebrew/FrontierForce-SMS)
 * cireza's [the Sword of Stone](https://www.smspower.org/Homebrew/SwordOfStone-GG)
 * Cyttorak's [Gemitas](https://www.smspower.org/Homebrew/Gemitas-SMS)
 * dark's [Yawi](https://www.smspower.org/Homebrew/Yawi-SG)
 * Disjointed Studio's [Weka Invaders](https://www.smspower.org/Homebrew/WekaInvaders-SMS)
 * Dr.Ludos' [Dangerous Demolition](https://www.smspower.org/Homebrew/DangerousDemolition-SMS)
-* Eruiz's [Lunar Skirmish](https://www.smspower.org/Homebrew/LunarSkirmish-SMS), [Galactic Revenge](https://www.smspower.org/Homebrew/GalacticRevenge-SMS), [Astro Force](https://www.smspower.org/Homebrew/AstroForce-SMS), [Bomb Jack Remake](https://www.smspower.org/Homebrew/BombJackRemake-SMS), [Green Beret Remake](https://www.smspower.org/Homebrew/GreenBeretRemake-SMS) [Crazy Pinball](https://www.smspower.org/Homebrew/CrazyPinball-SMS), [Electronic Dreams](https://www.smspower.org/Homebrew/ElectronicDreams-SMS)
+* Eruiz's [Lunar Skirmish](https://www.smspower.org/Homebrew/LunarSkirmish-SMS), [Galactic Revenge](https://www.smspower.org/Homebrew/GalacticRevenge-SMS), [Astro Force](https://www.smspower.org/Homebrew/AstroForce-SMS), [Bomb Jack Remake](https://www.smspower.org/Homebrew/BombJackRemake-SMS), [Green Beret Remake](https://www.smspower.org/Homebrew/GreenBeretRemake-SMS), [Crazy Pinball](https://www.smspower.org/Homebrew/CrazyPinball-SMS), [Electronic Dreams](https://www.smspower.org/Homebrew/ElectronicDreams-SMS)
 * Guy's [Grail of the Gods](https://www.smspower.org/Homebrew/GrailOfTheGods-SMS)
 * JoppyFurr's [Snepzhen Solitaire](https://www.smspower.org/Homebrew/SnepzhenSolitaire-SMS)
 * Louis the SEGA Nerd's [Monaco Master](https://www.smspower.org/Homebrew/MonacoMaster-SMS)
@@ -242,5 +242,6 @@ Check [SUPPORT.md](https://github.com/sverx/devkitSMS/blob/master/SUPPORT.md) to
 * Tuxedo Games' [Alter Ego](https://www.smspower.org/Homebrew/AlterEgo-SMS)
 * Will Britton's [Land on my Base](https://www.smspower.org/Homebrew/LandOnMyBase-SMS)
 * xfixium's [Ms. Pac-Man Classic](https://www.smspower.org/Homebrew/MsPacManClassic-SMS)
+
 ... and many more can be found [here](https://www.smspower.org/Tags/DevkitSMS)
 
