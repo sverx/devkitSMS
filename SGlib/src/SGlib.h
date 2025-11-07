@@ -211,8 +211,12 @@ void SG_setFrameInterruptHandler (void (*theHandlerFunction)(void)) __z88dk_fast
 #endif
 
 /* the Interrupt Service Routines (do not modify) */
+#ifndef TARGET_CV
 void SG_isr (void) __critical __interrupt(0);
+#endif
 
 #ifndef TARGET_CV
 void SG_nmi_isr (void) __critical __interrupt;
+#else
+void SG_nmi_isr (void) __naked;
 #endif

@@ -66,9 +66,8 @@ __sfr __at 0x80 IOPortCTRLmode1;
 #define VDP_SEMAPHORE_ON      __asm di __endasm
 #define VDP_SEMAPHORE_OFF     __asm ei __endasm
 #else
-void SG_isr_process (void);
-#define VDP_SEMAPHORE_ON      do{CV_VDP_op_pending=true;}while(0)
-#define VDP_SEMAPHORE_OFF     do{CV_VDP_op_pending=false;if(CV_NMI_srv_pending)SG_isr_process();}while(0)
+#define VDP_SEMAPHORE_ON      __asm rst 0x10 __endasm
+#define VDP_SEMAPHORE_OFF     __asm rst 0x08 __endasm
 #endif
 
 /* VDP address/registers operations macro definitions */

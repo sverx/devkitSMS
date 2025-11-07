@@ -316,8 +316,15 @@ void SG_nmi_isr (void) __critical __interrupt {   /* this is for NMI */
   PauseRequested = true;
 }
 #else
-void SG_isr_process (void) {
-  volatile unsigned char VDPStatus=VDPStatusPort;  /* this also aknowledge interrupt at VDP */
+void SG_isr_process (void) __naked {
+  __asm
+    push bc       ; AF and HL already saved
+    push de
+    push iy
+  __endasm;
+  __asm
+    in a,(#_VDPStatusPort)   ; aknowledge interrupt at VDP
+  __endasm;
 #ifdef AUTODETECT_SPRITE_OVERFLOW
   VDPSpriteOverflow=(VDPStatus & 0x40);
   VDPSpriteCollision=(VDPStatus & 0x20);
@@ -326,8 +333,16 @@ void SG_isr_process (void) {
   /* read joy input */
   PreviousKeysStatus=KeysStatus;
   IOPortCTRLmode0=0xff;
+  __asm
+    ex (sp),hl    ; delay before reading the joy IO ports
+    ex (sp),hl
+  __endasm;
   unsigned int tempKeysStatus=~(((IOPortH|0x80)<<8)|(IOPortL|0x80));
   IOPortCTRLmode1=0xff;
+  __asm
+    ex (sp),hl    ; delay before reading the joy IO ports
+    ex (sp),hl
+  __endasm;
   KeysStatus=(((IOPortH&0x40)?0:0x8000)|((IOPortL&0x40)?0:0x80))|tempKeysStatus;
 #ifndef NO_FRAME_INT_HOOK
   if (SG_theFrameInterruptHandler) {
@@ -335,12 +350,30 @@ void SG_isr_process (void) {
   }
 #endif
   CV_NMI_srv_pending=false;
+  __asm
+    pop iy
+    pop de
+    pop bc
+    ret           ; because I am naked
+  __endasm;
 }
 
-void SG_isr (void) __critical __interrupt {   /* this is for ColecoVision NMI */
-  if (!CV_VDP_op_pending)
-    SG_isr_process();
-  else
-    CV_NMI_srv_pending=true;
+void SG_nmi_isr (void) __naked {   /* this is for ColecoVision NMI */
+  __asm
+  push af
+  push hl
+    ld hl,#_CV_VDP_op_pending
+    bit 0,(hl)
+    jr z,1$                        ; VDP semaphore is off, we can serve NMI now
+    ld hl,#_CV_NMI_srv_pending
+    ld (hl),#1                     ; semaphore is on, defer NMI
+    jr 2$
+1$:
+    call _SG_isr_process
+2$:
+  pop hl
+  pop af
+  retn
+  __endasm;
 }
 #endif

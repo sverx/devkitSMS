@@ -20,15 +20,14 @@ void SG_decompressZX7toVRAM (const void *src, unsigned int dst) __naked {
 #ifndef TARGET_CV
   di             ; set VRAM address
 #else
-  ld a,#1
-  ld (#_CV_VDP_op_pending),a
+  rst 0x10
 #endif
   out (c),e
   out (c),d
 #ifndef TARGET_CV
   ei
 #else
-  call ZX7toVRAM_cv_ei
+  rst 0x08
 #endif
   res 6,d        ; remove VRAM write bit
   dec c          ; data port
@@ -107,17 +106,14 @@ dzx7s_inner_loop:
 #ifndef TARGET_CV
   di                      ; 4 = 27 (safe on every Master System or Game Gear)
 #else
-  push hl
-    ld hl,#_CV_VDP_op_pending
-    ld (hl),#1
-  pop hl
+  rst 0x10
 #endif
   out (c),l
   out (c),h
 #ifndef TARGET_CV
   ei             ; 4
 #else
-  call ZX7toVRAM_cv_ei
+  rst 0x08
 #endif
   inc hl         ; 6
   xor a          ; 4
@@ -135,17 +131,14 @@ dzx7s_inner_loop:
 #ifndef TARGET_CV
   di             ; 4 = 28 (safe on every Master System or Game Gear)
 #else
-  push hl
-    ld hl,#_CV_VDP_op_pending
-    ld (hl),#1
-  pop hl
+  rst 0x10
 #endif
   out (c),e
   out (c),d
 #ifndef TARGET_CV
   ei
 #else
-  call ZX7toVRAM_cv_ei
+  rst 0x08
 #endif
   out (#0xbe),a
   inc de                  ; 6
@@ -173,28 +166,6 @@ dzx7s_next_bit:
 l_ret:
   pop hl
   ret
-
-#ifdef TARGET_CV
-ZX7toVRAM_cv_ei:
-  push hl
-    ld hl,#_CV_VDP_op_pending
-    ld (hl),#0
-    ld hl,#_CV_NMI_srv_pending
-    bit 0,(hl)
-    jr z, skip_call
-    push iy
-    push de
-    push bc
-    push af
-      call _SG_isr_process
-    pop af
-    pop bc
-    pop de
-    pop iy
-skip_call:
-  pop hl
-  ret
-#endif
   __endasm;
 }
 #pragma restore

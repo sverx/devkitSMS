@@ -56,10 +56,7 @@ void SG_putPixel_f (unsigned char color, unsigned int xy_coords) __preserves_reg
 #ifndef TARGET_CV
     di
 #else
-    push hl
-      ld hl,#_CV_VDP_op_pending
-      ld (hl),#1
-    pop hl
+    rst 0x10
 #endif
     out (#_VDPControlPort),a     ; we want to read a byte from VRAM
     ld a,h
@@ -71,18 +68,14 @@ void SG_putPixel_f (unsigned char color, unsigned int xy_coords) __preserves_reg
     nop                          ; 4
     nop                          ; 4 = 27 (VRAM SAFE)
 #else
-    call putpixel_cv_ei
+    rst 0x08
 #endif
     in a,(#_VDPDataPort)         ; read the byte at CGTADDRESS+offset
 
     ld e,a                       ; preserve A
     and #0x0F
     cp c
-#ifndef TARGET_CV
     jr z,p_bkgcol                ; when equal it means we want to put a pixel in background color
-#else
-    jp z,p_bkgcol                ; when equal it means we want to put a pixel in background color
-#endif
 
     ld a,e                       ; restore A
     rrca
@@ -109,10 +102,7 @@ void SG_putPixel_f (unsigned char color, unsigned int xy_coords) __preserves_reg
 #ifndef TARGET_CV
     di
 #else
-    push hl
-      ld hl,#_CV_VDP_op_pending
-      ld (hl),#1
-    pop hl
+    rst 0x10
 #endif
     out (#_VDPControlPort),a     ; we want to write a byte to VRAM
     ld a,h
@@ -121,7 +111,7 @@ void SG_putPixel_f (unsigned char color, unsigned int xy_coords) __preserves_reg
 #ifndef TARGET_CV
     ei
 #else
-    call putpixel_cv_ei
+    rst 0x08
 #endif
     ld a,c
     out (#_VDPDataPort),a        ; 11 write new color attributes to VRAM
@@ -135,10 +125,7 @@ put_p:
     nop                          ; 4
     di                           ; 4 = 30 (VRAM SAFE)
 #else
-    push hl
-      ld hl,#_CV_VDP_op_pending
-      ld (hl),#1
-    pop hl
+    rst 0x10
 #endif
     out (#_VDPControlPort),a     ; we want to read a byte from VRAM
     ld a,h
@@ -146,7 +133,7 @@ put_p:
 #ifndef TARGET_CV
     ei
 #else
-    call putpixel_cv_ei
+    rst 0x08
 #endif
 
 #ifndef TARGET_CV
@@ -172,10 +159,7 @@ put_p_write:
 #ifndef TARGET_CV
     di
 #else
-    push hl
-      ld hl,#_CV_VDP_op_pending
-      ld (hl),#1
-    pop hl
+    rst 0x10
 #endif
     out (#_VDPControlPort),a     ; we want to write a byte to VRAM
     ld a,h
@@ -184,7 +168,7 @@ put_p_write:
 #ifndef TARGET_CV
     ei
 #else
-    call putpixel_cv_ei
+    rst 0x08
 #endif
     ld a,e                       ; restore the new byte value
     out (#_VDPDataPort),a        ; write updated pattern to VRAM
@@ -202,28 +186,6 @@ put_p_bkgcol:
 p_bkgcol:
     ld c,#0
     jp put_p
-
-#ifdef TARGET_CV
-putpixel_cv_ei:
-    push hl
-      ld hl,#_CV_VDP_op_pending
-      ld (hl),#0
-      ld hl,#_CV_NMI_srv_pending
-      bit 0,(hl)
-      jr z, skip_call
-      push iy
-      push de
-      push bc
-      push af
-        call _SG_isr_process
-      pop af
-      pop bc
-      pop de
-      pop iy
-skip_call:
-    pop hl
-    ret
-#endif
   __endasm;
 }
 #pragma restore

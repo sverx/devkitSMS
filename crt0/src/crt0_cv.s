@@ -33,7 +33,7 @@
   .globl  _main
 
   .area _HEADER (ABS)
-  .org  0x8000
+  .org 0x8000
   .db 0x55, 0xAA    ; cartridge header signature ("no title" version)
   .dw 0x0000        ; (unused LOCAL_SPR_TBL address)
   .dw 0x0000        ; (unused SPRITE_ORDER address)
@@ -41,35 +41,18 @@
   .dw 0x0000        ; (unused CONTROLLER_MAP address)
   .dw 2$            ; address of program entry point
 
-  ret               ; (unused RST $08 code)
-  nop
-  nop
+  .org 0x800c       ; RST $08 code (VDP_SEMAPHORE_OFF)
+  jp 4$
 
-  ret               ; (unused RST $10 code)
-  nop
-  nop
+  .org 0x800f       ; RST $10 code (VDP_SEMAPHORE_ON)
+  push hl
+    ld hl,#_CV_VDP_op_pending
+    ld (hl),#1
+  pop hl
+  ret
 
-  ret               ; (unused RST $18 code)
-  nop
-  nop
-
-  ret               ; (unused RST $20 code)
-  nop
-  nop
-
-  ret               ; (unused RST $28 code)
-  nop
-  nop
-
-  ret               ; (unused RST $30 code)
-  nop
-  nop
-
-  ret               ; (unused RST $38 code)
-  nop
-  nop
-
-  jp _SG_isr        ; NMI will call the vblank Interrupt Service Routine
+  .org 0x8021
+  jp _SG_nmi_isr    ; will call the vblank Interrupt Service Routine (NMI)
   
 2$:
   di                ; disable interrupt
@@ -97,6 +80,18 @@
 1$:
   halt              ; main has returned, stop here
   jr 1$
+
+4$:                 ; VDP_SEMAPHORE_OFF code 
+  push af
+  push hl
+    ld hl,#_CV_VDP_op_pending
+    ld (hl),#0
+    ld hl,#_CV_NMI_srv_pending
+    bit 0,(hl)
+    call nz,_SG_isr_process
+  pop hl
+  pop af
+  ret
 
   .ascii 'devkitSMS'; this is shameless
 
