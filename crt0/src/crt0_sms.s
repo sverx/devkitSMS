@@ -37,7 +37,7 @@
         di                              ; disable interrupt
         im 1                            ; interrupt mode 1 (this will never change)
         ld sp, #0xdff0                  ; set stack pointer at end of RAM
-        jr init
+        jr crt0_init
 ;--------------------------------------------------------------------------
         .org    0x08                    ; Reset 08h - write HL to VDP Control Port
 _SMS_crt0_RST08::
@@ -58,12 +58,12 @@ _SMS_crt0_RST18::
         out (#0xBE),a
         ret
 ;--------------------------------------------------------------------------
-init:
+crt0_init:
         ld hl,#0x0000                   ; initialize mappers
         ld (#0xfffc),hl                 ; [0xfffc]=$00, [0xfffd]=$00
         ld hl,#0x0201
         ld (#0xfffe),hl                 ; [0xfffe]=$01, [0xffff]=$02
-        jr clear_ram
+        jr crt0_clear_ram
 ;--------------------------------------------------------------------------
 get_bank::                              ; get current code bank num into A
         ld a,(#0xfffe)                  ; (read current page from mapper)
@@ -75,18 +75,18 @@ set_bank::                              ; set current code bank num to A
         .org    0x38                    ; handle IRQ
         jp _SMS_isr
 ;--------------------------------------------------------------------------
-clear_ram:
+crt0_clear_ram:
         ld hl,#0xc000                   ; save contents of $c000
         ld a,(hl)                       ;   before clearing RAM
         ld b,#0x00                      ; clear RAM (to value 0x00) by setting
         ld (hl),b                       ;   value 0 to $c000 and
         ld de,#0xc001                   ;   copying (LDIR) it to next byte
-        ld bc,#0x2000-17                ;   for 8 KB (minus 17 bytes)
+        ld bc,#l__DATA-1                ;   for the unitialized statics
         ldir                            ;   do that
         ld (_SMS_Port3EBIOSvalue),a     ; restore contents of $c000 to SMS_Port3EBIOSvalue var
 
         ;; Initialise global variables
-        call gsinit
+        call crt0_gsinit
         call _SMS_init
         ei                              ; re-enable interrupts before going to main()
         call _main
@@ -136,15 +136,15 @@ _outi_block::                           ; _outi_block label points to END of OUT
 
         .area   _CODE
         .area   _GSINIT
-gsinit::
+crt0_gsinit::
         ld bc, #l__INITIALIZER
         ld a, b
         or a, c
-        jr Z, gsinit_next
+        jr Z, crt0_gsinit_next
         ld de, #s__INITIALIZED
         ld hl, #s__INITIALIZER
         ldir
-gsinit_next:
+crt0_gsinit_next:
         .area   _GSFINAL
         ret
 
