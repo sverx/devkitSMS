@@ -37,12 +37,12 @@
   .org  0
   di                ; disable interrupt
   im 1              ; interrupt mode 1 (this will not change)
-  ld sp,#0xc3f0     ; set stack pointer at end of RAM
+  ld sp,#0xfff0     ; set stack pointer at end of (mirror) RAM
   xor a             ; clear RAM (to value 0x00)
   ld hl,#0xc000     ;   by setting value 0
   ld (hl),a         ;   to $c000 and
   ld de,#0xc001     ;   copying (LDIR) it to next byte
-  ld bc,#0x0400-17  ;   for 1 KB minus 17 bytes
+  ld bc,#l__DATA-1  ;   for the unitialized statics
   ldir              ;   do that
 
   ;; ensure this runs fine on SC-3000 too
@@ -52,7 +52,7 @@
   out (0xDE),a      ; Select ROW 7 (row 7 of PPI is joypad = default - no effect on SG-1000)
 
   ;; Initialise global variables
-  call  gsinit
+  call  crt0_gsinit
   call  _SG_init
   ei                ; make sure interrupts are enabled before calling main
   call  _main
@@ -103,15 +103,15 @@ _outi_block::       ; _outi_block label points to END of block
   .area   _HEAP
 
   .area   _GSINIT
-gsinit::
+crt0_gsinit::
   ld  bc, #l__INITIALIZER
   ld  a, b
   or  a, c
-  jr  Z, gsinit_next
+  jr  Z, crt0_gsinit_next
   ld  de, #s__INITIALIZED
   ld  hl, #s__INITIALIZER
   ldir
-gsinit_next:
-
+crt0_gsinit_next:
   .area   _GSFINAL
   ret
+
