@@ -70,6 +70,9 @@ This **must** be named *assets2banks.cfg* and it can contain what follows:
 
  * empty lines (will be ignored)
  * comments (begin the comment using the # char on *any* line)
+ * name of the asset file(s) that need handling
+ * assets attributes
+ * open and closed curly braces on their own lines for assets grouping
 
 ### assets grouping
 
@@ -274,13 +277,21 @@ blob3.bin
 will import only the first 1024 bytes from _blob1.bin_, then 128 bytes from _blob2.bin_ after skipping the first 256 bytes, and the whole _blob3.bin_ file dropping the first 32 bytes.
 
 ### asset attribute :discard
-The :discard attribute can be used to discard unwanted part(s) of an asset. More than one :discard attribute can be used on a single assets, if needed.
+The :discard attribute can be used to discard unwanted part(s) of an asset. More than one :discard attribute can be used on a single asset, if needed.
 
 By using:
 ```
-:discard <index> <count>
+:discard <index> [<count>]
 ```
-you can discard _count_ array elements starting from _index_. If _count_ is omitted, only the _index_ element will be discarded. You can also discard all the elements from _index_ until the end of the array by specifying a _count_ value of 0.
+you can discard _count_ array elements starting from _index_. If _count_ is omitted, only the _index_ element will be discarded. You can also discard all the elements from _index_ to the end of the array by specifying a _count_ value of 0.
+
+Example usage:
+```
+mapdata.csv
+:text
+:discard 0 16
+```
+This will discard the first 16 elements from the array of values imported from _mapdata.csv_.
 
 ### short but complete example of all the features
 
