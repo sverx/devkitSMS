@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 # Author: sverx
-# Version: 3.2  **assets2banks now supports custom bank sizes**
+# Version: 3.3  **assets2banks now supports discarding sections of data from assets**
 
 from __future__ import absolute_import, division, generators, unicode_literals, print_function, nested_scopes
 import sys
@@ -15,6 +15,11 @@ class Modify:
         self.start = start
         self.length = length
         self.values = values
+
+class Discard:
+    def __init__(self, start, length):
+        self.start = start
+        self.length = length
 
 class Segment:
     def __init__(self, length, start):
@@ -30,6 +35,7 @@ class Asset:
         self.style = 0
         self.text = 0
         self.excluded = 0
+        self.discards = []
         self.segments = []
         self.modifies = []
         self.header = []
@@ -47,6 +53,10 @@ class Asset:
 
     def exclude(self):
         self.excluded = 1
+
+    def add_discard(self, discard):
+        self.discards.append(discard)
+        self.discards.sort(key=lambda g: g.start, reverse=True)
 
     def add_segment(self, length, start):
         s = Segment(length, start)
@@ -156,6 +166,19 @@ class Asset:
                     print("Warning: invalid value '{0}' on text asset '{1}' has been ignored".format(value, self.name))
 
         in_file.close()
+
+        # discard the unwanted parts of the data
+        for d in self.discards:
+            if d.length == 0:
+                del_len = len(self.data[d.start:])
+                del self.data[d.start:]
+                self.size-=del_len*((1, 2)[a.style == 1])
+            elif d.length == 1:
+                del self.data[d.start]
+                self.size-=((1, 2)[a.style == 1])
+            else:
+                del self.data[d.start:(d.start+d.length)]
+                self.size-=d.length*((1, 2)[a.style == 1])
 
         # do the requested modifies to the data
         for m in self.modifies:
@@ -372,6 +395,20 @@ try:
                 a.set_style(1)
             elif ls == ":text" or ls == ":data":
                 a.set_text(1)
+            elif ls[:9] == ":discard ":
+                dpp = ls[9:].split()
+                try:
+                    if len(dpp) == 2:                    # if there are two values, we discard a slice
+                        dp = Discard(int(dpp[0], 0), int(dpp[1], 0))
+                    elif len(dpp) == 1:                  # if there is only one value, we discard a single element
+                        dp = Discard(int(dpp[0], 0), 1)
+                    else:
+                        print("Fatal: invalid discard attribute parameter(s)")
+                        sys.exit(1)
+                except ValueError:
+                    print("Fatal: invalid discard attribute parameter(s)")
+                    sys.exit(1)
+                a.add_discard(dp)
             elif ls[:11] == ":overwrite ":
                 ovp = ls[11:].split()
                 try:
@@ -483,7 +520,7 @@ for ag in AssetGroupList:
         if a.excluded == 0:
             a.process()
             if (a.style == 0 and len(a.data) != a.size) or (a.style == 1 and len(a.data) != a.size/2):
-                print("Fatal: Internal error processing asset '{0}')".format(a.name))
+                print("Fatal: Internal error processing asset '{0}'".format(a.name))
                 sys.exit(1)
     ag.calculate_size()
 

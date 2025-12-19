@@ -273,6 +273,15 @@ blob3.bin
 ```
 will import only the first 1024 bytes from _blob1.bin_, then 128 bytes from _blob2.bin_ after skipping the first 256 bytes, and the whole _blob3.bin_ file dropping the first 32 bytes.
 
+### asset attribute :discard
+The :discard attribute can be used to discard unwanted part(s) of an asset. More than one :discard attribute can be used on a single assets, if needed.
+
+By using:
+```
+:discard <index> <count>
+```
+you can discard _count_ array elements starting from _index_. If _count_ is omitted, only the _index_ element will be discarded. You can also discard all the elements from _index_ until the end of the array by specifying a _count_ value of 0.
+
 ### short but complete example of all the features
 
 Here's an example of a short (but feature complete) configuration file:
@@ -314,6 +323,9 @@ asset4.bin
 random_values_table.txt
 :text
 # this is a text file that will be parsed into an array
+:discard 0 32
+:discard 200 0
+# the first 32 elements of the array will be discarded, and the same to all the elements from the 200th onward
 
 somedata.bin
 :segment skip 32
