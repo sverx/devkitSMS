@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 # Author: sverx
-# Version: 3.3  **assets2banks now supports discarding sections of data from assets**
+# Version: 3.4  **assets2banks now supports replacing values in data from assets**
 
 from __future__ import absolute_import, division, generators, unicode_literals, print_function, nested_scopes
 import sys
@@ -229,6 +229,18 @@ class Asset:
                     else:
                         print("Fatal: trying to modify data from asset '{0}' past its end".format(self.name))
                         sys.exit(1)
+            elif m.operator == 'replace':
+                for cnt in range(m.length):
+                    if (m.start+cnt)<len(self.data):
+                        try:
+                            if self.data[m.start+cnt] == int(m.values[0], 0):
+                                self.data[m.start+cnt] = int(m.values[1], 0)
+                        except OverflowError:
+                            print("Fatal: invalid result value for 'replace' operation on asset '{0}'".format(self.name))
+                            sys.exit(1)
+                    else:
+                        print("Fatal: trying to modify data from asset '{0}' past its end".format(self.name))
+                        sys.exit(1)
             elif m.operator == 'set':
                 for cnt in range(m.length):
                     if (m.start+cnt)<len(self.data):
@@ -418,6 +430,23 @@ try:
                         md = Modify('set', int(ovp[0], 0), int(ovp[1], 0), ovp[2:])
                 except ValueError:
                     print("Fatal: invalid overwrite attribute parameter(s)")
+                    sys.exit(1)
+                a.add_modify(md)
+            elif ls[:9] == ":replace ":
+                mdf = ls[9:].split()
+                try:
+                    if len(mdf) == 2:                    # if there are only two values after the operator, we search in all array elements
+                        md = Modify('replace', 0, 0, mdf)
+                    # I'm still unsure about this part, let's not do that for now!
+                    # ~ elif len(mdf) == 3:                  # if there are three values after the operator, we test only 1 element
+                        # ~ md = Modify('replace', int(mdf[0], 0), 1, mdf[1:])
+                    # ~ elif len(mdf) == 4:                  # if there are four values after the operator, we search in *len* array elements from *start*
+                        # ~ md = Modify('replace', int(mdf[0], 0), int(mdf[1], 0), mdf[2:])
+                    else:
+                        print("Fatal: invalid replace attribute parameter(s)")
+                        sys.exit(1)
+                except ValueError:
+                    print("Fatal: invalid replace attribute parameter(s)")
                     sys.exit(1)
                 a.add_modify(md)
             elif ls[:9] == ":segment ":

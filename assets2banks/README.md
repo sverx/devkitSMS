@@ -114,7 +114,7 @@ By using:
 ```
 :overwrite <start> <length> <value> [<value>[...]]
 ```
-*length* array elements from *start* will be replaced with the listed value(s), repeating them if needed. Accept decimal values, or 0x-prefixed hex values.
+*length* array elements from *start* will be replaced with the listed value(s), repeating them if needed. Accepts decimal values, or 0x-prefixed hex values.
 
 There's also a shorter form to replace a single element.
 ```
@@ -133,7 +133,7 @@ The first value in the sprite_palette_bin array will be replaced by _0x00_.
 
 ### asset attribute :modify
 
-The :modify attribute can be used to update elements in the asset.
+The :modify attribute can be used to update elements in the asset. Accepts decimal values, or 0x-prefixed hex values.
 
 By using:
 ```
@@ -154,7 +154,7 @@ Also, by using:
 ```
 all the array elements will be modified using the provided action and value.
 
-Is it also possible to specify more than one modify attribute for a single asset.
+It is also possible to specify more than one :modify attribute for an asset.
 
 Example usage:
 ```
@@ -162,7 +162,27 @@ my_tilemap.bin
 :format unsigned int
 :modify OR 20 4 0x1000
 ```
-The 20th, 21th, 22th, 23th value in the my_tilemap_bin **const unsigned int** array will be ORed with _0x1000_.
+The values in the array at my_tilemap_bin[20], my_tilemap_bin[21], my_tilemap_bin[22], my_tilemap_bin[23] will be ORed with value _0x1000_.
+
+### asset attribute :replace
+
+The :replace attribute can be used to replace specific values in an asset data. Accepts decimal values, or 0x-prefixed hex values.
+
+By using:
+```
+:replace <old_value> <new_value>
+```
+all the array elements that match with *old_value* will be replaced with *new_value*.
+
+It is possible to specify more than one :replace attribute for an asset.
+
+Example usage:
+```
+my_tilemap.bin
+:format unsigned int
+:replace 0 192
+```
+every element in the array having a value of 0 will be replaced with value 192. No other elements in the array are affected.
 
 ### asset attribute :header (or :prepend)
 
@@ -293,6 +313,15 @@ mapdata.csv
 ```
 This will discard the first 16 elements from the array of values imported from _mapdata.csv_.
 
+### asset attributes processing order
+
+Each asset is processed as required following the instructions in the config file with these caveats:
+- before importing any data, :format, :text, :ignore and :alias attributes, if present, are considered.
+- data is then imported. :segment attributes, when present, are processed in the order they appear in the config file.
+- unwanted data is discarded, so :discard attributes, if present, are processed next.
+- data is possibly manipulated, so :overwrite, :modify and :replace attributes are processed in the order they appear in the config file.
+- leading and trailing data is finally added, so :header and :append attributes, if present, are processed last.
+
 ### short but complete example of all the features
 
 Here's an example of a short (but feature complete) configuration file:
@@ -331,12 +360,14 @@ asset4.bin
 # 'asset4.bin' 128 elements starting from array[32] will be set to the values listed
 # (values list will be reitered until 128 array elements are replaced)
 
-random_values_table.txt
+some_LUT.csv
 :text
-# this is a text file that will be parsed into an array
+# this is a CSV file that will be parsed into an array
 :discard 0 32
 :discard 200 0
 # the first 32 elements of the array will be discarded, and the same to all the elements from the 200th onward
+:replace 0 0xFF
+# any element in the array equal to 0 will become 0xFF
 
 somedata.bin
 :segment skip 32
