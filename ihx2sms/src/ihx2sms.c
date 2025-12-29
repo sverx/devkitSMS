@@ -235,6 +235,11 @@ int main(int argc, char const* *argv) {
     if (!strncmp("SDSC",(char *)&buf[SDSC_HEADER_ADDR],4)) {
       if (!memcmp("\0\0\0\0",&buf[SDSC_HEADER_ADDR+6],4)) {
         time_t curr_time = time(NULL);
+        char *source_date_epoch;
+        if ((source_date_epoch = getenv("SOURCE_DATE_EPOCH")) == NULL
+            || (curr_time = (time_t)strtoll(source_date_epoch, NULL, 10)) <= 0) {
+          time(&curr_time);
+        }
         struct tm *compile_time = localtime(&curr_time);
         buf[SDSC_HEADER_ADDR+6]=BYTE_TO_BCD(compile_time->tm_mday);
         buf[SDSC_HEADER_ADDR+7]=BYTE_TO_BCD(compile_time->tm_mon+1);
