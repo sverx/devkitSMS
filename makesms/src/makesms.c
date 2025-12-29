@@ -305,7 +305,13 @@ int main(int argc, char const* *argv) {
   /* check/update SDSC header date */
   if (!strncmp("SDSC",(char *)&buf[SDSC_HEADER_ADDR_32K],4)) {
     if (!memcmp("\0\0\0\0",&buf[SDSC_HEADER_ADDR_32K+6],4)) {
-      time_t curr_time = time(NULL);
+      time_t curr_time;
+
+      // use SOURCE_DATE_EPOCH when defined, to make reproducible builds - see https://reproducible-builds.org/docs/source-date-epoch/
+      char *source_date_epoch;
+      if ((source_date_epoch = getenv("SOURCE_DATE_EPOCH")) == NULL || (curr_time = (time_t)strtoll(source_date_epoch, NULL, 10)) <= 0)
+        time(&curr_time);
+
       struct tm *compile_time = localtime(&curr_time);
       buf[SDSC_HEADER_ADDR_32K+6]=BYTE_TO_BCD(compile_time->tm_mday);
       buf[SDSC_HEADER_ADDR_32K+7]=BYTE_TO_BCD(compile_time->tm_mon+1);
@@ -315,7 +321,13 @@ int main(int argc, char const* *argv) {
     }
   } else if (!strncmp("SDSC",(char *)&buf[SDSC_HEADER_ADDR_16K],4)) {
     if (!memcmp("\0\0\0\0",&buf[SDSC_HEADER_ADDR_16K+6],4)) {
-      time_t curr_time = time(NULL);
+      time_t curr_time;
+
+      // use SOURCE_DATE_EPOCH when defined, to make reproducible builds - see https://reproducible-builds.org/docs/source-date-epoch/
+      char *source_date_epoch;
+      if ((source_date_epoch = getenv("SOURCE_DATE_EPOCH")) == NULL || (curr_time = (time_t)strtoll(source_date_epoch, NULL, 10)) <= 0)
+        time(&curr_time);
+
       struct tm *compile_time = localtime(&curr_time);
       buf[SDSC_HEADER_ADDR_16K+6]=BYTE_TO_BCD(compile_time->tm_mday);
       buf[SDSC_HEADER_ADDR_16K+7]=BYTE_TO_BCD(compile_time->tm_mon+1);
