@@ -113,6 +113,8 @@ void SMS_init (void) {
   unsigned char i;
   /* make sure the VDP is ready */
   while (VDPVCounterPort!=0xB0);
+  /* extra care in case the BIOS had left the VDP registers with weird config */
+  while (VDPVCounterPort!=0xC8);
   /* set sprite palette color 0 to black */
 #ifndef TARGET_GG
   SMS_setSpritePaletteColor(0, RGB(0,0,0));
