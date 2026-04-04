@@ -53,7 +53,8 @@ __asm
     ld (de),a
     inc de
 
-    dec iyl
+    .db 0xFD                         ;   --- SDCC issues workaround
+    dec l                            ; dec iyl   ; decrement the counter
     jr nz,2$
 
     ex de,hl                         ; move current DE into HL
