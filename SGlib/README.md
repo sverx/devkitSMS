@@ -58,6 +58,9 @@ unsigned int SG_getKeyboardJoypadPressed (void)
 unsigned int SG_getKeyboardJoypadHeld (void)
 unsigned int SG_getKeyboardJoypadReleased (void)
 
+/* functions to read ColecoVision numpad(s) */
+unsigned char SG_readCVNumPad (unsigned char which)
+
 /* read from keyboard max keys and return the keycodes and amount */
 unsigned char SG_getKeycodes (unsigned int *keys, unsigned char max_keys)
 

@@ -117,6 +117,11 @@ unsigned int SG_getKeysPressed (void);
 unsigned int SG_getKeysHeld (void);
 unsigned int SG_getKeysReleased (void);
 
+#ifdef TARGET_CV
+/* functions to read ColecoVision numpad(s) */
+unsigned char SG_readCVNumPad (unsigned char which);
+#endif
+
 /* handy defines for joypad(s) handling */
 #ifndef CONTROLLER_PORTS
 #define CONTROLLER_PORTS
@@ -154,6 +159,23 @@ unsigned int SG_getKeysReleased (void);
 #define PORT_B_KEY_LEFT   0x0800
 #define PORT_B_KEY_1      0x4000
 #define PORT_B_KEY_2      0x8000
+
+#define PORT_A_CV_NUMPAD  0
+#define PORT_B_CV_NUMPAD  1
+
+#define CV_NUMPAD_0       0x0A
+#define CV_NUMPAD_1       0x0D
+#define CV_NUMPAD_2       0x07
+#define CV_NUMPAD_3       0x0C
+#define CV_NUMPAD_4       0x02
+#define CV_NUMPAD_5       0x03
+#define CV_NUMPAD_6       0x0E
+#define CV_NUMPAD_7       0x05
+#define CV_NUMPAD_8       0x01
+#define CV_NUMPAD_9       0x0B
+#define CV_NUMPAD_STAR    0x09
+#define CV_NUMPAD_HASH    0x06
+#define CV_NUMPAD_NONE    0x0F
 #endif
 
 #define PORT_A_KEY_START  PORT_A_KEY_1  /* handy alias */

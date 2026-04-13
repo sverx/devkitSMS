@@ -43,6 +43,9 @@ volatile bool VDPSpriteOverflow=false;
 #endif
 
 volatile unsigned int KeysStatus, PreviousKeysStatus;
+#ifdef TARGET_CV
+volatile unsigned char PadsStatus;
+#endif
 
 unsigned int  spritesHeight=8, spritesWidth=8;
 
@@ -230,6 +233,15 @@ void SG_waitForVBlank (void) {
   while (!VDPBlank);
 }
 
+#ifdef TARGET_CV
+unsigned char SG_readCVNumPad (unsigned char which) {
+  if (which==PORT_A_CV_NUMPAD)
+    return (PadsStatus & 0x0F);
+  else
+    return (PadsStatus >> 4);
+}
+#endif
+
 unsigned int SG_getKeysStatus (void) {
   return (KeysStatus);
 }
@@ -332,17 +344,18 @@ void SG_isr_process (void) __naked {
   VDPBlank=true;         /* frame interrupt */
   /* read joy input */
   PreviousKeysStatus=KeysStatus;
-  IOPortCTRLmode0=0xff;
+  IOPortCTRLmode0=0xff;  // set the controllers in mode 0 (read joys directions)
   __asm
     ex (sp),hl    ; delay before reading the joy IO ports
     ex (sp),hl
   __endasm;
   unsigned int tempKeysStatus=~(((IOPortH|0x80)<<8)|(IOPortL|0x80));
-  IOPortCTRLmode1=0xff;
+  IOPortCTRLmode1=0xff;  // set the controllers in mode 1 (read numpad keys and right trigger)
   __asm
     ex (sp),hl    ; delay before reading the joy IO ports
     ex (sp),hl
   __endasm;
+  PadsStatus=((IOPortH&0x0F)<<4)|(IOPortL&0x0F);
   KeysStatus=(((IOPortH&0x40)?0:0x8000)|((IOPortL&0x40)?0:0x80))|tempKeysStatus;
 #ifndef NO_FRAME_INT_HOOK
   if (SG_theFrameInterruptHandler) {
