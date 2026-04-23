@@ -218,6 +218,7 @@ void SG_debugPrintf(const unsigned char *format, ...) __naked __preserves_regs(a
 void SG_initBitmapMode (unsigned char foreground_color, unsigned char background_color);
 #define  SG_putPixel(x,y,color)      SG_putPixel_f((color),((x)<<8)|(y))
 void SG_putPixel_f (unsigned char color, unsigned int xy_coords) __preserves_regs(iyh,iyl);
+void SG_setPixel (unsigned char x, unsigned char y) __preserves_regs(iyh,iyl);
 
 /* low level functions */
 void SG_VRAMmemcpy (unsigned int dst, void *src, unsigned int size);

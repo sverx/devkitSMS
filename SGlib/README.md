@@ -80,7 +80,8 @@ SG_loadZX7compressedTilesatAddr(src,dst)                              /* handy m
 
 /* Bitmap Mode functions and macros */
 void SG_initBitmapMode (unsigned char foreground_color, unsigned char background_color)   /* initialize BMP mode with specified foreground and background colors */
-SG_putPixel(x,y,color)                                                                    /* macro to put a pixel on the bitmap with the specified color */
+SG_putPixel(x,y,color)                                                                    /* macro to put a pixel on the bitmap using the specified color */
+void SG_setPixel (unsigned char x, unsigned char y)                                       /* function to turn a pixel on using the selected foreground color at the location */
 
 /* low level functions */
 void SG_VRAMmemcpy (unsigned int dst, void *src, unsigned int size)              /* memcpy to VRAM */
@@ -88,6 +89,6 @@ void SG_VRAMmemcpy_brief (unsigned int dst, void *src, unsigned char size)      
 void SG_VRAMmemset (unsigned int dst, unsigned char value, unsigned int size)    /* memset to VRAM */
 
 /* print messages to the debug console of emulators */
-void SG_debugPrintf(const unsigned char *format, ...) __naked __preserves_regs(a,b,c,iyh,iyl);
+void SG_debugPrintf(const unsigned char *format, ...)
 ```
 

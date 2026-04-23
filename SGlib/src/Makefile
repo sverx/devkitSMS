@@ -2,7 +2,7 @@ CC=sdcc
 AR=sdar
 
 ########### BUILD CONFIGURATION ##############
-CONFIG= 
+CONFIG=
 
 ############# END OF BUILD CONFIG OPTIONS #############
 
@@ -12,8 +12,8 @@ CFLAGS=-mz80 $(OPT) $(CONFIG)
 OUTPUT_LIBS=SGlib.lib SGlib_CV.lib
 
 SRCS_COMMON=SGlib_spriteClip.c SGlib_zx7.c SGlib_debug.c
-SRCS_SG=SGlib.c SGlib_zx7_VRAM.c SGlib_bitmap.c SGlib_keyboard.c 
-SRCS_CV=SGlib.c SGlib_zx7_VRAM.c SGlib_bitmap.c
+SRCS_SG=SGlib.c SGlib_zx7_VRAM.c SGlib_bitmap.c SGlib_putPixel.c SGlib_setPixel.c SGlib_keyboard.c
+SRCS_CV=SGlib.c SGlib_zx7_VRAM.c SGlib_bitmap.c SGlib_putPixel.c SGlib_setPixel.c
 
 # One .rel per common source file. Add target specific .rel dependencies here.
 OBJS_COMMON=$(patsubst %.c,%.rel,$(SRCS_COMMON))
