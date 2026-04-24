@@ -37,7 +37,7 @@
   .org  0
   di                ; disable interrupt
   im 1              ; interrupt mode 1 (this will not change)
-  ld sp,#0xc7f0     ; set stack pointer at end of RAM (2KiB or 1KiB mirror)
+  ld sp,#0xdff0     ; set stack pointer at end of RAM (8KiB or 1KiB/2KiB mirrors)
   xor a             ; clear RAM (to value 0x00)
   ld hl,#0xc000     ;   by setting value 0
   ld (hl),a         ;   to $c000 and
