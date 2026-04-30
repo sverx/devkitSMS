@@ -246,7 +246,7 @@ Check [SUPPORT.md](https://github.com/sverx/devkitSMS/blob/master/SUPPORT.md) to
 * Ricco's [Where Is It?](https://www.smspower.org/Homebrew/WhereIsIt-SMS), [Do The Same](https://www.smspower.org/Homebrew/DoTheSame-SMS)
 * slogra's [Jumping Jack'son](https://www.smspower.org/Homebrew/JumpingJackson-SMS)
 * SteveProXNA's [Skazka](https://www.smspower.org/Homebrew/Skazka-SMS), [Simpsons Trivia](https://www.smspower.org/Homebrew/SimpsonsTrivia-SMS)
-* TheGouldFish's [Atom](https://www.smspower.org/Homebrew/Atoms-SMS)
+* TheGouldFish's [Atoms](https://www.smspower.org/Homebrew/Atoms-SMS)
 * Tuxedo Games' [Alter Ego](https://www.smspower.org/Homebrew/AlterEgo-SMS), [Gotris](https://www.smspower.org/Homebrew/Gotris-SMS)
 * undeveloper's [Intergalactic Prophylactic](https://www.smspower.org/Homebrew/IntergalacticProphylactic-SMS), [Land on my Base](https://www.smspower.org/Homebrew/LandOnMyBase-SMS), [Eggie Chuck](https://www.smspower.org/Homebrew/EggieChuck-SMS), [Primates](https://www.smspower.org/Homebrew/Primates-SMS)
 * x7r's [Sutoroku](https://www.smspower.org/Homebrew/Sutoroku-SMS)
