@@ -215,6 +215,18 @@ A few additional third-party libraries are available and can be used with devkit
 * Joe's [Banjo](https://github.com/joffb/banjo) - a FM+PSG (YM2413+SN76489) sound driver supporting furnace tracker modules.
 
 
+### Release your SMS/GG game on a cartridge:
+
+Once your game is done and tested, you might want to consider releasing it on a cartridge. There are only a few options available at the moment:
+- Raphnet's reprogrammable [4Mbit cartridge](https://www.raphnet-tech.com/products/sms_4Megabit_cartridge/index.php) has complete SEGA Mapper support and _can_ also come with a plastic shell. It's available for the [Game Gear](https://www.raphnet-tech.com/products/gamegear_4megabit_cartridge_pcb/index.php) too.
+- doragasu's [FrugalMapper](https://gitlab.com/doragasu/sms-sl2map) supports up to 4Mbit too, but the SEGA Mapper support is limited to _slot-2 only_ which means it **will** work with devkitSMS programs that don't use banked _code_. It's a cheap solution but you have to order the printed circuit boards yourself from JLC (or a similar PCB factory) and you'll have to provide plastic shells too (you can buy new shells [here](https://hoskinson-industries.myshopify.com/collections/master-system-game-shells?sort_by=price-ascending) for instance).
+- the [ModestMapper](https://github.com/sverx/ModestMapper). This is a solution very similar to doragasu's FrugalMapper, as it's a derivate of that. It supports the SEGA mapper slot-1 & slot-2 which means it can be also used for devkitSMS programs that use banked _code_.
+
+Using any of these, your ROM needs to be programmed onto each cartridge. For Raphnet's solution you can use for instance this [cartridge reader/programmer](https://www.raphnet-tech.com/products/sms_cartridge_reader_programmer/index.php) and for doragasu's solution you can use its [MegaWiFi programmer](https://gitlab.com/doragasu/mw-prog). Regarding the ModestMapper cartridge, either programmer should work.
+
+Publishers like [2Minds](https://www.2minds.fr/en/) are also a nice option, but they're currently shutting down operations. We're hoping there will be other publishers soon.
+
+
 ### Support devkitSMS:
 
 Check [SUPPORT.md](https://github.com/sverx/devkitSMS/blob/master/SUPPORT.md) to see how you can contribute to development.
