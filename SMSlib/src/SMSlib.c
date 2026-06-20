@@ -71,6 +71,11 @@ unsigned char spritesHeight=8, spritesWidth=8, spritesTileOffset=1;
 /* 'empty' line interrupt handler */
 void (*SMS_theLineInterruptHandler)(void);
 
+#ifdef TARGET_GG
+/* If non-NULL, will be called by NMI_isr after acknowledging */
+void (*GG_theNMIHandler)(void);
+#endif
+
 #ifndef TARGET_GG
 #ifdef  VDPTYPE_DETECTION
 unsigned char SMS_detect_VDP_type (void) __z88dk_fastcall __naked __preserves_regs(c,d,e,h,iyh,iyl) {
@@ -319,6 +324,10 @@ _Bool SMS_queryPauseRequested (void) {
 void SMS_resetPauseRequest (void) {
   PauseRequested=false;
 }
+#else
+void GG_setNMIHandler (void (*theHandlerFunction)(void)) __z88dk_fastcall {
+  GG_theNMIHandler=theHandlerFunction;
+}
 #endif
 
 #ifndef NO_FRAME_INT_HOOK
@@ -461,12 +470,27 @@ void SMS_isr (void) __naked {
 
 void SMS_nmi_isr (void) __naked {          /* this is for NMI */
   __asm
-#ifndef TARGET_GG
     push hl
+#ifndef TARGET_GG
     ld hl,#_PauseRequested
     ld (hl),#0x01
-    pop hl
+#else
+    push af
+    ld hl,(_GG_theNMIHandler)
+    ld a,h
+    or a,l
+    jr z,4$                                /* NULL? Do not call it */
+    push bc
+    push de
+    push iy
+    call ___sdcc_call_hl
+    pop iy
+    pop de
+    pop bc
+4$:
+    pop af
 #endif
+    pop hl
     retn                                   /* this is here because function is __naked */
   __endasm;
 }
