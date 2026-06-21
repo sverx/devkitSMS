@@ -87,7 +87,7 @@ int main(int argc, char const* *argv) {
   used_bank[0]=CRT0_END;
 
   while (!feof(fIN)) {
-    fscanf(fIN,":%2x%4x%2x%s\n", &count, &addr, &type, data);
+    fscanf(fIN,":%2x%4x%2x%255s\n", &count, &addr, &type, data);
 
     // printf(":%02x-%04x-%02x-%s\n", count, addr, type, data);
 
@@ -96,7 +96,7 @@ int main(int argc, char const* *argv) {
 
         for (i=0;i<count;i++) {
 
-          strncpy (tmp,&data[i*2],2);
+          tmp[0]=data[i*2]; tmp[1]=data[i*2+1]; tmp[2]='\0';
           unsigned char value=strtol(tmp,NULL,16);
 
           if (addr>=BANKED_ADDR) {
@@ -123,7 +123,7 @@ int main(int argc, char const* *argv) {
 
       case 4: // SET SEGMENT
 
-        strncpy (tmp,&data[2],2);
+        tmp[0]=data[2]; tmp[1]=data[3]; tmp[2]='\0';
         segment=strtol(tmp,NULL,16);
 
         if (segment>MAX_BANKS) {
