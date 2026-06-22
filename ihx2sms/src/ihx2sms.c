@@ -30,7 +30,7 @@ unsigned int used=CRT0_END,used_low=CRT0_END;
 int use_additional_banks=0;
 unsigned int add_banks=0;
 unsigned int count, addr, type;
-char data[256];
+char data[1024];
 char padding_type;
 unsigned char map_loc[MAX_SLOT2_BANKS];
 unsigned int num_map_loc=0;
@@ -163,7 +163,7 @@ int main(int argc, char const* *argv) {
   }
 
   while (!feof(fIN)) {
-    fscanf(fIN,":%2x%4x%2x%s\n", &count, &addr, &type, data);
+    fscanf(fIN,":%2x%4x%2x%1000s\n", &count, &addr, &type, data);
 
     // printf(":%02x-%04x-%02x-%s\n", count, addr, type, data);
 
@@ -193,6 +193,7 @@ int main(int argc, char const* *argv) {
             dest_addr=addr+i;
 
           strncpy (tmp,&data[i*2],2);
+          tmp[2]='\0';  // ensure tmp is NULL terminated
           buf[dest_addr]=strtol(tmp,NULL,16);
 
           // printf("*%02x-%04x\n", buf[dest_addr], dest_addr);

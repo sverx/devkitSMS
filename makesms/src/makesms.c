@@ -43,7 +43,7 @@ struct merge {
 struct merge merges[MAX_MERGES];
 int num_merges;
 
-char data[256];
+char data[1024];
 
 FILE *fIN;
 FILE *fOUT;
@@ -232,7 +232,7 @@ int main(int argc, char const* *argv) {
   memset(buf, emptyfill, MAX_ROM_SIZE);
 
   while (!feof(fIN)) {
-    fscanf(fIN,":%2x%4x%2x%s\n", &count, &addr, &type, data);
+    fscanf(fIN,":%2x%4x%2x%1000s\n", &count, &addr, &type, data);
 
     // printf(":%02x-%04x-%02x-%s\n", count, addr, type, data);
 
@@ -248,6 +248,7 @@ int main(int argc, char const* *argv) {
         for (i=0;i<count;i++) {
 
           strncpy (tmp,&data[i*2],2);
+          tmp[2]='\0';  // ensure tmp is NULL terminated
           buf[dest_addr+i]=strtol(tmp,NULL,16);
 
           // printf("*%02x-%04x\n", buf[dest_addr], dest_addr);
@@ -273,6 +274,7 @@ int main(int argc, char const* *argv) {
       case 4: // SET SEGMENT
 
         strncpy (tmp,&data[2],2);
+        tmp[2]='\0';  // ensure tmp is NULL terminated
         segment=strtol(tmp,NULL,16);
         break;
 
