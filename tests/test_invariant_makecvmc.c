@@ -70,4 +70,23 @@ END_TEST
 Suite *security_suite(void)
 {
     Suite *s;
-    TCase *tc_
+    TCase *tc_core;
+
+    s = suite_create("Security");
+    tc_core = tcase_create("BufferOverflow");
+    tcase_set_timeout(tc_core, 30);
+    tcase_add_test(tc_core, test_ihx_buffer_overflow);
+    suite_add_tcase(s, tc_core);
+    return s;
+}
+
+int main(void)
+{
+    int number_failed;
+    Suite *s = security_suite();
+    SRunner *sr = srunner_create(s);
+    srunner_run_all(sr, CK_NORMAL);
+    number_failed = srunner_ntests_failed(sr);
+    srunner_free(sr);
+    return (number_failed == 0) ? EXIT_SUCCESS : EXIT_FAILURE;
+}
