@@ -1,0 +1,3 @@
+schema: "4.1"
+compilers:
+  - path: /usr/bin/sdcc
