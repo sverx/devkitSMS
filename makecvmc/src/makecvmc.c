@@ -96,7 +96,7 @@ int main(int argc, char const* *argv) {
 
         for (i=0;i<count;i++) {
 
-          tmp[0]=data[i*2]; tmp[1]=data[i*2+1]; tmp[2]='\0';
+          strncpy(tmp, &data[i*2], 2); tmp[2]='\0';
           unsigned char value=strtol(tmp,NULL,16);
 
           if (addr>=BANKED_ADDR) {
@@ -123,7 +123,7 @@ int main(int argc, char const* *argv) {
 
       case 4: // SET SEGMENT
 
-        tmp[0]=data[2]; tmp[1]=data[3]; tmp[2]='\0';
+        strncpy(tmp, &data[2], 2); tmp[2]='\0';
         segment=strtol(tmp,NULL,16);
 
         if (segment>MAX_BANKS) {
