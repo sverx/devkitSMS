@@ -27,7 +27,7 @@ unsigned int size,avail_size,used=0;
 unsigned char segment=0,highest_segment=0;
 unsigned int count, addr, type;
 unsigned char emptyfill = DEFAULT_EMPTY_FILL;
-char data[256];
+char data[513];
 
 FILE *fIN;
 FILE *fOUT;
@@ -87,7 +87,7 @@ int main(int argc, char const* *argv) {
   used_bank[0]=CRT0_END;
 
   while (!feof(fIN)) {
-    fscanf(fIN,":%2x%4x%2x%255s\n", &count, &addr, &type, data);
+    fscanf(fIN,":%2x%4x%2x%512s\n", &count, &addr, &type, data);
 
     // printf(":%02x-%04x-%02x-%s\n", count, addr, type, data);
 

@@ -43,7 +43,7 @@ struct merge {
 struct merge merges[MAX_MERGES];
 int num_merges;
 
-char data[256];
+char data[513];
 
 FILE *fIN;
 FILE *fOUT;
@@ -232,7 +232,7 @@ int main(int argc, char const* *argv) {
   memset(buf, emptyfill, MAX_ROM_SIZE);
 
   while (!feof(fIN)) {
-    fscanf(fIN,":%2x%4x%2x%s\n", &count, &addr, &type, data);
+    fscanf(fIN,":%2x%4x%2x%512s\n", &count, &addr, &type, data);
 
     // printf(":%02x-%04x-%02x-%s\n", count, addr, type, data);
 
