@@ -247,7 +247,7 @@ int main(int argc, char const* *argv) {
 
         for (i=0;i<count;i++) {
 
-          strncpy (tmp,&data[i*2],2);
+          tmp[0]=data[i*2]; tmp[1]=data[i*2+1]; tmp[2]='\0';
           buf[dest_addr+i]=strtol(tmp,NULL,16);
 
           // printf("*%02x-%04x\n", buf[dest_addr], dest_addr);
@@ -272,7 +272,7 @@ int main(int argc, char const* *argv) {
 
       case 4: // SET SEGMENT
 
-        strncpy (tmp,&data[2],2);
+        tmp[0]=data[2]; tmp[1]=data[3]; tmp[2]='\0';
         segment=strtol(tmp,NULL,16);
         break;
 
