@@ -93,7 +93,7 @@ volatile __at (0xfffc) unsigned char SRAM_bank_to_be_mapped_on_slot2;
 #define SMS_disableSRAM()       SRAM_bank_to_be_mapped_on_slot2=0x00
 
 /* SRAM access is as easy as accessing an array of char */
-__at (0x8000) unsigned char SMS_SRAM[];
+__at (0x8000) unsigned char SMS_SRAM[16384];
 
 /* ***************************************************************** */
 /* Tiles / Background handling                                       */
