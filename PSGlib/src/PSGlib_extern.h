@@ -9,14 +9,14 @@
 #define PSGDataPort         #0xff
 #endif
 
-#define PSGLatch            #0x80
-#define PSGData             #0x40
+#define PSGLatch            0x80
+#define PSGData             0x40
 
-#define PSGChannel0         #0b00000000
-#define PSGChannel1         #0b00100000
-#define PSGChannel2         #0b01000000
-#define PSGChannel3         #0b01100000
-#define PSGVolumeData       #0b00010000
+#define PSGChannel0         0b00000000
+#define PSGChannel1         0b00100000
+#define PSGChannel2         0b01000000
+#define PSGChannel3         0b01100000
+#define PSGVolumeData       0b00010000
 
 #define PSGWait             #0x38
 #define PSGSubString        #0x08

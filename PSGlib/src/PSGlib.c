@@ -14,14 +14,14 @@
 #define PSGDataPort         #0xff
 #endif
 
-#define PSGLatch            #0x80
-#define PSGData             #0x40
+#define PSGLatch            0x80
+#define PSGData             0x40
 
-#define PSGChannel0         #0b00000000
-#define PSGChannel1         #0b00100000
-#define PSGChannel2         #0b01000000
-#define PSGChannel3         #0b01100000
-#define PSGVolumeData       #0b00010000
+#define PSGChannel0         0b00000000
+#define PSGChannel1         0b00100000
+#define PSGChannel2         0b01000000
+#define PSGChannel3         0b01100000
+#define PSGVolumeData       0b00010000
 
 #define PSGWait             #0x38
 #define PSGSubString        #0x08
@@ -281,7 +281,7 @@ _intLoop:
 
 _continue:
   ld a,b                         ; copy PSG byte into A
-  cp PSGLatch                    ; is it a latch?
+  cp #PSGLatch                   ; is it a latch?
   jr c,_noLatch                  ; if < $80 then it is NOT a latch
   ld (_PSGMusicLastLatch),a      ; it is a latch - save it in "LastLatch"
 
@@ -325,7 +325,7 @@ _latch_chn23:
   or a
   jr z,_send2PSG_B               ; if no SFX is playing on channel 2 we are OK
   ld (_PSGChannel3SFX),a         ; otherwise mark channel 3 as occupied too
-  ld a,PSGLatch|PSGChannel3|PSGVolumeData|#0x0F   ; and silence channel 3
+  ld a,#PSGLatch|#PSGChannel3|#PSGVolumeData|#0x0F   ; and silence channel 3
   out (PSGDataPort),a
   jp _intLoop
 _ifchn2:
@@ -336,7 +336,7 @@ _ifchn2:
   jp _intLoop
 
 _noLatch:
-  cp PSGData
+  cp #PSGData
   jr c,_command                  ; if < $40 then it is a command
   ; it is a data
   ld a,(_PSGMusicLastLatch)      ; retrieve last latch
@@ -601,7 +601,7 @@ _intSFXLoop:
 
 _SFXcontinue:
   ld a,b                         ; restore byte
-  cp PSGData
+  cp #PSGData
   jp c,_SFXcommand               ; if less than $40 then it is a command
   bit 7,a                        ; check if it is a latch
   jr z,_SFXoutbyte               ; if not, output it directly
