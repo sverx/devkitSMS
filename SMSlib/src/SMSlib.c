@@ -372,8 +372,15 @@ void SMS_isr (void) __naked {
     VDPBlank=true;                          /* frame interrupt */
     PreviousKeysStatus=KeysStatus;
     PreviousMDKeysStatus=MDKeysStatus;
-    KeysStatus=~(((IOPortH)<<8)|IOPortL);   /* TH status unimportant */
+    KeysStatus=~(((IOPortH)<<8)|IOPortL);   /* TH status important only if an MD pad is connected */
     IOPortCtrl=TH_LO;
+    __asm
+      nop
+      nop
+      sub a,#0
+      nop
+      nop  ; 23 cycles
+    __endasm;                               /* additional delay that makes some wireless MD pads work correctly */
     MDKeysStatus=IOPortL;
     if (!(MDKeysStatus & 0x0C)) {           /* verify it's a MD pad */
       MDKeysStatus=(~MDKeysStatus)&0x30;    /* read MD_A & MD_START */
