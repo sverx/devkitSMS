@@ -63,6 +63,7 @@ void (*SMS_theFrameInterruptHandler)(void);
 volatile unsigned int KeysStatus,PreviousKeysStatus;
 #ifdef MD_PAD_SUPPORT
 volatile unsigned int MDKeysStatus,PreviousMDKeysStatus;
+volatile unsigned char DetectedPadType;
 #endif
 
 /* variables for sprite windowing and clipping */
@@ -392,9 +393,13 @@ void SMS_isr (void) __naked {
         IOPortCtrl=TH_HI;
         MDKeysStatus|=(~IOPortL)&0x0F;      /* read MD_MODE, MD_X, MD_Y, MD_Z */
         IOPortCtrl=TH_LO;
+        DetectedPadType=PAD_TYPE_MD_6BTN;
+      } else {
+        DetectedPadType=PAD_TYPE_MD_3BTN;
       }
     } else {
       MDKeysStatus=0;                       /* (because one might have detached his MD pad) */
+      DetectedPadType=PAD_TYPE_SMS;
     }
     IOPortCtrl=TH_HI;                       /* leave TH high */
 #ifndef NO_FRAME_INT_HOOK

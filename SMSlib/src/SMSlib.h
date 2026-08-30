@@ -334,6 +334,14 @@ unsigned int SMS_getMDKeysReleased (void);
 #define PORT_A_MD_KEY_A         0x0010
 #define PORT_A_MD_KEY_START     0x0020
 /* port B still missing */
+
+#define SMS_getDetectedPadType()  (DetectedPadType)
+extern volatile unsigned char DetectedPadType;
+
+/* defines for SMS_getDetectedPadType */
+#define PAD_TYPE_SMS      0
+#define PAD_TYPE_MD_3BTN  1
+#define PAD_TYPE_MD_6BTN  2
 #endif
 
 #ifndef TARGET_GG
