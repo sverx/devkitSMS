@@ -51,6 +51,10 @@
   pop hl
   ret
 
+  .org 0x801e
+  ei
+  reti              ; ensure interrupts won't end up triggering an NMI by mistake
+
   .org 0x8021
   jp _SG_nmi_isr    ; will call the vblank Interrupt Service Routine (NMI)
   
@@ -62,7 +66,7 @@
   ld hl,#0x6000     ;   by setting value 0
   ld (hl),a         ;   to $6000 and
   ld de,#0x6001     ;   copying (LDIR) it to next byte
-  ld bc,#0x0400-1   ;   for 1 KB minus 1 byte
+  ld bc,#l__DATA-1  ;   for the unitialized statics
   ldir              ;   do that
 
   ;; Initialise global variables
