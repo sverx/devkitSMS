@@ -10,14 +10,14 @@
 
 /* the VDP registers initialization value */
 const unsigned char VDPReg_init[8]={
-  0x02, // Mode2
-  0xa0, // 16KB, screen off, VBlank IRQ, sprite 8x8, no zoom
+  0x02, // 'Graphics II' video mode
+  0xa0, // 16 KiB VRAM, screen off, VBlank IRQ active, 8×8 sprites (not zoomed)
   0x06, // PN bits 13-10 = 0 1 1 0     (address = $1800)
   0xff, // CT bits 13-7  = 1 x x x x x x x (address = $2000)
   0x03, // PG bits 13-11 = 0 x x     (address = $0000)
   0x36, // SA bits 13-7  = 0 1 1 0 1 1 0   (address = $1B00)
   0x07, // SG bits 13-11 = 1 1 1     (address = $3800)
-  0x01  // text color (unused in Mode2) / backdrop (black)
+  0x01  // black backdrop
 };
 
 /* ColecoVision VDP/NMI semaphore variables */
@@ -109,6 +109,9 @@ void SG_init (void) {
   unsigned char i;
   for (i=0;i<8;i++)
     SG_write_to_VDPRegister (i, VDPReg_init[i]);
+#ifdef TARGET_CV
+  unsigned char VDPStatus=VDPStatusPort;          /* ensure there are no interrupts waiting aknowledgement in the VDP */
+#endif
   SG_initSprites ();
   SG_finalizeSprites ();
   SG_copySpritestoSAT ();
@@ -306,7 +309,7 @@ void SG_setFrameInterruptHandler (void (*theHandlerFunction)(void)) __z88dk_fast
 /* Interrupt Service Routines */
 #ifndef TARGET_CV
 void SG_isr (void) __critical __interrupt(0) {
-  volatile unsigned char VDPStatus=VDPStatusPort;  /* this also aknowledge interrupt at VDP */
+  unsigned char VDPStatus=VDPStatusPort;  /* this aknowledges the VDP interrupt */
 #ifdef AUTODETECT_SPRITE_OVERFLOW
   VDPSpriteOverflow=(VDPStatus & 0x40);
   VDPSpriteCollision=(VDPStatus & 0x20);
@@ -334,9 +337,7 @@ void SG_isr_process (void) __naked {
     push de
     push iy
   __endasm;
-  __asm
-    in a,(#_VDPStatusPort)   ; aknowledge interrupt at VDP
-  __endasm;
+  unsigned char VDPStatus=VDPStatusPort;  /* this aknowledges the VDP interrupt */
 #ifdef AUTODETECT_SPRITE_OVERFLOW
   VDPSpriteOverflow=(VDPStatus & 0x40);
   VDPSpriteCollision=(VDPStatus & 0x20);
