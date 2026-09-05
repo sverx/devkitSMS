@@ -1,0 +1,23 @@
+{
+    "configurations": [
+        {
+            "name": "SMS",
+            "includePath": [
+                "${workspaceFolder}/**",
+                "${env:DEVKITSMS_BASE}/SMSlib/src",
+                "${env:DEVKITSMS_BASE}/PSGlib/src",
+                "${env:DEVKITSMS_BASE}/SGlib/src",
+                "${env:DEVKITSMS_BASE}/MBMlib/src"
+            ],
+            "defines": [],
+            "cStandard": "c99",
+            "cppStandard": "c++17",
+            "intelliSenseMode": "${default}",
+            "compilerPath": "/usr/bin/sdcc",
+            "forcedInclude": [
+                ".sdcc.h"
+            ]
+        }
+    ],
+    "version": 4
+}
