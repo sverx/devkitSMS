@@ -146,6 +146,7 @@ void SMS_init (void) {
   else if (detected==0xDA)
     VDPType=VDP_NTSC;
 #endif
+  SMS_theLineInterruptHandler=outi_block;  // to fix the issues with the ED X7 snapshots
 #endif
 }
 

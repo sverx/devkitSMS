@@ -101,6 +101,7 @@ __at (0x8000) unsigned char SMS_SRAM[16384];
 
 void SMS_crt0_RST08(unsigned int addr) __z88dk_fastcall __preserves_regs(a,b,d,e,h,l,iyh,iyl);
 void SMS_crt0_RST18(unsigned int tile) __z88dk_fastcall __preserves_regs(b,c,d,e,h,l,iyh,iyl);
+void outi_block(void);
 
 /* function for setting tiles/moving 'cursor' */
 #define SMS_setTile(tile)         SMS_crt0_RST18(tile)
