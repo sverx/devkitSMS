@@ -339,7 +339,10 @@ void SMS_setFrameInterruptHandler (void (*theHandlerFunction)(void)) __z88dk_fas
 #endif
 
 void SMS_setLineInterruptHandler (void (*theHandlerFunction)(void)) __z88dk_fastcall {
-  SMS_theLineInterruptHandler=theHandlerFunction;
+  if (theHandlerFunction)
+    SMS_theLineInterruptHandler=theHandlerFunction;
+  else
+    SMS_theLineInterruptHandler=outi_block;   // to fix the issues with the ED X7 snapshots
 }
 
 void SMS_setLineCounter (unsigned char count) __z88dk_fastcall {
