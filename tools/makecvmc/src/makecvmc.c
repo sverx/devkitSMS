@@ -1,5 +1,5 @@
 /*
-  makecvmc - IHX converter to BINary for ColecoVision MegaCart
+  makecvmc - IHX to BINary converter for ColecoVision MegaCart
 
   sverx\2025
 */
@@ -7,7 +7,6 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
-#include <time.h>
 
 #define BYTE_TO_BCD(n)      (((n)/10)*16+((n)%10))
 
@@ -19,7 +18,7 @@
 #define BANKED_ADDR                    0xC000
 #define DEFAULT_EMPTY_FILL             0x00
 
-char textnote[]="* NOTE: THIS IS A COLECOVISION MEGACART * created with makecvmc ";
+char const textnote[]="* NOTE: THIS IS A COLECOVISION MEGACART * created with makecvmc ";
 
 unsigned char buf[MAX_BANKS][BANK_SIZE];
 unsigned short used_bank[MAX_BANKS];
@@ -27,7 +26,7 @@ unsigned int size,avail_size,used=0;
 unsigned char segment=0,highest_segment=0;
 unsigned int count, addr, type;
 unsigned char emptyfill = DEFAULT_EMPTY_FILL;
-char data[1024];
+char data[MAX_BANKS*BANK_SIZE];
 
 FILE *fIN;
 FILE *fOUT;
@@ -36,38 +35,27 @@ void usage (int ret_value) {
   printf("Usage: makecvmc [options] infile.ihx outfile.rom\n");
   printf("\nSupported options:\n");
   printf(" -emptyfill value           Fill unused memory with specified value. Default: 0x%02x\n", DEFAULT_EMPTY_FILL);
-
   exit(ret_value);
 }
 
-int count_set_bits (unsigned int value) {
-  int cnt=0;
-  while (value) {
-    cnt+=(value & 0x01);
-    value>>=1;
-  }
-  return (cnt);
-}
-
 int main(int argc, char const* *argv) {
-
   unsigned int i;
   char tmp[3];
   int cur_arg=1;
 
   printf("*** sverx's makecvmc converter ***\n");
-
   if (argc<3)
     usage(1);
 
   while (cur_arg<(argc-2)) {
     if (strcmp(argv[cur_arg], "-emptyfill")==0) {
       cur_arg++;
-      if (cur_arg >=(argc)) {
-        fprintf(stderr, "Missing value for -emptyfill\n");
+      if (cur_arg>(argc-2)) {
+        fprintf(stderr, "Fatal: missing value for -emptyfill\n");
         usage(1);
       }
       emptyfill = strtol(argv[cur_arg], NULL, 0);
+      printf("Info: emptyfill value set to %d (0x%02x)\n",emptyfill,emptyfill);
     }
     else {
       fprintf(stderr, "Fatal: can't understand argument '%s'\n",argv[cur_arg]);
@@ -82,7 +70,7 @@ int main(int argc, char const* *argv) {
     return(1);
   }
 
-  // Initialize buffers with fill value
+  // Initialize buffer with fill value
   memset(buf, emptyfill, MAX_BANKS*BANK_SIZE);
   used_bank[0]=CRT0_END;
 
@@ -106,7 +94,7 @@ int main(int argc, char const* *argv) {
             // printf("*%02x-%04x\n", buf[dest_addr], dest_addr);
 
             if (++used_bank[segment]>BANK_SIZE) {
-              printf("Fatal: Bank %d overflow.\n", segment);
+              printf("Fatal: Bank %d overflow\n", segment);
               return(1);
             }
           } else if (addr>=BASE_ADDR) {
@@ -115,7 +103,7 @@ int main(int argc, char const* *argv) {
             // printf("*%02x-%04x\n", buf[dest_addr], dest_addr);
 
             if ((addr>=BASE_ADDR+CRT0_END) && (++used_bank[0]>AVAILABLE_BANK_SIZE)) {
-              printf("Fatal: Base ROM overflow.\n");
+              printf("Fatal: Base ROM overflow\n");
               return(1);
             }
           }
@@ -129,7 +117,7 @@ int main(int argc, char const* *argv) {
         segment=strtol(tmp,NULL,16);
 
         if (segment>MAX_BANKS) {
-          printf("Fatal: Mega Cart supports only up to 64 banks.\n");
+          printf("Fatal: MegaCart supports only up to 64 banks\n");
           return(1);
         }
 
@@ -148,7 +136,14 @@ int main(int argc, char const* *argv) {
   }
   fclose (fIN);
 
-  if (highest_segment<8) {
+  if (highest_segment<2)
+    printf("Note: you don't need to create a MegaCart 64 KiB ROM file when the data can fit into a stardard (mapperless) 32 KiB cartridge\n");
+
+  if (highest_segment<4) {
+    // 64 KiB ROM (emulators support this, even if no hardware MegaCart with 64 KiB exist)
+    size=4*BANK_SIZE;
+    avail_size=3*AVAILABLE_BANK_SIZE+BANK_SIZE;
+  } else if (highest_segment<8) {
     // 128 KiB ROM
     size=8*BANK_SIZE;
     avail_size=7*AVAILABLE_BANK_SIZE+BANK_SIZE;
@@ -169,7 +164,7 @@ int main(int argc, char const* *argv) {
   for (i=0;i<(size/BANK_SIZE);i++)
     used+=used_bank[i];
 
-  printf("Info: %d bytes used/%d total [%0.2f%%] - size of output ROM file is %d KB\n",used,avail_size,(float)used/(float)avail_size*100, size/1024);
+  printf("Info: %d bytes used/%d total [%0.2f%%] - size of output ROM file is %d KiB\n",used,avail_size,(float)used/(float)avail_size*100, size/1024);
 
   printf("Info: ");
     printf("[bank0 %d] ",BANK_SIZE-used_bank[0]);
@@ -186,7 +181,7 @@ int main(int argc, char const* *argv) {
   // add text note at end of bank1
   memcpy(&buf[1][AVAILABLE_BANK_SIZE],&textnote,BANK_SIZE-AVAILABLE_BANK_SIZE);
 
-  // mega cart banks are written in reversed order
+  // megacart banks are written in reversed order
   i=(size/BANK_SIZE);
   do {
     i--;
