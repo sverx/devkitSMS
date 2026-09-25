@@ -1,0 +1,6 @@
+{
+  "clangd.arguments": [
+    "--query-driver=/usr/bin/sdcc",
+    "--compile-commands-dir=${workspaceFolder}"
+  ]
+}
