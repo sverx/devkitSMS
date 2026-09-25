@@ -131,11 +131,8 @@ void SMS_init (void) {
   for (i=0;i<sizeof(VDPReg_init);i++)
     SMS_write_to_VDPRegister(i,VDPReg_init[i]);
   /* reset sprites */
-  SMS_initSprites();
+  // SMS_initSprites();  not really needed, as the variable is zero already
   SMS_copySpritestoSAT();
-#ifndef TARGET_GG
-  /* init Pause (SMS only) */
-  SMS_resetPauseRequest();
 #ifdef VDPTYPE_DETECTION
   /* PAL/NTSC detection (SMS only) */
   DISABLE_INTERRUPTS;
@@ -147,6 +144,9 @@ void SMS_init (void) {
     VDPType=VDP_NTSC;
 #endif
   SMS_theLineInterruptHandler=outi_block;  // to fix the issues with the ED X7 snapshots
+#ifndef TARGET_GG
+  /* init Pause (SMS only) */
+  SMS_resetPauseRequest();
 #endif
 }
 
