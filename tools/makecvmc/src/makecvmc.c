@@ -26,7 +26,7 @@ unsigned int size,avail_size,used=0;
 unsigned char segment=0,highest_segment=0;
 unsigned int count, addr, type;
 unsigned char emptyfill = DEFAULT_EMPTY_FILL;
-char data[MAX_BANKS*BANK_SIZE];
+char data[1024];
 
 FILE *fIN;
 FILE *fOUT;
@@ -93,7 +93,7 @@ int main(int argc, char const* *argv) {
 
             // printf("*%02x-%04x\n", buf[dest_addr], dest_addr);
 
-            if (++used_bank[segment]>BANK_SIZE) {
+            if (++used_bank[segment]>AVAILABLE_BANK_SIZE) {
               printf("Fatal: Bank %d overflow\n", segment);
               return(1);
             }
@@ -142,23 +142,23 @@ int main(int argc, char const* *argv) {
   if (highest_segment<4) {
     // 64 KiB ROM (emulators support this, even if no hardware MegaCart with 64 KiB exist)
     size=4*BANK_SIZE;
-    avail_size=3*AVAILABLE_BANK_SIZE+BANK_SIZE;
+    avail_size=4*AVAILABLE_BANK_SIZE;
   } else if (highest_segment<8) {
     // 128 KiB ROM
     size=8*BANK_SIZE;
-    avail_size=7*AVAILABLE_BANK_SIZE+BANK_SIZE;
+    avail_size=8*AVAILABLE_BANK_SIZE;
   } else if (highest_segment<16) {
     // 256 KiB ROM
     size=16*BANK_SIZE;
-    avail_size=15*AVAILABLE_BANK_SIZE+BANK_SIZE;
+    avail_size=16*AVAILABLE_BANK_SIZE;
   } else if (highest_segment<32) {
     // 512 KiB ROM
     size=32*BANK_SIZE;
-    avail_size=31*AVAILABLE_BANK_SIZE+BANK_SIZE;
+    avail_size=32*AVAILABLE_BANK_SIZE;
   } else {
     // 1024 KiB ROM
     size=64*BANK_SIZE;
-    avail_size=63*AVAILABLE_BANK_SIZE+BANK_SIZE;
+    avail_size=64*AVAILABLE_BANK_SIZE;
   }
 
   for (i=0;i<(size/BANK_SIZE);i++)
@@ -167,8 +167,7 @@ int main(int argc, char const* *argv) {
   printf("Info: %d bytes used/%d total [%0.2f%%] - size of output ROM file is %d KiB\n",used,avail_size,(float)used/(float)avail_size*100, size/1024);
 
   printf("Info: ");
-    printf("[bank0 %d] ",BANK_SIZE-used_bank[0]);
-  for (i=1;i<(size/BANK_SIZE);i++)
+  for (i=0;i<(size/BANK_SIZE);i++)
     printf("[bank%d %d] ",i,AVAILABLE_BANK_SIZE-used_bank[i]);
   printf("bytes free\n");
 

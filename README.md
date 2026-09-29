@@ -190,7 +190,7 @@ Once loaded, the program can be run with the `CALL &H9800` command.
 ```
   makecvmc your_program.ihx your_program.rom
 ```
-  The size of the final ROM file will be either 128, 256, 512 or 1024 KiB, as these are the only supported sizes for a ColecoVision MegaCart ROM.
+The size of the final ROM file will be either 64, 128, 256, 512 or 1024 KiB, as these are the valid sizes for a ColecoVision MegaCart ROM (64 KiB MegaCart ROMs are supported by most emulators).
 
 ### ADVANCED: How to use more than 32 KiB of code in your SMS/GG/SG/SC ROM ('banked code'):
 
