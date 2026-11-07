@@ -196,7 +196,7 @@ void SG_initSprites (void) {
 _Bool SG_addSprite (unsigned char x, unsigned char y, unsigned char tile, unsigned char attr) {
   unsigned char idx;
   if (SpriteNextFree < MAXSPRITES) {
-    if (y - 1 != 0xd0) {
+    if (--y != 0xd0) {
 #ifdef AUTODETECT_SPRITE_OVERFLOW
       spriteOverflowCounter ++;
       if (0 == VDPSpriteOverflow || (spriteOverflowCounter & 1) == spriteOverflowFlipflop)
