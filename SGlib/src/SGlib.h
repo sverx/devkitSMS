@@ -7,6 +7,30 @@
 // #define TARGET_CV
 /* to recompile the library for the ColecoVision */
 
+/*  --------------------------------------------------------- *
+        VRAM memory map
+
+    $0000 +---------+
+          |   PGT   |  ($1800 bytes, pattern generator table)
+    $1800 +---------+
+          |   PNT   |  ($0300 bytes, nametable)
+    $1B00 +---------+
+          |   SAT   |  ($0080 bytes, sprite attribute table)
+    $1B80 +---------+
+          |         |  ($0480 bytes free)
+    $2000 +---------+
+          |   CGT   |  ($1800 bytes, colour table)
+    $3800 +---------+
+          |   SGT   |  ($0800 bytes, sprite generator table)
+          +---------+
+ *  --------------------------------------------------------- */
+
+#define PNTADDRESS      0x1800
+#define SATADDRESS      0x1B00
+#define PGTADDRESS      0x0000
+#define CGTADDRESS      0x2000
+#define SGTADDRESS      0x3800
+
 /* library initialization. you don't need to call this if you use devkitSMS crt0_sg.rel or crt0_cv.rel */
 void SG_init (void);
 
@@ -17,13 +41,13 @@ void SG_VDPturnOffFeature (unsigned int feature);
 /* feature can be one of the following: */
 #define SG_VDPFEATURE_SHOWDISPLAY      0x0140
 #define SG_VDPFEATURE_FRAMEIRQ         0x0120
-#define SG_VDPFEATURE_USELARGESPRITES  0x0102
-#define SG_VDPFEATURE_ZOOMSPRITES      0x0101
+#define SG_VDPFEATURE_USELARGESPRITES  0x0102     /* don't use this directly, use SG_setSpriteMode */
+#define SG_VDPFEATURE_ZOOMSPRITES      0x0101     /* don't use this directly, use SG_setSpriteMode */
 /* (it's possible to combine (OR) them if they belong to the same group) */
 
 /* handy macros :) */
-#define SG_displayOn()   SG_VDPturnOnFeature(SG_VDPFEATURE_SHOWDISPLAY)   /* turns on display */
-#define SG_displayOff()  SG_VDPturnOffFeature(SG_VDPFEATURE_SHOWDISPLAY)  /* turns off display */
+#define SG_displayOn()                 SG_VDPturnOnFeature(SG_VDPFEATURE_SHOWDISPLAY)   /* turns on display */
+#define SG_displayOff()                SG_VDPturnOffFeature(SG_VDPFEATURE_SHOWDISPLAY)  /* turns off display */
 
 void SG_setSpriteMode (unsigned char mode);
 #define SG_SPRITEMODE_NORMAL           0x00
@@ -31,7 +55,7 @@ void SG_setSpriteMode (unsigned char mode);
 #define SG_SPRITEMODE_ZOOMED           0x02
 #define SG_SPRITEMODE_LARGE_ZOOMED     0x03
 
-void SG_setBackdropColor (unsigned char entry);
+#define SG_setBackdropColor(color)     SG_write_to_VDPRegister(0x07,(color));
 #define SG_COLOR_TRANSPARENT           0x00
 #define SG_COLOR_BLACK                 0x01
 #define SG_COLOR_MEDIUM_GREEN          0x02
@@ -48,6 +72,9 @@ void SG_setBackdropColor (unsigned char entry);
 #define SG_COLOR_MAGENTA               0x0D
 #define SG_COLOR_GRAY                  0x0E
 #define SG_COLOR_WHITE                 0x0F
+
+#define BG_COL(col)          (col)
+#define FG_COL(col)          ((col)<<4)
 
 /* wait until next VBlank starts */
 void SG_waitForVBlank (void);
@@ -88,19 +115,26 @@ volatile __at (0xffff) unsigned char CV_MEGACART_BANKSWITCH[];
 #define SG_mapROMBank(n)       CV_MEGACART_BANKSWITCH[-((n)&0x3F)]=(n)
 #endif
 
-/* functions to load tiles into VRAM */
-void SG_loadTilePatterns (void *src, unsigned int tilefrom, unsigned int size);
-void SG_loadTileColours (void *src, unsigned int tilefrom, unsigned int size);
-void SG_loadSpritePatterns (void *src, unsigned int tilefrom, unsigned int size);
+/* macros to load patterns, their attributes (colours) and sprites into VRAM */
+#define SG_loadTilePatterns(src,tilefrom,size)      SG_VRAMmemcpy((PGTADDRESS+((tilefrom)<<3)),(src),(size))
+#define SG_loadTileColours(src,tilefrom,size)       SG_VRAMmemcpy((CGTADDRESS+((tilefrom)<<3)),(src),(size))
+#define SG_loadSpritePatterns(src,tilefrom,size)    SG_VRAMmemcpy((SGTADDRESS+((tilefrom)<<3)),(src),(size))
 
-/* functions for the tilemap */
-void SG_loadTileMap (unsigned char x, unsigned char y, void *src, unsigned int size);
+#define XYtoADDR(x,y)      (PNTADDRESS|(((unsigned int)(y)<<5)+((unsigned char)(x))))
+
+/* macro to load a tilemap */
+#define SG_loadTileMap(x,y,src,size)                SG_VRAMmemcpy((XYtoADDR((x),(y))),(src),(size))
+
+/* functions to load a part of the tilemap */
 void SG_loadTileMapArea (unsigned char x, unsigned char y, void *src, unsigned char width, unsigned char height);
+
+/* functions update the tilemap */
 void SG_setNextTileatXY (unsigned char x, unsigned char y);
 void SG_setTile (unsigned char tile);
+#define SG_setTileatXY(x,y,tile) do{SG_setNextTileatXY((x),(y));SG_setTile(tile);}while(0)
+
 void SG_getNextTileatXY (unsigned char x, unsigned char y);
 unsigned char SG_getTile (void);
-#define SG_setTileatXY(x,y,tile) do{SG_setNextTileatXY((x),(y));SG_setTile(tile);}while(0)
 #define SG_getTileatXY(x,y)      (SG_getNextTileatXY((x),(y)),SG_getTile())
 
 /* functions for sprites handling */
@@ -214,26 +248,30 @@ unsigned char SG_getKeycodes (unsigned int *keys, unsigned char max_keys);
 void SG_decompressZX7 (const void *src, void *dst) __naked;
 
 /* functions to decompress data to VRAM */
-#define SG_loadZX7compressedBGTiles(src,tilefrom)      SG_decompressZX7toVRAM((src),0x4000+((tilefrom)<<3))
-#define SG_loadZX7compressedBGColors(src,tilefrom)     SG_decompressZX7toVRAM((src),0x6000+((tilefrom)<<3))
-#define SG_loadZX7compressedSpritesTiles(src,tilefrom) SG_decompressZX7toVRAM((src),0x7800+((tilefrom)<<3))
+#define SG_loadZX7compressedBGTiles(src,tilefrom)      SG_decompressZX7toVRAM((src),PGTADDRESS+((tilefrom)<<3))
+#define SG_loadZX7compressedBGColors(src,tilefrom)     SG_decompressZX7toVRAM((src),CGTADDRESS+((tilefrom)<<3))
+#define SG_loadZX7compressedSpritesTiles(src,tilefrom) SG_decompressZX7toVRAM((src),SGTADDRESS+((tilefrom)<<3))
 #define SG_loadZX7compressedTilesatAddr(src,dst)       SG_decompressZX7toVRAM((src),(dst))
 void SG_decompressZX7toVRAM (const void *src, unsigned int dst) __naked;
+
+/* old aPlib decompressor (works ONLY when screen is OFF) */
+void UNSAFE_SG_decompressAPLIBtoVRAM (const void *src, unsigned int dst) __naked;
 
 /* function to print messages to the debug console of emulators */
 void SG_debugPrintf(const unsigned char *format, ...) __naked __preserves_regs(a,b,c,iyh,iyl);
 
 /* Bitmap Mode functions */
 void SG_initBitmapMode (unsigned char foreground_color, unsigned char background_color);
-#define  SG_putPixel(x,y,color)      SG_putPixel_f((color),((x)<<8)|(y))
+#define  SG_putPixel(x,y,color)          SG_putPixel_f((color),((x)<<8)|(y))
 void SG_putPixel_f (unsigned char color, unsigned int xy_coords) __preserves_regs(iyh,iyl);
 void SG_setPixel (unsigned char x, unsigned char y) __preserves_regs(iyh,iyl);
 
-/* low level functions */
-void SG_VRAMmemcpy (unsigned int dst, void *src, unsigned int size);
-void SG_VRAMmemcpy_brief (unsigned int dst, void *src, unsigned char size);
-void SG_VRAMmemset (unsigned int dst, unsigned char value, unsigned int size);
-void SG_VRAMmemsetW (unsigned int dst, unsigned int value, unsigned int size);
+/* low level functions / macros */
+void SG_VRAMmemcpy (unsigned int dst, const void *src, unsigned int size) __naked __z88dk_callee __preserves_regs(iyh,iyl);
+#define SG_VRAMmemset(dst,value,size)    SG_VRAMmemset_f((value),(dst),(size))
+//~ void SG_VRAMmemsetW (unsigned int dst, unsigned int value, unsigned int size);     /* removed because it was useless */
+//~ void SG_VRAMmemcpy_brief (unsigned int dst, void *src, unsigned char size);        /* removed because it was useless */
+void SG_VRAMmemset_f (unsigned char value, unsigned int dst, unsigned int size) __naked __z88dk_callee __preserves_regs(a,h,l,iyh,iyl);
 
 /* vertical interrupt hook */
 #ifndef NO_FRAME_INT_HOOK

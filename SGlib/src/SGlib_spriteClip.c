@@ -4,11 +4,8 @@
    ************************************************** */
 
 #include "SGlib.h"
+#include "SGlib_common.h"
 #include <stdbool.h>
-
-#ifndef MAXSPRITES
-#define MAXSPRITES      32
-#endif
 
 extern unsigned int  spritesHeight, spritesWidth;
 
@@ -42,7 +39,7 @@ _Bool SG_addSpriteClipping (int x, int y, unsigned char tile, unsigned char attr
       return false;                             // sprite clipped
     if ((y > clipWin_y1) || (y < ((int) clipWin_y0 - spritesHeight)))
       return false;                             // sprite clipped
-    if (y - 1 != 0xd0) {
+    if (--y != 0xd0) {
 #ifdef AUTODETECT_SPRITE_OVERFLOW
       spriteOverflowCounter ++;
       if (0 == VDPSpriteOverflow || (spriteOverflowCounter & 1) == spriteOverflowFlipflop)

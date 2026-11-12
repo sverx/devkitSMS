@@ -1,24 +1,40 @@
-# compile the modules
-sdcc -o SGlib.rel            -c -mz80 --max-allocs-per-node 100000 SGlib.c
-sdcc -o SGlib_spriteClip.rel -c -mz80 --max-allocs-per-node 100000 SGlib_spriteClip.c
-sdcc -o SGlib_zx7.rel        -c -mz80 --max-allocs-per-node 100000 SGlib_zx7.c
-sdcc -o SGlib_zx7_VRAM.rel   -c -mz80 --max-allocs-per-node 100000 SGlib_zx7_VRAM.c
-sdcc -o SGlib_bitmap.rel     -c -mz80 --max-allocs-per-node 100000 SGlib_bitmap.c
-sdcc -o SGlib_putPixel.rel   -c -mz80 --max-allocs-per-node 100000 SGlib_putPixel.c
-sdcc -o SGlib_setPixel.rel   -c -mz80 --max-allocs-per-node 100000 SGlib_setPixel.c
-sdcc -o SGlib_debug.rel      -c -mz80 --max-allocs-per-node 100000 SGlib_debug.c
-sdcc -o SGlib_keyboard.rel   -c -mz80 --max-allocs-per-node 100000 SGlib_keyboard.c
+# compile all the modules
+sdcc -o SGlib.rel                     -c -mz80 --max-allocs-per-node 100000 SGlib.c
+sdcc -o SGlib_input.rel               -c -mz80 --max-allocs-per-node 100000 SGlib_input.c
+sdcc -o SGlib_sprites.rel             -c -mz80 --max-allocs-per-node 100000 SGlib_sprites.c
+sdcc -o SGlib_VRAMmemcpy.rel          -c -mz80 --max-allocs-per-node 100000 SGlib_VRAMmemcpy.c
+sdcc -o SGlib_VRAMmemset.rel          -c -mz80 --max-allocs-per-node 100000 SGlib_VRAMmemset.c
+sdcc -o SGlib_setTile.rel             -c -mz80 --max-allocs-per-node 100000 SGlib_setTile.c
+sdcc -o SGlib_getTile.rel             -c -mz80 --max-allocs-per-node 100000 SGlib_getTile.c
+sdcc -o SGlib_loadTileMapArea.rel     -c -mz80 --max-allocs-per-node 100000 SGlib_loadTileMapArea.c
+sdcc -o SGlib_spriteClip.rel          -c -mz80 --max-allocs-per-node 100000 SGlib_spriteClip.c
+sdcc -o SGlib_zx7.rel                 -c -mz80 --max-allocs-per-node 100000 SGlib_zx7.c
+sdcc -o SGlib_zx7_VRAM.rel            -c -mz80 --max-allocs-per-node 100000 SGlib_zx7_VRAM.c
+sdcc -o SGlib_aPLib_VRAM.rel          -c -mz80 --max-allocs-per-node 100000 SGlib_aPLib_VRAM.c
+sdcc -o SGlib_keyboard.rel            -c -mz80 --max-allocs-per-node 100000 SGlib_keyboard.c
+sdcc -o SGlib_putPixel.rel            -c -mz80 --max-allocs-per-node 100000 SGlib_putPixel.c
+sdcc -o SGlib_setPixel.rel            -c -mz80 --max-allocs-per-node 100000 SGlib_setPixel.c
+sdcc -o SGlib_bitmap.rel              -c -mz80 --max-allocs-per-node 100000 SGlib_bitmap.c
+sdcc -o SGlib_debug.rel               -c -mz80 --max-allocs-per-node 100000 SGlib_debug.c
 
 # create the library archive
-sdar r SGlib.lib SGlib.rel SGlib_spriteClip.rel SGlib_zx7.rel SGlib_zx7_VRAM.rel SGlib_bitmap.rel SGlib_putPixel.rel SGlib_setPixel.rel SGlib_debug.rel SGlib_keyboard.rel
+sdar r SGlib.lib SGlib.rel SGlib_input.rel SGlib_sprites.rel SGlib_VRAMmemcpy.rel SGlib_VRAMmemset.rel SGlib_setTile.rel SGlib_getTile.rel SGlib_loadTileMapArea.rel SGlib_spriteClip.rel SGlib_zx7.rel SGlib_zx7_VRAM.rel SGlib_aPLib_VRAM.rel SGlib_keyboard.rel SGlib_putPixel.rel SGlib_setPixel.rel SGlib_bitmap.rel SGlib_debug.rel
 
-# compile the modules for ColecoVision
-sdcc -o SGlib_CV.rel          -c -mz80 --max-allocs-per-node 100000 -D TARGET_CV SGlib.c
-sdcc -o SGlib_bitmap_CV.rel   -c -mz80 --max-allocs-per-node 100000 -D TARGET_CV SGlib_bitmap.c
-sdcc -o SGlib_putPixel_CV.rel -c -mz80 --max-allocs-per-node 100000 -D TARGET_CV SGlib_putPixel.c
-sdcc -o SGlib_setPixel_CV.rel -c -mz80 --max-allocs-per-node 100000 -D TARGET_CV SGlib_setPixel.c
-sdcc -o SGlib_zx7_VRAM_CV.rel -c -mz80 --max-allocs-per-node 100000 -D TARGET_CV SGlib_zx7_VRAM.c
+# compile the modules specific for ColecoVision
+sdcc -o SGlib_CV.rel                      -c -mz80 --max-allocs-per-node 100000 -D TARGET_CV SGlib.c
+sdcc -o SGlib_input_CV.rel                -c -mz80 --max-allocs-per-node 100000 -D TARGET_CV SGlib_input.c
+sdcc -o SGlib_sprites_CV.rel              -c -mz80 --max-allocs-per-node 100000 -D TARGET_CV SGlib_sprites.c
+sdcc -o SGlib_VRAMmemcpy_CV.rel           -c -mz80 --max-allocs-per-node 100000 -D TARGET_CV SGlib_VRAMmemcpy.c
+sdcc -o SGlib_VRAMmemset_CV.rel           -c -mz80 --max-allocs-per-node 100000 -D TARGET_CV SGlib_VRAMmemset.c
+sdcc -o SGlib_setTile_CV.rel              -c -mz80 --max-allocs-per-node 100000 -D TARGET_CV SGlib_setTile.c
+sdcc -o SGlib_getTile_CV.rel              -c -mz80 --max-allocs-per-node 100000 -D TARGET_CV SGlib_getTile.c
+sdcc -o SGlib_loadTileMapArea_CV.rel      -c -mz80 --max-allocs-per-node 100000 -D TARGET_CV SGlib_loadTileMapArea.c
+sdcc -o SGlib_zx7_VRAM_CV.rel             -c -mz80 --max-allocs-per-node 100000 -D TARGET_CV SGlib_zx7_VRAM.c
+sdcc -o SGlib_aPLib_VRAM_CV.rel           -c -mz80 --max-allocs-per-node 100000 -D TARGET_CV SGlib_aPLib_VRAM.c
+sdcc -o SGlib_putPixel_CV.rel             -c -mz80 --max-allocs-per-node 100000 -D TARGET_CV SGlib_putPixel.c
+sdcc -o SGlib_setPixel_CV.rel             -c -mz80 --max-allocs-per-node 100000 -D TARGET_CV SGlib_setPixel.c
+sdcc -o SGlib_bitmap_CV.rel               -c -mz80 --max-allocs-per-node 100000 -D TARGET_CV SGlib_bitmap.c
 
 # create the ColecoVision library archive
-sdar r SGlib_CV.lib SGlib_CV.rel SGlib_spriteClip.rel SGlib_zx7.rel SGlib_zx7_VRAM_CV.rel SGlib_bitmap_CV.rel SGlib_putPixel_CV.rel SGlib_setPixel_CV.rel SGlib_debug.rel
+sdar r SGlib_CV.lib SGlib_CV.rel SGlib_input_CV.rel SGlib_sprites_CV.rel SGlib_VRAMmemcpy_CV.rel SGlib_VRAMmemset_CV.rel SGlib_setTile_CV.rel SGlib_getTile_CV.rel SGlib_loadTileMapArea_CV.rel SGlib_zx7_VRAM_CV.rel SGlib_aPLib_VRAM_CV.rel SGlib_putPixel_CV.rel SGlib_setPixel_CV.rel SGlib_bitmap_CV.rel SGlib_spriteClip.rel SGlib_zx7.rel SGlib_debug.rel
 

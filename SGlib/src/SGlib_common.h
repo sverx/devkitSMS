@@ -4,30 +4,6 @@
    code: na_th_an, sverx
    ************************************************** */
 
-/*  --------------------------------------------------------- *
-        VRAM memory map
-
-    $0000 +---------+
-          |   PGT   |  ($1800 bytes, pattern generator table)
-    $1800 +---------+
-          |   PNT   |  ($0300 bytes, nametable)
-    $1B00 +---------+
-          |   SAT   |  ($0080 bytes, sprite attribute table)
-    $1B80 +---------+
-          |         |  ($0480 bytes free)
-    $2000 +---------+
-          |   CGT   |  ($1800 bytes, colour table)
-    $3800 +---------+
-          |   SGT   |  ($0800 bytes, sprite generator table)
-          +---------+
- *  --------------------------------------------------------- */
-
-#define PNTADDRESS      0x1800
-#define SATADDRESS      0x1B00
-#define PGTADDRESS      0x0000
-#define CGTADDRESS      0x2000
-#define SGTADDRESS      0x3800
-
 /* define VDPControlPort (SDCC z80 syntax) */
 __sfr __at 0xBF VDPControlPort;
 /* define VDPStatusPort */

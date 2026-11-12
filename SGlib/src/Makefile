@@ -12,8 +12,8 @@ CFLAGS=-mz80 $(OPT) $(CONFIG)
 OUTPUT_LIBS=SGlib.lib SGlib_CV.lib
 
 SRCS_COMMON=SGlib_spriteClip.c SGlib_zx7.c SGlib_debug.c
-SRCS_SG=SGlib.c SGlib_zx7_VRAM.c SGlib_bitmap.c SGlib_putPixel.c SGlib_setPixel.c SGlib_keyboard.c
-SRCS_CV=SGlib.c SGlib_zx7_VRAM.c SGlib_bitmap.c SGlib_putPixel.c SGlib_setPixel.c
+SRCS_SG=SGlib.c SGlib_input.c SGlib_sprites.c SGlib_VRAMmemcpy.c SGlib_VRAMmemset.c SGlib_setTile.c SGlib_getTile.c SGlib_loadTileMapArea.c SGlib_zx7_VRAM.c SGlib_aPLib_VRAM.c SGlib_putPixel.c SGlib_setPixel.c SGlib_bitmap.c SGlib_keyboard.c
+SRCS_CV=SGlib.c SGlib_input.c SGlib_sprites.c SGlib_VRAMmemcpy.c SGlib_VRAMmemset.c SGlib_setTile.c SGlib_getTile.c SGlib_loadTileMapArea.c SGlib_zx7_VRAM.c SGlib_aPLib_VRAM.c SGlib_putPixel.c SGlib_setPixel.c SGlib_bitmap.c
 
 # One .rel per common source file. Add target specific .rel dependencies here.
 OBJS_COMMON=$(patsubst %.c,%.rel,$(SRCS_COMMON))
