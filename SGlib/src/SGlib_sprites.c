@@ -9,11 +9,7 @@
 #include <stdbool.h>
 
 unsigned int  spritesHeight=8, spritesWidth=8;
-#if MAXSPRITES==32
 unsigned char SpriteTable[MAXSPRITES*4];
-#else
-unsigned char SpriteTable[(MAXSPRITES+1)*4];
-#endif
 unsigned char SpriteNextFree;
 
 #ifdef AUTODETECT_SPRITE_OVERFLOW
@@ -50,47 +46,97 @@ void SG_initSprites (void) {
 #endif
 }
 
-_Bool SG_addSprite (unsigned char x, unsigned char y, unsigned char tile, unsigned char attr) {
-  unsigned char idx;
-  if (SpriteNextFree < MAXSPRITES) {
-    if (--y != 0xd0) {
-#ifdef AUTODETECT_SPRITE_OVERFLOW
-      spriteOverflowCounter ++;
-      if (0 == VDPSpriteOverflow || (spriteOverflowCounter & 1) == spriteOverflowFlipflop)
-#endif
-      {
-        idx = SpriteNextFree << 2;
-        SpriteTable [idx ++] = y;
-        SpriteTable [idx ++] = x;
-        SpriteTable [idx ++] = tile;
-        SpriteTable [idx] = attr;
-        SpriteNextFree ++;
-      }
-    }
-    return true;
-  } else
-    return false;
-}
-
 void SG_finalizeSprites (void) {
-#if MAXSPRITES==32
-  if (SpriteNextFree < MAXSPRITES)
-#endif
-    SpriteTable[SpriteNextFree<<2]=0xd0;
+  // now deprecated, does nothing
 }
 
-inline void SG_byte_brief_array_to_VDP_data (const unsigned char *data, unsigned char size) {
-  /* INTERNAL FUNCTION */
-  do {
-    VDPDataPort = *(data ++);
-  } while (-- size);
-}
+#pragma save
+#pragma disable_warning 85
+_Bool SG_addSprite_f (unsigned int x_y, unsigned int tilenum_attrib) __naked __preserves_regs(d,e,iyh,iyl) {
+  // X passed in H
+  // Y passed in L
+  // tilenum passed in D
+  // attrib passed in E
+  // return value will be in A
+  __asm
+    ld  a,(#_SpriteNextFree)
+    cp  a,#MAXSPRITES
+    jr  nc,_returnFalse              ; no sprites left, leave!
+    ld  c,a                          ; save SpriteNextFree value in c
 
-void SG_copySpritestoSAT (void) {
-  SG_set_address_VRAM (SATADDRESS);
-#if MAXSPRITES==32
-  SG_byte_brief_array_to_VDP_data (SpriteTable, MAXSPRITES*4);
-#else
-  SG_byte_brief_array_to_VDP_data (SpriteTable, (MAXSPRITES+1)*4);
-#endif
+    ld  a,l
+    dec a
+    cp  a,#0xd0
+    jr z,_skipped                    ; invalid Y, leave!
+    ld b,a                           ; save Y in B
+
+    ld a,c                           ; restore SpriteNextFree
+    add a,a
+    add a,a
+
+    ld c,h                           ; save X in C
+
+    ld  hl,#_SpriteTable
+    add a,l
+    ld l,a
+    ld a,h
+    adc #0
+    ld h,a
+
+    ld (hl),b                        ; write Y
+    inc hl
+    ld (hl),c                        ; write X
+    inc hl
+    ld (hl),d                        ; write tilenum
+    inc hl
+    ld (hl),e                        ; write attrib
+
+    ld hl,#_SpriteNextFree
+    inc (hl)                         ; increment SpriteNextFree value
+
+_skipped:
+    ld a,#1                          ; return true
+    ret
+
+_returnFalse:
+    xor a                            ; return false
+    ret
+ __endasm;
+}
+#pragma restore
+
+void SG_copySpritestoSAT (void) __naked __preserves_regs(d,e,iyh,iyl) {
+__asm
+    ld hl,#SATADDRESS+0x4000
+    ld c,#_VDPControlPort
+__endasm;
+
+    VDP_SEMAPHORE_ON;
+
+__asm
+    out (c),l
+    out (c),h
+__endasm;
+
+    VDP_SEMAPHORE_OFF;
+
+__asm
+    dec c                   ; same as ld c,#_VDPDataPort
+    ld a,(#_SpriteNextFree)
+    or a
+    jr z,_no_sprites
+    add a,a
+    add a,a
+    ld b,a                  ; now B is number of used sprites*4
+    ld hl,#_SpriteTable
+_inner_loop:
+    outi                    ; 16 cycles
+    jr nz,_inner_loop       ; 12 cycles = 28 (VRAM safe)
+    cp #32                  ;  7 cycles
+    ret z                   ;  5 cycles when ret not taken
+_no_sprites:
+    ld a,#0xD0              ;  7 cycles = 31 (VRAM safe)
+    out (c),a
+    ret                     ; because this function is naked
+__endasm;
 }

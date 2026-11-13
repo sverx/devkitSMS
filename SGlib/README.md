@@ -43,7 +43,7 @@ void SG_initSprites (void)
 _Bool SG_addSprite (unsigned char x, unsigned char y, unsigned char tile, unsigned char attr)	/* returns false if no more sprites are available */
 void SG_setClippingWindow (unsigned char x0, unsigned char y0, unsigned char x1, unsigned char y1)
 _Bool SG_addSpriteClipping (int x, int y, unsigned char tile, unsigned char attr)		        /* returns false if no more sprites are available or sprite clipped */
-void SG_finalizeSprites (void)
+void SG_finalizeSprites (void)      /* now deprecated, you don't need to use it */
 void SG_copySpritestoSAT (void)
 
 /* joypad handling */
@@ -58,11 +58,11 @@ unsigned int SG_getKeyboardJoypadPressed (void)
 unsigned int SG_getKeyboardJoypadHeld (void)
 unsigned int SG_getKeyboardJoypadReleased (void)
 
-/* functions to read ColecoVision numpad(s) */
-unsigned char SG_readCVNumPad (unsigned char which)
-
 /* read from keyboard max keys and return the keycodes and amount */
 unsigned char SG_getKeycodes (unsigned int *keys, unsigned char max_keys)
+
+/* functions to read ColecoVision numpad(s) */
+unsigned char SG_readCVNumPad (unsigned char which)
 
 /* pause handling */
 _Bool SG_queryPauseRequested (void)      /* the pause key has been pressed since previous check */
@@ -71,12 +71,15 @@ void SG_resetPauseRequest (void)         /* reset/acknowledge pause requests */
 /* decompress data to RAM */
 void SG_decompressZX7 (const void *src, void *dst)                    /* function that does the decompression to RAM */
 
-/* functions and macros to decompress data to VRAM */
+/* functions and macros to decompress ZX7 compressed data to VRAM */
 void SG_decompressZX7toVRAM (const void *src, unsigned int dst)       /* function that does the decompression directly to VRAM */
 SG_loadZX7compressedBGTiles(src,tilefrom)                             /* handy macro to decompress tiles to background tiles */
 SG_loadZX7compressedBGColors(src,tilefrom)                            /* handy macro to decompress tiles to background attributes */
 SG_loadZX7compressedSpritesTiles(src,tilefrom)                        /* handy macro to decompress tiles to sprites */
 SG_loadZX7compressedTilesatAddr(src,dst)                              /* handy macro to decompress tiles to any location in VRAM */
+
+/* functions and macros to decompress APLIB compressed data to VRAM */
+void UNSAFE_SG_decompressAPLIBtoVRAM (const void *src, unsigned int dst)   /* UNSAFE! can be used only when screen is OFF! */
 
 /* Bitmap Mode functions and macros */
 void SG_initBitmapMode (unsigned char foreground_color, unsigned char background_color)   /* initialize BMP mode with specified foreground and background colors */
@@ -85,7 +88,6 @@ void SG_setPixel (unsigned char x, unsigned char y)                             
 
 /* low level functions */
 void SG_VRAMmemcpy (unsigned int dst, void *src, unsigned int size)              /* memcpy to VRAM */
-void SG_VRAMmemcpy_brief (unsigned int dst, void *src, unsigned char size)       /* memcpy to VRAM (256 bytes max) */
 void SG_VRAMmemset (unsigned int dst, unsigned char value, unsigned int size)    /* memset to VRAM */
 
 /* print messages to the debug console of emulators */

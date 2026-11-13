@@ -129,21 +129,26 @@ volatile __at (0xffff) unsigned char CV_MEGACART_BANKSWITCH[];
 void SG_loadTileMapArea (unsigned char x, unsigned char y, void *src, unsigned char width, unsigned char height);
 
 /* functions update the tilemap */
-void SG_setNextTileatXY (unsigned char x, unsigned char y);
-void SG_setTile (unsigned char tile);
-#define SG_setTileatXY(x,y,tile) do{SG_setNextTileatXY((x),(y));SG_setTile(tile);}while(0)
+void SG_setNextTileatAddr (unsigned int addr) __naked __preserves_regs(a,b,d,e,l,iyh,iyl);
+#define SG_setNextTileatXY(x,y)                     SG_setNextTileatAddr(PNTADDRESS+((y)<<5)+(x))
+void SG_setTile (unsigned char tile) __naked __preserves_regs(a,b,c,d,e,h,l,iyh,iyl);
+#define SG_setTileatAddr(addr,tile)                 do{SG_setNextTileatAddr(addr);SG_setTile(tile);}while(0)
+#define SG_setTileatXY(x,y,tile)                    do{SG_setNextTileatXY((x),(y));SG_setTile(tile);}while(0)
 
-void SG_getNextTileatXY (unsigned char x, unsigned char y);
-unsigned char SG_getTile (void);
-#define SG_getTileatXY(x,y)      (SG_getNextTileatXY((x),(y)),SG_getTile())
+void SG_getNextTileatAddr (unsigned int addr) __naked __preserves_regs(a,b,d,e,l,iyh,iyl);
+#define SG_getNextTileatXY(x,y)                     SG_getNextTileatAddr(PNTADDRESS+((y)<<5)+(x))
+unsigned char SG_getTile (void) __naked __preserves_regs(b,c,d,e,h,l,iyh,iyl);
+#define SG_getTileatAddr(addr)                      (SG_getNextTileatAddr(addr),SG_getTile())
+#define SG_getTileatXY(x,y)                         (SG_getNextTileatXY((x),(y)),SG_getTile())
 
 /* functions for sprites handling */
 void SG_initSprites (void);
-_Bool SG_addSprite (unsigned char x, unsigned char y, unsigned char tile, unsigned char attr);  /* returns false if no more sprites are available */
+#define SG_addSprite(x,y,tile,attr)                 SG_addSprite_f((((unsigned int)(x)&0xff)<<8)|(((y)&0xff)),(((unsigned int)(tile)&0xff)<<8)|(((attr)&0xff)))  /* returns false if no more sprites are available */
+_Bool SG_addSprite_f (unsigned int x_y, unsigned int tilenum_attrib) __naked __preserves_regs(d,e,iyh,iyl);
 void SG_setClippingWindow (unsigned char x0, unsigned char y0, unsigned char x1, unsigned char y1);
 _Bool SG_addSpriteClipping (int x, int y, unsigned char tile, unsigned char attr);              /* returns false if no more sprites are available or sprite clipped */
-void SG_finalizeSprites (void);
-void SG_copySpritestoSAT (void);
+void SG_finalizeSprites (void);   /* now deprecated, you don't need to use it */
+void SG_copySpritestoSAT (void) __naked __preserves_regs(d,e,iyh,iyl);
 
 /* functions to read joypad(s) */
 unsigned int SG_getKeysStatus (void);
